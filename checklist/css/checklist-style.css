@@ -1058,6 +1058,27 @@ details[open] .progress-badge {
   color: var(--color-accent);
 }
 
+/* Flex utilities */
+.flex-1 {
+  flex: 1;
+}
+
+.flex-row {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card {
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--space-lg);
+}
+
 /* ============================================================================
    PRINT STYLES
    ============================================================================ */

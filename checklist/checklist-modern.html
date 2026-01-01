@@ -1773,7 +1773,7 @@
                 </p>
 
                 <div class="admin-only" id="custom-items-admin" aria-label="Custom items editor">
-                  <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+                  <div class="card mb-lg">
                     <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">➕ Custom Items (Admin)</h3>
 
                     <input type="hidden" id="custom-item-id" value="">
@@ -1792,8 +1792,8 @@
                     </div>
 
                     <div style="display: flex; gap: var(--space-md);">
-                      <button type="button" id="btn-save-custom-item" class="btn btn-primary" style="flex: 1;">💾 Save item</button>
-                      <button type="button" id="btn-clear-custom-item" class="btn btn-secondary" style="flex: 1;">↻ Clear</button>
+                      <button type="button" id="btn-save-custom-item" class="btn btn-primary flex-1">💾 Save item</button>
+                      <button type="button" id="btn-clear-custom-item" class="btn btn-secondary flex-1">↻ Clear</button>
                     </div>
                   </div>
                 </div>
@@ -1900,10 +1900,10 @@
 
               <!-- Quick Actions -->
               <div style="display: flex; gap: 8px; margin-top: var(--space-md);">
-                <button type="button" id="btn-use-lead-data" class="btn btn-secondary" style="flex: 1;">
+                <button type="button" id="btn-use-lead-data" class="btn btn-secondary flex-1">
                   📋 Use Lead Data
                 </button>
-                <button type="button" id="btn-add-new-client" class="btn btn-secondary" style="flex: 1;">
+                <button type="button" id="btn-add-new-client" class="btn btn-secondary flex-1">
                   ➕ Create New Client
                 </button>
               </div>
@@ -1911,7 +1911,7 @@
             <!-- SERVICE & BOOKING SECTION -->
             <div class="grid grid-2col gap-lg mb-lg">
               <!-- Service Selection -->
-              <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg);">
+              <div class="card">
                 <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🎯 Service</h3>
                 <div class="meta-field">
                   <label for="quote-service-type">Service Type</label>
@@ -1926,7 +1926,7 @@
               </div>
 
               <!-- Booking Date/Time -->
-              <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg);">
+              <div class="card">
                 <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📅 Booking</h3>
                 <div class="meta-field">
                   <label for="quote-booking-date">Preferred Job Date</label>
@@ -1963,11 +1963,11 @@
                   <span>Surcharges:</span>
                   <span id="quote-surcharges">$0.00</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid var(--color-border);">
+                <div class="flex-between mb-md" style="padding-top: 8px; border-top: 1px solid var(--color-border);">
                   <span style="font-weight: bold;">Subtotal:</span>
                   <span style="font-weight: bold;" id="quote-subtotal-detail">$0.00</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 0;">
+                <div class="flex-between">
                   <span style="color: var(--color-secondary);" id="quote-tax-label-detail">GST</span>
                   <span style="color: var(--color-secondary);" id="quote-tax-detail">$0.00</span>
                 </div>
@@ -2000,7 +2000,7 @@
             </div>
 
             <!-- SEND OPTIONS SECTION -->
-            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <div class="card mb-lg">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📤 Send Quote</h3>
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">How would you like to send this quote?</p>
 
