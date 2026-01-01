@@ -1,0 +1,605 @@
+/**
+ * End of Tenancy Checklist
+ * Modern, responsive design with HTML5 details/summary
+ * Touch-friendly, mobile-first approach
+ */
+
+@import url('checklist-variables.css');
+
+/* ============================================================================
+   RESET & BASE STYLES
+   ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-primary);
+  background-color: var(--color-light);
+  padding: var(--space-md);
+}
+
+/* ============================================================================
+   MAIN CONTAINER & HEADER
+   ============================================================================ */
+
+.checklist-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.checklist-header {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: var(--color-white);
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  border-bottom: 4px solid var(--color-accent);
+  box-shadow: inset 0 -2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.checklist-header h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-sm);
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.checklist-header p {
+  font-size: var(--font-size-sm);
+  opacity: 0.95;
+  margin-bottom: var(--space-md);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================================================
+   SERVICE TYPE TABS
+   ============================================================================ */
+
+.service-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--color-accent);
+  background: var(--color-white);
+  padding: var(--space-md);
+  gap: var(--space-sm);
+}
+
+.tab {
+  cursor: pointer;
+  padding: var(--space-md) var(--space-lg);
+  color: var(--color-secondary);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-normal);
+  user-select: none;
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  background: var(--color-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.tab:hover {
+  background-color: var(--color-light);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 6px rgba(28, 201, 80, 0.15);
+}
+
+.tab:not(.is-tab-selected):hover {
+  /* Inactive tabs only - allows ID selectors to override */
+  background-color: var(--color-light);
+  color: var(--color-accent);
+}
+
+.tab.is-tab-selected {
+  color: var(--color-white);
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 8px rgba(28, 201, 80, 0.3);
+}
+
+.tab.is-tab-selected:hover {
+  background-color: #15a03d;
+  color: var(--color-white);
+  border-color: #15a03d;
+  box-shadow: 0 3px 10px rgba(28, 201, 80, 0.4);
+}
+
+/* ID-based selectors for inactive tab hover - higher specificity with animation */
+#tab-end-of-tenancy:hover,
+#tab-residential:hover,
+#tab-commercial:hover,
+#tab-custom:hover {
+  animation: tabHoverPulse 0.4s ease-out forwards;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+@keyframes tabHoverPulse {
+  0% {
+    background-color: #ccc;
+  }
+  100% {
+    background-color: #fff;
+  }
+}
+
+.tab-label {
+  font-weight: 600;
+}
+
+/* ============================================================================
+   SERVICE CONTENT CONTAINER
+   ============================================================================ */
+
+.service-content {
+  position: relative;
+}
+
+.service-tab-content {
+  display: none;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.service-tab-content.is-active {
+  display: block;
+  opacity: 1;
+}
+
+/* ============================================================================
+   FORM CONTROLS (Crew Info, Date)
+   ============================================================================ */
+
+.checklist-meta {
+  background: var(--color-light);
+  padding: var(--space-lg) var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .checklist-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+.meta-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-field label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-secondary);
+  margin-bottom: var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-field input,
+.meta-field textarea {
+  padding: var(--button-padding);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.meta-field input:focus,
+.meta-field textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(28, 201, 80, 0.1);
+}
+
+.meta-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* ============================================================================
+   ACCORDION (Details/Summary)
+   ============================================================================ */
+
+.checklist-content {
+  padding: var(--space-lg) var(--space-md);
+}
+
+.room-section {
+  margin-bottom: var(--space-lg);
+}
+
+/* HTML5 Details element styling */
+details {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base);
+}
+
+details[open] {
+  box-shadow: var(--shadow-md);
+}
+
+details summary {
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-light);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  transition: background-color var(--transition-base);
+  min-height: var(--touch-target-min);
+}
+
+/* Hover state for closed details */
+details:not([open]) summary:hover {
+  background-color: #f0f0f0;
+  color: var(--hover-text-color);
+  text-shadow: var(--hover-text-shadow);
+}
+
+details[open] summary {
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Hover state for open details - gray text with outline for contrast */
+details[open] summary:hover {
+  background: #e8f5e9;
+  color: var(--hover-text-color);
+  text-shadow: var(--hover-text-shadow);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Custom arrow indicator */
+details summary::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: var(--space-md);
+  transition: transform var(--transition-base);
+  font-size: var(--font-size-sm);
+}
+
+details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+/* Progress badge in summary */
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.room-title {
+  flex: 1;
+}
+
+.progress-badge {
+  background: var(--color-accent);
+  color: var(--color-white);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-left: var(--space-md);
+}
+
+details[open] .progress-badge {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+
+/* ============================================================================
+   CHECKLIST ITEMS (inside details)
+   ============================================================================ */
+
+.room-details {
+  padding: var(--space-lg) var(--space-md);
+  background: var(--color-white);
+  overflow: hidden;
+  height: auto;
+}
+
+.checklist-items {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+/* Responsive grid: 2 columns on tablet, 1 on mobile */
+@media (min-width: 768px) {
+  .checklist-items {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .checklist-items {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ============================================================================
+   CUSTOM CHECKBOX STYLING
+   ============================================================================ */
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--color-light);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  user-select: none;
+  min-height: var(--touch-target-min);
+}
+
+.checklist-item:hover {
+  background: #fafafa;
+  border-color: var(--color-accent);
+}
+
+.checklist-item:hover .item-label {
+  color: var(--hover-text-color);
+  text-shadow: var(--hover-text-shadow);
+}
+
+/* Hide native checkbox */
+.checklist-item input[type="checkbox"] {
+  display: none;
+}
+
+/* Custom checkbox box */
+.checkbox-custom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  margin-right: var(--space-md);
+  transition: all var(--transition-fast);
+}
+
+.checklist-item input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.checklist-item input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: '✓';
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: var(--font-weight-bold);
+}
+
+/* Item label */
+.item-label {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  color: var(--color-primary);
+  transition: color var(--transition-base);
+}
+
+.checklist-item input[type="checkbox"]:checked + .checkbox-custom + .item-label {
+  color: var(--color-secondary);
+  text-decoration: line-through;
+}
+
+/* Focus state for accessibility */
+.checklist-item input[type="checkbox"]:focus + .checkbox-custom {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   ACTIONS (Print, Download, Complete, Reset)
+   ============================================================================ */
+
+.checklist-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  padding: var(--space-lg) var(--space-md);
+  background: var(--color-light);
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: var(--button-padding);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary button */
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #17a038;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Secondary button */
+.btn-secondary {
+  background: var(--color-white);
+  color: #000;
+  border: 2px solid var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-primary);
+  background: var(--color-accent-light);
+}
+
+/* Text button */
+.btn-text {
+  background: transparent;
+  color: var(--color-accent);
+  border: none;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.btn-text:hover:not(:disabled) {
+  background: var(--color-accent-light);
+  border-radius: var(--radius-md);
+}
+
+/* Icon styling */
+.btn svg,
+.btn i {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+
+.checklist-footer {
+  background: var(--color-primary);
+  color: var(--color-white);
+  text-align: center;
+  padding: var(--space-md);
+  font-size: var(--font-size-xs);
+  opacity: 0.8;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  body {
+    padding: var(--space-sm);
+  }
+
+  .checklist-header {
+    padding: var(--space-md);
+  }
+
+  .checklist-header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  details summary {
+    padding: var(--space-md);
+    font-size: var(--font-size-base);
+  }
+
+  .room-details {
+    padding: var(--space-md);
+  }
+
+  .checklist-items {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+
+  .checklist-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+  body {
+    background: var(--color-white);
+    padding: 0;
+  }
+
+  .checklist-wrapper {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .checklist-actions {
+    display: none;
+  }
+
+  details {
+    page-break-inside: avoid;
+  }
+
+  details summary {
+    background: var(--color-light);
+  }
+
+  .checklist-item {
+    page-break-inside: avoid;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+  }
+}

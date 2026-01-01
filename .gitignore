@@ -1,0 +1,9 @@
+# Ignore everything by default
+*
+
+# But keep the ignore file itself
+!.gitignore
+
+# Keep ONLY the checklist folder
+!checklist/
+!checklist/**

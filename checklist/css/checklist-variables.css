@@ -1,0 +1,97 @@
+/**
+ * Checklist Design System
+ * CSS Custom Properties (Variables)
+ * Aligns with Super Clean Business plugin aesthetic
+ */
+
+:root {
+  /* Color Palette - Neutral with Accent */
+  --color-primary: #333333;        /* Dark text/primary */
+  --color-secondary: #666666;      /* Medium gray */
+  --color-light: #f5f5f5;          /* Light background */
+  --color-white: #ffffff;          /* Pure white */
+  --color-border: #ddd;            /* Light borders */
+  --color-accent: #1cc950;         /* Super Clean green (from plugin) */
+  --color-accent-light: #e8f5e9;   /* Light accent bg */
+  
+  /* Status Colors */
+  --color-success: #4caf50;        /* Checkbox checked */
+  --color-warning: #ff9800;        /* Pending */
+  --color-error: #f44336;          /* Error state */
+  
+  /* Typography */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Spacing (8px base unit) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  
+  /* Touch/Mobile Spacing (for toggle targets, buttons) */
+  --touch-target-min: 44px;        /* Minimum touch target height */
+  --button-padding: 12px 20px;     /* Accessible button padding */
+  
+  /* Hover States - Universal contrast solution */
+  --hover-text-color: #666;        /* Medium gray for hover text (works on light/dark) */
+  --hover-text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);  /* White outline effect */
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-base: 200ms ease-in-out;
+  --transition-slow: 300ms ease-in-out;
+  
+  /* Z-index Scale */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 1000;
+  --z-tooltip: 1100;
+}
+
+/* Dark Mode Support (future-ready) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #f5f5f5;
+    --color-secondary: #ccc;
+    --color-light: #2a2a2a;
+    --color-border: #444;
+  }
+}
+
+/* Print Styles */
+@media print {
+  :root {
+    --color-light: #ffffff;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+  }
+}
