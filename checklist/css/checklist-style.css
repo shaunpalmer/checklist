@@ -165,7 +165,54 @@ body {
 /* Fluid padding using clamp() — scales fluidly between viewport sizes */
 .p-fluid {
   padding: clamp(var(--space-sm), 3vw, var(--space-lg));
-}/* ============================================================================
+}
+
+/* ============================================================================
+   UTILITY CLASSES - Responsive Typography
+   ============================================================================ */
+/* Fluid text sizing with clamp() — scales smoothly from mobile to desktop */
+/* Formula: clamp(min, preferred, max) */
+
+/* Heading 1 - scales from 24px to 32px */
+.text-h1-fluid {
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+/* Heading 2 - scales from 20px to 28px */
+.text-h2-fluid {
+  font-size: clamp(20px, 4vw, 28px);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+/* Heading 3 - scales from 18px to 24px */
+.text-h3-fluid {
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+}
+
+/* Body text - scales from 14px to 18px */
+.text-body-fluid {
+  font-size: clamp(14px, 2vw, 18px);
+  line-height: var(--line-height-normal);
+}
+
+/* Small text - scales from 12px to 16px */
+.text-small-fluid {
+  font-size: clamp(12px, 1.5vw, 16px);
+  line-height: var(--line-height-normal);
+}
+
+/* Label text - stays readable on mobile, expands on desktop */
+.text-label-fluid {
+  font-size: clamp(13px, 1.8vw, 15px);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ============================================================================
    MAIN CONTAINER & HEADER
    ============================================================================ */
 
