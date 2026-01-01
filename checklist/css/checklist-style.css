@@ -49,6 +49,123 @@ body {
 }
 
 /* ============================================================================
+   UTILITY CLASSES - Grid Systems
+   ============================================================================ */
+/* Grid container with responsive columns using modern CSS clamp() */
+
+.grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+/* 2-column grid (most common) */
+.grid-2col {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* 3-column grid */
+.grid-3col {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* 4-column grid */
+.grid-4col {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* 2-column with 2:1 ratio (wider left) */
+.grid-2col-wide-left {
+  grid-template-columns: 2fr 1fr;
+}
+
+/* 1-column (fallback/mobile) */
+.grid-1col {
+  grid-template-columns: 1fr;
+}
+
+/* Modern responsive grid using auto-fit (no media queries needed) */
+/* Automatically wraps columns based on available space */
+.grid-auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  /* Fallback: at least 300px per column before wrapping */
+}
+
+/* Responsive grid that collapses to 1 column on mobile (< 640px) */
+@media (max-width: 640px) {
+  .grid-responsive-2col,
+  .grid-responsive-3col,
+  .grid-responsive-4col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  .grid-responsive-2col {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid-responsive-3col,
+  .grid-responsive-4col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive-2col {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid-responsive-3col {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .grid-responsive-4col {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+}
+
+/* Gap Utility Classes */
+.gap-sm {
+  gap: var(--space-sm);
+}
+
+.gap-md {
+  gap: var(--space-md);
+}
+
+.gap-lg {
+  gap: var(--space-lg);
+}
+
+.gap-xl {
+  gap: var(--space-xl);
+}
+
+/* Fluid gap using clamp() — scales between mobile and desktop */
+.gap-fluid {
+  gap: clamp(var(--space-sm), 2vw, var(--space-lg));
+}
+
+/* ============================================================================
+   UTILITY CLASSES - Spacing (Margin & Padding)
+   ============================================================================ */
+
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mt-xl { margin-top: var(--space-xl); }
+
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-xl { margin-bottom: var(--space-xl); }
+
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
+
+/* Fluid padding using clamp() — scales fluidly between viewport sizes */
+.p-fluid {
+  padding: clamp(var(--space-sm), 3vw, var(--space-lg));
+}/* ============================================================================
    MAIN CONTAINER & HEADER
    ============================================================================ */
 
