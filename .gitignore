@@ -4,6 +4,9 @@
 # But keep the ignore file itself
 !.gitignore
 
+# Keep a small repo-level README
+!README.md
+
 # Keep ONLY the checklist folder
 !checklist/
 !checklist/**
