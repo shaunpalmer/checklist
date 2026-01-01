@@ -154,6 +154,30 @@ CustomItemsStore.add({
 
 ---
 
+### Phase 6: Performance Optimization (Parallel/Continuous)
+**Scope:** Reduce bundle size, optimize for mobile devices & variable network speeds (4G/5G)  
+**Estimated Effort:** 2-4 hours (staggered across other phases)  
+**Risk Level:** Low (no breaking changes required)  
+**Rationale:** Phones vary widely in hardware + networks (NZ moving to 4G/5G). Code consolidation from Phases 2-4 will help naturally.
+
+**Key Optimizations:**
+1. **Code minification** — concatenate & uglify JS/CSS (one-time, pre-deployment)
+2. **Lazy-load patterns** — VariantManager, CustomItemsStore only when tabs opened
+3. **Compress assets** — inline SVG sprites for icons instead of separate files
+4. **Reduce DOM queries** — cache frequently-accessed elements (already done via jQuery selections)
+5. **Service Worker caching** — cache CSS/JS/images for offline access + faster reload
+6. **Network resilience** — ensure app works on slow 4G connections (optimize AJAX payloads)
+
+**Success Criteria:**
+- [ ] Initial load < 2 seconds on 4G
+- [ ] No layout shifts (CLS < 0.1)
+- [ ] Time to Interactive < 3 seconds
+- [ ] Largest Contentful Paint < 2.5s
+
+**When to tackle:** Continuously during Phases 2-5; formal optimization pass after Phase 5.
+
+---
+
 ## Known Risks & Mitigation
 
 ### Risk 1: File Caching in Tooling ⚠️
@@ -215,10 +239,12 @@ console.assert(SnapshotBuilder.build({ crew: 'test' }).schema === 1, 'Snapshot b
 |--------|-------|------|--------|
 | `e2b95b0` | Init | Repo reorganization (docs → tools/docs) | ✅ |
 | `727fda3` | 1 | Design patterns library added | ✅ |
+| `8eef4ca` | 1.5 | Dynamic window pricing (hours/charges from Settings) | ✅ |
 | *TBD* | 2 | CSS consolidation complete | ⏳ |
 | *TBD* | 3 | HTML audit documented | ⏳ |
 | *TBD* | 4 | Patterns integrated into Checklist object | ⏳ |
 | *TBD* | 5 | RoomTemplate tested in isolated HTML | ⏳ |
+| *Continuous* | 6 | Performance optimizations (mobile/network resilience) | ⏳ |
 
 ---
 
@@ -323,4 +349,6 @@ const restored = SnapshotBuilder.restore(snap);
 2. Should RoomTemplate be deployed incrementally (Bathrooms first) or all-at-once?
 3. Is there demand for custom item categories or tags?
 4. Should VariantManager support dynamic pricing rules (e.g., "20% surcharge after 6 PM")?
+5. **Phase 6 (Performance):** Should we prioritize initial load speed (< 2s on 4G) or ongoing performance? How important is Service Worker caching for offline access?
+6. Mobile testing: Which devices/browsers are priority? (iOS Safari, Android Chrome, etc.)
 
