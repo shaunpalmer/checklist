@@ -87,7 +87,7 @@
          ======================================== -->
     <div class="checklist-meta">
       <div class="meta-field">
-        <label for="crew-name">Cleaning Crew Name</label>
+        <label for="crew-name">Cleaning Crew Name <span style="font-size: 0.85em; color: var(--color-secondary);">(optional for custom items)</span></label>
         <input 
           type="text" 
           id="crew-name" 
@@ -1774,7 +1774,8 @@
 
                 <div class="admin-only" id="custom-items-admin" aria-label="Custom items editor">
                   <div class="card mb-lg">
-                    <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">➕ Custom Items (Admin)</h3>
+                    <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">➕ Custom Items</h3>
+                    <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Add one-off tasks to the checklist. Only the item label is required.</p>
 
                     <input type="hidden" id="custom-item-id" value="">
 
