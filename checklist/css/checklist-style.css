@@ -1011,6 +1011,17 @@ details[open] .progress-badge {
     padding: var(--space-md);
   }
 
+  .section-heading {
+    margin-top: 0;
+    padding: 0 0 var(--space-md) 0;
+    color: var(--color-secondary);
+    font-size: var(--font-size-sm);
+  }
+
+  .section-heading:not(:first-child) {
+    margin-top: var(--space-lg);
+  }
+
   .checklist-items {
     grid-template-columns: 1fr;
     gap: var(--space-sm);
