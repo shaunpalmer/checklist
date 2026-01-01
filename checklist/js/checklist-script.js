@@ -284,6 +284,19 @@
         this.saveCustomItems(items);
         this.renderCustomItems();
       });
+
+      $(document).on('click', '[data-action="custom-item-delete"]', (e) => {
+        e.preventDefault();
+        if (!this.isAdminView()) return;
+        const id = $(e.currentTarget).attr('data-id');
+        if (!confirm('Are you sure you want to permanently delete this item? This cannot be undone.')) {
+          return;
+        }
+        const items = this.loadCustomItems();
+        const filteredItems = items.filter((it) => it && it.id !== id);
+        this.saveCustomItems(filteredItems);
+        this.renderCustomItems();
+      });
     },
 
     renderCustomItems: function() {
@@ -346,6 +359,7 @@
               <div style="display: flex; gap: 8px; margin-top: 8px;">
                 <button type="button" class="btn btn-secondary" data-action="custom-item-edit" data-id="${this.escapeHtml(item.id)}" style="padding: 6px 10px; font-size: 12px;">Edit</button>
                 <button type="button" class="btn btn-secondary" data-action="custom-item-archive" data-id="${this.escapeHtml(item.id)}" style="padding: 6px 10px; font-size: 12px;">Archive</button>
+                <button type="button" class="btn btn-secondary" data-action="custom-item-delete" data-id="${this.escapeHtml(item.id)}" style="padding: 6px 10px; font-size: 12px; background-color: #dc3545; border-color: #dc3545;">Delete</button>
               </div>
             ` : ''}
           </div>
@@ -362,7 +376,10 @@
                   return `
                     <div style="display:flex; justify-content: space-between; gap: 10px; align-items: center;">
                       <div>${this.escapeHtml(item.description)}</div>
-                      <button type="button" class="btn btn-secondary" data-action="custom-item-unarchive" data-id="${this.escapeHtml(item.id)}" style="padding: 6px 10px; font-size: 12px;">Restore</button>
+                      <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-secondary" data-action="custom-item-unarchive" data-id="${this.escapeHtml(item.id)}" style="padding: 6px 10px; font-size: 12px;">Restore</button>
+                        <button type="button" class="btn btn-secondary" data-action="custom-item-delete" data-id="${this.escapeHtml(item.id)}" style="padding: 6px 10px; font-size: 12px; background-color: #dc3545; border-color: #dc3545;">Delete</button>
+                      </div>
                     </div>
                   `;
                 }).join('')}
