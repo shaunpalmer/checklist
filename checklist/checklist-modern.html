@@ -1776,21 +1776,25 @@
                 </div>
               </summary>
               <div class="room-details">
+                <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
+                  Add extra checklist items here when they aren’t already on the list.
+                </p>
+
                 <div class="admin-only" id="custom-items-admin" aria-label="Custom items editor">
                   <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
                     <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">➕ Custom Items (Admin)</h3>
 
                     <input type="hidden" id="custom-item-id" value="">
 
-                    <div class="meta-field" style="margin-bottom: var(--space-md);">
+                    <div class="meta-field">
                       <label for="custom-item-description">Item label</label>
                       <input type="text" id="custom-item-description" maxlength="190" placeholder="e.g., Balcony sweep" autocomplete="off" />
                     </div>
-                    <div class="meta-field" style="margin-bottom: var(--space-md);">
+                    <div class="meta-field">
                       <label for="custom-item-details">Public description</label>
                       <textarea id="custom-item-details" placeholder="Shown under Details" style="min-height: 80px;"></textarea>
                     </div>
-                    <div class="meta-field" style="margin-bottom: var(--space-md);">
+                    <div class="meta-field">
                       <label for="custom-item-internal-notes">Internal notes (staff only)</label>
                       <textarea id="custom-item-internal-notes" placeholder="Not shown to clients" style="min-height: 80px;"></textarea>
                     </div>
