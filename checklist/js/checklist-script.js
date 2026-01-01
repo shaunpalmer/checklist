@@ -2882,6 +2882,14 @@
         surcharge_single_oven: $('#surcharge-single-oven').val(),
         surcharge_double_oven: $('#surcharge-double-oven').val(),
         surcharge_windows: $('#surcharge-windows').val(),
+        surcharge_windows_2br_hours: $('#surcharge-windows-2br-hours').val(),
+        surcharge_windows_2br: $('#surcharge-windows-2br').val(),
+        surcharge_windows_3br_hours: $('#surcharge-windows-3br-hours').val(),
+        surcharge_windows_3br: $('#surcharge-windows-3br').val(),
+        surcharge_windows_4br_hours: $('#surcharge-windows-4br-hours').val(),
+        surcharge_windows_4br: $('#surcharge-windows-4br').val(),
+        surcharge_windows_2story_hours: $('#surcharge-windows-2story-hours').val(),
+        surcharge_windows_2story: $('#surcharge-windows-2story').val(),
         surcharge_carpet: $('#surcharge-carpet').val(),
         surcharge_drawers: $('#surcharge-drawers').val(),
         surcharge_garage: $('#surcharge-garage').val(),
@@ -2891,6 +2899,11 @@
       localStorage.setItem('checklist_settings', JSON.stringify(settings));
 
       this.applyTheme(settings.theme);
+      
+      // Initialize VariantManager with new settings
+      if (window.VariantManager) {
+        window.VariantManager.init(settings);
+      }
 
       if (this._eventWorker) {
         this._eventWorker.postMessage({
@@ -3022,6 +3035,13 @@
    */
   $(document).ready(function() {
     Checklist.init();
+    
+    // Initialize VariantManager with current settings
+    const settings = Checklist.getSettings();
+    if (window.VariantManager && settings) {
+      window.VariantManager.init(settings);
+    }
+    
     initCarpetCleaningDropdowns();
     initWindowsCleaningDropdowns();
   });
@@ -3040,12 +3060,55 @@
         commercial: { hours: 2.5, charge: 400, label: 'Commercial Oven' }
       },
       windows: {
-        '2br': { hours: 2.0, charge: 65, label: '2BR' },
-        '3br': { hours: 2.0, charge: 85, label: '3BR' },
-        '4br': { hours: 2.0, charge: 110, label: '4BR' },
-        '2story': { hours: 1.0, charge: 40, label: '2-Story' }
+        '2br': { hours: 0.75, charge: 120, label: '2BR' },
+        '3br': { hours: 1.0, charge: 150, label: '3BR' },
+        '4br': { hours: 1.5, charge: 180, label: '4BR' },
+        '2story': { hours: 2.0, charge: 240, label: '2-Story' }
       }
     },
+    
+    // Initialize from settings — call this on app startup and when settings change
+    init: function(settings) {
+      if (!settings) return;
+      
+      // Load window pricing & hours from settings (BR-specific multipliers)
+      if (settings.surcharge_windows_2br_hours !== undefined && settings.surcharge_windows_2br_hours !== null) {
+        this.variants.windows['2br'].hours = parseFloat(settings.surcharge_windows_2br_hours) || 0.75;
+      }
+      if (settings.surcharge_windows_2br !== undefined && settings.surcharge_windows_2br !== null) {
+        this.variants.windows['2br'].charge = parseInt(settings.surcharge_windows_2br) || 120;
+      }
+      
+      if (settings.surcharge_windows_3br_hours !== undefined && settings.surcharge_windows_3br_hours !== null) {
+        this.variants.windows['3br'].hours = parseFloat(settings.surcharge_windows_3br_hours) || 1.0;
+      }
+      if (settings.surcharge_windows_3br !== undefined && settings.surcharge_windows_3br !== null) {
+        this.variants.windows['3br'].charge = parseInt(settings.surcharge_windows_3br) || 150;
+      }
+      
+      if (settings.surcharge_windows_4br_hours !== undefined && settings.surcharge_windows_4br_hours !== null) {
+        this.variants.windows['4br'].hours = parseFloat(settings.surcharge_windows_4br_hours) || 1.5;
+      }
+      if (settings.surcharge_windows_4br !== undefined && settings.surcharge_windows_4br !== null) {
+        this.variants.windows['4br'].charge = parseInt(settings.surcharge_windows_4br) || 180;
+      }
+      
+      if (settings.surcharge_windows_2story_hours !== undefined && settings.surcharge_windows_2story_hours !== null) {
+        this.variants.windows['2story'].hours = parseFloat(settings.surcharge_windows_2story_hours) || 2.0;
+      }
+      if (settings.surcharge_windows_2story !== undefined && settings.surcharge_windows_2story !== null) {
+        this.variants.windows['2story'].charge = parseInt(settings.surcharge_windows_2story) || 240;
+      }
+      
+      // Load oven pricing from settings
+      if (settings.surcharge_single_oven !== undefined && settings.surcharge_single_oven !== null) {
+        this.variants.oven.single.charge = parseInt(settings.surcharge_single_oven) || 150;
+      }
+      if (settings.surcharge_double_oven !== undefined && settings.surcharge_double_oven !== null) {
+        this.variants.oven.double.charge = parseInt(settings.surcharge_double_oven) || 200;
+      }
+    },
+    
     getPrice(type, variant) {
       const group = this.variants[type];
       return group ? group[variant] : null;

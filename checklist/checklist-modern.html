@@ -2137,7 +2137,47 @@
 
             <!-- Surcharge Settings Section -->
             <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">⭐ Surcharge Pricing</h3>
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">⭐ Window Cleaning - Dynamic Pricing (by BR count & panes)</h3>
+              <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">35 panes = 1 hour. Minimum $120 for any job.</p>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                <div class="meta-field">
+                  <label for="surcharge-windows-2br-hours">2BR - Hours (45 min typical)</label>
+                  <input type="number" id="surcharge-windows-2br-hours" value="0.75" step="0.25" min="0" />
+                </div>
+                <div class="meta-field">
+                  <label for="surcharge-windows-2br">2BR - Charge ($) - Min. 120</label>
+                  <input type="number" id="surcharge-windows-2br" value="120" step="5" min="0" />
+                </div>
+                <div class="meta-field">
+                  <label for="surcharge-windows-3br-hours">3BR - Hours (35 panes typical)</label>
+                  <input type="number" id="surcharge-windows-3br-hours" value="1.0" step="0.25" min="0" />
+                </div>
+                <div class="meta-field">
+                  <label for="surcharge-windows-3br">3BR - Charge ($)</label>
+                  <input type="number" id="surcharge-windows-3br" value="150" step="5" min="0" />
+                </div>
+                <div class="meta-field">
+                  <label for="surcharge-windows-4br-hours">4BR - Hours (52 panes typical)</label>
+                  <input type="number" id="surcharge-windows-4br-hours" value="1.5" step="0.25" min="0" />
+                </div>
+                <div class="meta-field">
+                  <label for="surcharge-windows-4br">4BR - Charge ($)</label>
+                  <input type="number" id="surcharge-windows-4br" value="180" step="5" min="0" />
+                </div>
+                <div class="meta-field">
+                  <label for="surcharge-windows-2story-hours">2-Story - Hours (52-70 panes + inside/out)</label>
+                  <input type="number" id="surcharge-windows-2story-hours" value="2.0" step="0.25" min="0" />
+                </div>
+                <div class="meta-field">
+                  <label for="surcharge-windows-2story">2-Story - Charge ($)</label>
+                  <input type="number" id="surcharge-windows-2story" value="240" step="5" min="0" />
+                </div>
+              </div>
+              
+              <hr style="margin: var(--space-lg) 0; border: none; border-top: 1px solid var(--color-border);" />
+              
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🔧 Other Surcharges</h3>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
                 <div class="meta-field">
@@ -2147,10 +2187,6 @@
                 <div class="meta-field">
                   <label for="surcharge-double-oven">Double Oven Clean ($)</label>
                   <input type="number" id="surcharge-double-oven" value="200" step="5" min="0" />
-                </div>
-                <div class="meta-field">
-                  <label for="surcharge-windows">Windows (Base) ($)</label>
-                  <input type="number" id="surcharge-windows" value="65" step="5" min="0" />
                 </div>
                 <div class="meta-field">
                   <label for="surcharge-carpet">Carpet Clean (Base) ($)</label>
