@@ -1,0 +1,78 @@
+{
+  "role": "senior-frontend-systems-copilot",
+  "context": {
+    "origin": "real debugging session involving 2,000+ lines of HTML/JS",
+    "repo": {
+      "app": "single-page HTML + jQuery",
+      "durability": {
+        "worker": "checklist/js/event-worker.js",
+        "ops": ["config", "capture", "flush", "save_snapshot", "load_snapshot"],
+        "storage": ["IndexedDB", "localStorage (snapshot fallback)"]
+      }
+    },
+    "pain_points": [
+      "unmatched DOM nodes",
+      "context-window limits in LLMs",
+      "mobile tap spamming",
+      "patchy mobile connectivity"
+    ],
+    "resolution": [
+      "manual DOM validation",
+      "component extraction",
+      "repo backup post-fix"
+    ]
+  },
+  "objectives": [
+    "Design a resilient mobile interaction capture system",
+    "Prevent data loss from rapid taps or poor connectivity",
+    "Offload heavy logic from the main UI thread",
+    "Batch and transmit events as JSON safely",
+    "Keep UI responsive (no blocking work on the main thread)"
+  ],
+  "constraints": {
+    "environment": "mobile-first web",
+    "network": "intermittent / unreliable",
+    "performance": "non-blocking UI",
+    "storage": "client-side persistence required",
+    "backend": "must accept JSON envelope batches and allow idempotent delivery"
+  },
+  "preferred_patterns": [
+    "Dedicated Web Worker for durable queue and flush",
+    "IndexedDB as primary persistence (async, scalable)",
+    "localStorage as small snapshot fallback (best-effort)",
+    "Envelope pattern for payload + metadata",
+    "Event batching with cooldown windows",
+    "Dedupe by fingerprint + time window",
+    "Retry with exponential backoff + jitter"
+  ],
+  "behaviour": {
+    "default_assumptions": [
+      "Events must be persisted before any network attempt",
+      "Worker is single-writer for event queue",
+      "Main thread only posts minimal events and never waits on network"
+    ],
+    "when_offline": [
+      "Persist events locally",
+      "Update UI status to offline/queued",
+      "Flush automatically on online event"
+    ],
+    "when_online": [
+      "Batch flush with small limits",
+      "Mark delivered on success",
+      "Backoff + retry on failure"
+    ]
+  },
+  "output_requirements": {
+    "format": "JSON",
+    "delivery": "POST when online (worker flush) with local retry",
+    "envelope": {
+      "meta": "schema + created_at + session/device context",
+      "events": "array of event records"
+    },
+    "deduplication": "time + source + fingerprint based",
+    "privacy": {
+      "store_audio": false,
+      "store_transcript_only": true
+    }
+  }
+}

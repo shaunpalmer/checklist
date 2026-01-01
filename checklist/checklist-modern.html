@@ -7,6 +7,23 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>Cleaning Checklist</title>
 
+  <!-- Theme bootstrap (runs before CSS to avoid flash) -->
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('checklist_settings');
+        if (!raw) return;
+        var settings = JSON.parse(raw);
+        var theme = settings && settings.theme;
+        if (theme === 'dark' || theme === 'light') {
+          document.documentElement.setAttribute('data-theme', theme);
+        }
+      } catch (_) {
+        // ignore
+      }
+    })();
+  </script>
+
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/checklist-variables.css" />
   <link rel="stylesheet" href="css/checklist-style.css" />
@@ -26,6 +43,9 @@
 
 <body>
   <div class="checklist-wrapper">
+
+    <!-- Accessibility: announces dynamic status updates for screen readers/voice control -->
+    <div id="aria-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
     <!-- ========================================
          HEADER
          ======================================== -->
@@ -73,6 +93,7 @@
           id="crew-name" 
           placeholder="e.g., John's Cleaning Team" 
           class="crew-name-input"
+          autocomplete="organization"
         />
       </div>
       <div class="meta-field">
@@ -81,6 +102,7 @@
           type="date" 
           id="checklist-date" 
           class="date-input"
+          autocomplete="off"
         />
       </div>
     </div>
@@ -109,42 +131,42 @@
           </summary>
           <div class="room-details">
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-sinks" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-sinks" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Sinks and Faucets</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-microwave-out" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-microwave-out" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Microwave (outside)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-countertops" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-countertops" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Countertops</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-floors" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-floors" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Floors Mopped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-baseboards" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-baseboards" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-garbage" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-garbage" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Garbage bags removed</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-stovetop" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-stovetop" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Stovetop wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-fridge-out" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-fridge-out" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Refrig. (outside)</span>
@@ -154,7 +176,7 @@
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Drawers/Pantry (empty & wipe) - $50</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="kitchen-lights" data-room="kitchen" data-category="basic" data-hours="0.5">
                 <input type="checkbox" id="kitchen-lights" name="kitchen" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light switches</span>
@@ -175,37 +197,37 @@
           </summary>
           <div class="room-details">
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="living-carpet" data-room="living-room" data-category="floors" data-hours="0.3" data-difficulty="basic">
                 <input type="checkbox" id="living-carpet" name="living" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Carpet Vacuum</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="living-tile" data-room="living-room" data-category="floors" data-hours="0.3" data-difficulty="basic">
                 <input type="checkbox" id="living-tile" name="living" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Tile cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="living-walls" data-room="living-room" data-category="walls" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="living-walls" name="living" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Spot cleaning of walls</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="living-decobing" data-room="living-room" data-category="high" data-hours="0.4" data-difficulty="deep">
                 <input type="checkbox" id="living-decobing" name="living" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Decobing (ceiling/walls)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="living-shelves" data-room="living-room" data-category="dust" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="living-shelves" name="living" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Shelves dusted</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="living-baseboards" data-room="living-room" data-category="trim" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="living-baseboards" name="living" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="living-lights" data-room="living-room" data-category="touchpoints" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="living-lights" name="living" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light Switches</span>
@@ -226,27 +248,27 @@
           </summary>
           <div class="room-details">
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="entryway-carpet" data-room="entryway" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="entryway-carpet" name="entryway" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Carpet Vacuum</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="entryway-tile" data-room="entryway" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="entryway-tile" name="entryway" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Tile cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="entryway-wood" data-room="entryway" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="entryway-wood" name="entryway" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Wood cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="entryway-shelves" data-room="entryway" data-category="dust" data-hours="0.15" data-difficulty="basic">
                 <input type="checkbox" id="entryway-shelves" name="entryway" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Shelves dusted</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="entryway-baseboards" data-room="entryway" data-category="trim" data-hours="0.15" data-difficulty="basic">
                 <input type="checkbox" id="entryway-baseboards" name="entryway" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards</span>
@@ -269,22 +291,22 @@
             <!-- Laundry Sink & Taps -->
             <h4 style="margin-top: 0; padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Laundry Sink & Taps</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="laundry-sink" data-room="laundry" data-category="fixtures" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="laundry-sink" name="laundry" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Sink Tub (stainless steel)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="laundry-faucets" data-room="laundry" data-category="fixtures" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="laundry-faucets" name="laundry" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Faucets & Taps wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="laundry-machines" data-room="laundry" data-category="appliances" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="laundry-machines" name="laundry" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Machines Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="laundry-floors" data-room="laundry" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="laundry-floors" name="laundry" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Floors cleaned</span>
@@ -294,22 +316,22 @@
             <!-- Laundry Cabinets & Shelving -->
             <h4 style="margin-top: var(--space-lg); padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Cabinets & Shelving</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="laundry-cabinets" data-room="laundry" data-category="surfaces" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="laundry-cabinets" name="laundry" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Cabinets wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="laundry-doors" data-room="laundry" data-category="touchpoints" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="laundry-doors" name="laundry" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Cabinet doors & handles</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="laundry-shelves" data-room="laundry" data-category="dust" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="laundry-shelves" name="laundry" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Shelving cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="laundry-baseboards" data-room="laundry" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="laundry-baseboards" name="laundry" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards & Light switches</span>
@@ -332,52 +354,52 @@
             <!-- Bathroom 1 -->
             <h4 style="margin-top: 0; padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Bathroom 1</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-sink" data-room="bathrooms" data-category="fixtures" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath1-sink" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Sinks and Faucets</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-tub" data-room="bathrooms" data-category="shower" data-hours="0.3" data-difficulty="basic">
                 <input type="checkbox" id="bath1-tub" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Tub/Shower</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-toilet" data-room="bathrooms" data-category="toilet" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath1-toilet" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Toilet Bowl & Tank</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-mirrors" data-room="bathrooms" data-category="glass" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath1-mirrors" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Mirrors cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-counter" data-room="bathrooms" data-category="surfaces" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath1-counter" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Countertops</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-cabinets" data-room="bathrooms" data-category="cabinets" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath1-cabinets" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Cabinets (outside)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-floors" data-room="bathrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath1-floors" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Floors Mopped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-baseboards" data-room="bathrooms" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath1-baseboards" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-lights" data-room="bathrooms" data-category="touchpoints" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bath1-lights" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light switches</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath1-trash" data-room="bathrooms" data-category="trash" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bath1-trash" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Remove Trash Bags</span>
@@ -387,52 +409,52 @@
             <!-- Bathroom 2 -->
             <h4 style="margin-top: var(--space-lg); padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Bathroom 2</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-sink" data-room="bathrooms" data-category="fixtures" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath2-sink" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Sinks and Faucets</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-tub" data-room="bathrooms" data-category="shower" data-hours="0.3" data-difficulty="basic">
                 <input type="checkbox" id="bath2-tub" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Tub/Shower</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-toilet" data-room="bathrooms" data-category="toilet" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath2-toilet" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Toilet Bowl & Tank</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-mirrors" data-room="bathrooms" data-category="glass" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath2-mirrors" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Mirrors cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-counter" data-room="bathrooms" data-category="surfaces" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath2-counter" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Countertops</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-cabinets" data-room="bathrooms" data-category="cabinets" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath2-cabinets" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Cabinets (outside)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-floors" data-room="bathrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath2-floors" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Floors Mopped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-baseboards" data-room="bathrooms" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath2-baseboards" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-lights" data-room="bathrooms" data-category="touchpoints" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bath2-lights" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light switches</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath2-trash" data-room="bathrooms" data-category="trash" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bath2-trash" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Remove Trash Bags</span>
@@ -442,52 +464,52 @@
             <!-- Bathroom 3 -->
             <h4 style="margin-top: var(--space-lg); padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Bathroom 3</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-sink" data-room="bathrooms" data-category="fixtures" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath3-sink" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Sinks and Faucets</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-tub" data-room="bathrooms" data-category="shower" data-hours="0.3" data-difficulty="basic">
                 <input type="checkbox" id="bath3-tub" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Tub/Shower</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-toilet" data-room="bathrooms" data-category="toilet" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath3-toilet" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Toilet Bowl & Tank</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-mirrors" data-room="bathrooms" data-category="glass" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath3-mirrors" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Mirrors cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-counter" data-room="bathrooms" data-category="surfaces" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath3-counter" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Countertops</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-cabinets" data-room="bathrooms" data-category="cabinets" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath3-cabinets" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Cabinets (outside)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-floors" data-room="bathrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath3-floors" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Floors Mopped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-baseboards" data-room="bathrooms" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath3-baseboards" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-lights" data-room="bathrooms" data-category="touchpoints" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bath3-lights" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light switches</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath3-trash" data-room="bathrooms" data-category="trash" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bath3-trash" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Remove Trash Bags</span>
@@ -497,52 +519,52 @@
             <!-- Bathroom 4 -->
             <h4 style="margin-top: var(--space-lg); padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Bathroom 4</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-sink" data-room="bathrooms" data-category="fixtures" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath4-sink" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Sinks and Faucets</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-tub" data-room="bathrooms" data-category="shower" data-hours="0.3" data-difficulty="basic">
                 <input type="checkbox" id="bath4-tub" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Tub/Shower</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-toilet" data-room="bathrooms" data-category="toilet" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath4-toilet" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Toilet Bowl & Tank</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-mirrors" data-room="bathrooms" data-category="glass" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath4-mirrors" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Mirrors cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-counter" data-room="bathrooms" data-category="surfaces" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath4-counter" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Countertops</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-cabinets" data-room="bathrooms" data-category="cabinets" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath4-cabinets" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Cabinets (outside)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-floors" data-room="bathrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bath4-floors" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Floors Mopped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-baseboards" data-room="bathrooms" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bath4-baseboards" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-lights" data-room="bathrooms" data-category="touchpoints" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bath4-lights" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light switches</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bath4-trash" data-room="bathrooms" data-category="trash" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bath4-trash" name="bathrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Remove Trash Bags</span>
@@ -565,27 +587,27 @@
             <!-- Bedroom 1 -->
             <h4 style="margin-top: 0; padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Bedroom 1</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed1-beds" data-room="bedrooms" data-category="beds" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed1-beds" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Beds Made</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed1-carpet" data-room="bedrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed1-carpet" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Carpet Vacuum</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed1-wood" data-room="bedrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed1-wood" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Wood Floors Cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed1-baseboards" data-room="bedrooms" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bed1-baseboards" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed1-lights" data-room="bedrooms" data-category="touchpoints" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bed1-lights" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light Switches</span>
@@ -595,27 +617,27 @@
             <!-- Bedroom 2 -->
             <h4 style="margin-top: var(--space-lg); padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Bedroom 2</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed2-beds" data-room="bedrooms" data-category="beds" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed2-beds" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Beds Made</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed2-carpet" data-room="bedrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed2-carpet" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Carpet Vacuum</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed2-wood" data-room="bedrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed2-wood" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Wood Floors Cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed2-baseboards" data-room="bedrooms" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bed2-baseboards" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed2-lights" data-room="bedrooms" data-category="touchpoints" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bed2-lights" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light Switches</span>
@@ -625,27 +647,27 @@
             <!-- Bedroom 3 -->
             <h4 style="margin-top: var(--space-lg); padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Bedroom 3</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed3-beds" data-room="bedrooms" data-category="beds" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed3-beds" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Beds Made</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed3-carpet" data-room="bedrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed3-carpet" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Carpet Vacuum</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed3-wood" data-room="bedrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed3-wood" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Wood Floors Cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed3-baseboards" data-room="bedrooms" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bed3-baseboards" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed3-lights" data-room="bedrooms" data-category="touchpoints" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bed3-lights" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light Switches</span>
@@ -655,27 +677,27 @@
             <!-- Bedroom 4 -->
             <h4 style="margin-top: var(--space-lg); padding: 0 0 var(--space-md) 0; color: var(--color-secondary); font-size: var(--font-size-sm);">Bedroom 4</h4>
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed4-beds" data-room="bedrooms" data-category="beds" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed4-beds" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Beds Made</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed4-carpet" data-room="bedrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed4-carpet" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Carpet Vacuum</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed4-wood" data-room="bedrooms" data-category="floors" data-hours="0.2" data-difficulty="basic">
                 <input type="checkbox" id="bed4-wood" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Wood Floors Cleaned</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed4-baseboards" data-room="bedrooms" data-category="trim" data-hours="0.1" data-difficulty="basic">
                 <input type="checkbox" id="bed4-baseboards" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Baseboards Wiped</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="bed4-lights" data-room="bedrooms" data-category="touchpoints" data-hours="0.05" data-difficulty="basic">
                 <input type="checkbox" id="bed4-lights" name="bedrooms" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Light Switches</span>
@@ -696,32 +718,51 @@
           </summary>
           <div class="room-details">
             <div class="checklist-items">
-              <label class="checklist-item" data-item-id="deep-oven" data-room="deep-cleaning" data-category="oven-single" data-hours="1.5" data-base-charge="150" data-labor-cost="75" data-material-cost="75" data-service-code="OC(S)" data-settings-key="surcharge_single_oven" data-difficulty="deep">
+              <label class="checklist-item" data-item-id="deep-oven" data-room="deep-cleaning" data-category="oven" data-hours="1.5" data-base-charge="150" data-variant-type="dropdown" data-options-key="oven_variants" data-difficulty="deep">
                 <input type="checkbox" id="deep-oven" name="deep" />
                 <span class="checkbox-custom"></span>
-                <span class="item-label">Oven (inside) - $150</span>
+                <span class="item-label">Oven (inside)</span>
+                <select style="display: none;" data-options-select="oven_variants" class="variant-dropdown">
+                  <option value="">Choose oven...</option>
+                  <option value="single-1">1 × Single oven</option>
+                  <option value="single-2">2 × Single ovens</option>
+                  <option value="single-3">3 × Single ovens</option>
+                  <option value="single-4">4 × Single ovens</option>
+                  <option value="single-5">5 × Single ovens</option>
+                  <option value="single-6">6 × Single ovens</option>
+                  <option value="single-7">7 × Single ovens</option>
+                  <option value="single-8">8 × Single ovens</option>
+                  <option value="double-1">1 × Double oven</option>
+                  <option value="double-2">2 × Double ovens</option>
+                  <option value="double-3">3 × Double ovens</option>
+                  <option value="double-4">4 × Double ovens</option>
+                  <option value="double-5">5 × Double ovens</option>
+                  <option value="double-6">6 × Double ovens</option>
+                  <option value="double-7">7 × Double ovens</option>
+                  <option value="double-8">8 × Double ovens</option>
+                </select>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="deep-fridge" data-room="deep-cleaning" data-category="fridge" data-hours="1.0" data-difficulty="deep">
                 <input type="checkbox" id="deep-fridge" name="deep" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Refrig. (inside)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="deep-microwave" data-room="deep-cleaning" data-category="microwave" data-hours="0.5" data-difficulty="deep">
                 <input type="checkbox" id="deep-microwave" name="deep" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Microwave (inside)</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="deep-shower-mold" data-room="deep-cleaning" data-category="bathroom" data-hours="0.75" data-difficulty="deep">
                 <input type="checkbox" id="deep-shower-mold" name="deep" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Shower Mold</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="deep-shower-door" data-room="deep-cleaning" data-category="bathroom" data-hours="0.75" data-difficulty="deep">
                 <input type="checkbox" id="deep-shower-door" name="deep" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Shower door Mineral Deposits</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="deep-cabinets" data-room="deep-cleaning" data-category="cabinets" data-hours="1.0" data-difficulty="deep">
                 <input type="checkbox" id="deep-cabinets" name="deep" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Cabinets (inside)</span>
@@ -743,17 +784,17 @@
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Drawers (inside) - $50</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="deep-launder-apparel" data-room="deep-cleaning" data-category="laundry" data-hours="1.0" data-difficulty="basic">
                 <input type="checkbox" id="deep-launder-apparel" name="deep" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Launder Apparel</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="deep-launder-linens" data-room="deep-cleaning" data-category="laundry" data-hours="1.0" data-difficulty="basic">
                 <input type="checkbox" id="deep-launder-linens" name="deep" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Launder Linens</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="deep-ceiling-fan" data-room="deep-cleaning" data-category="high" data-hours="0.3" data-difficulty="deep">
                 <input type="checkbox" id="deep-ceiling-fan" name="deep" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Ceiling Fan</span>
@@ -774,27 +815,27 @@
           </summary>
           <div class="room-details">
             <div class="checklist-items">
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="special-garage" data-room="special" data-category="extra" data-hours="2.0" data-difficulty="deep">
                 <input type="checkbox" id="special-garage" name="special" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Garage</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="special-laundry" data-room="special" data-category="laundry" data-hours="1.0" data-difficulty="basic">
                 <input type="checkbox" id="special-laundry" name="special" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Clothes folded</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="special-iron" data-room="special" data-category="laundry" data-hours="1.5" data-difficulty="basic">
                 <input type="checkbox" id="special-iron" name="special" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Clothes Ironed</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="special-range-hood" data-room="special" data-category="appliance" data-hours="0.5" data-difficulty="deep">
                 <input type="checkbox" id="special-range-hood" name="special" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Range hood</span>
               </label>
-              <label class="checklist-item">
+              <label class="checklist-item" data-item-id="special-other" data-room="special" data-category="extra" data-hours="0.5" data-difficulty="basic">
                 <input type="checkbox" id="special-other" name="special" />
                 <span class="checkbox-custom"></span>
                 <span class="item-label">Other (see notes)</span>
@@ -822,7 +863,7 @@
             </div>
           </summary>
           <div class="room-details">
-            <p style="color: #666; font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Select services you want to quote for this property</p>
+            <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Select services you want to quote for this property</p>
             
             <!-- Carpet Cleaning Dropdown -->
             <div class="meta-field" style="margin-bottom: var(--space-lg);">
@@ -831,7 +872,7 @@
                 data-type="dropdown"
                 data-service="carpet-cleaning"
                 data-service-code="carpet"
-                style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px;">
+                style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px; background: var(--color-white); color: var(--color-primary);">
                 <option value="">-- Select Number of Rooms --</option>
                 <option value="C1">1 Room</option>
                 <option value="C2">2 Rooms</option>
@@ -851,7 +892,7 @@
                 data-type="dropdown"
                 data-service="windows-cleaning"
                 data-service-code="windows"
-                style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px;">
+                style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px; background: var(--color-white); color: var(--color-primary);">
                 <option value="">-- Select Property Type --</option>
                 <option value="W2BR">2 Bedroom</option>
                 <option value="W3BR">3 Bedroom</option>
@@ -901,6 +942,30 @@
                     <input type="checkbox" id="res-kit-microwave" name="res-kitchen" />
                     <span class="checkbox-custom"></span>
                     <span class="item-label">Microwave wiped (inside & out)</span>
+                  </label>
+                  <label class="checklist-item" data-item-id="res-kit-oven-inside" data-room="res-kitchen" data-category="oven" data-hours="1.5" data-base-charge="150" data-variant-type="dropdown" data-options-key="oven_variants" data-difficulty="deep">
+                    <input type="checkbox" id="res-kit-oven-inside" name="res-kitchen" />
+                    <span class="checkbox-custom"></span>
+                    <span class="item-label">Oven (inside)</span>
+                    <select style="display: none;" data-options-select="oven_variants" class="variant-dropdown">
+                      <option value="">Choose oven...</option>
+                      <option value="single-1">1 × Single oven</option>
+                      <option value="single-2">2 × Single ovens</option>
+                      <option value="single-3">3 × Single ovens</option>
+                      <option value="single-4">4 × Single ovens</option>
+                      <option value="single-5">5 × Single ovens</option>
+                      <option value="single-6">6 × Single ovens</option>
+                      <option value="single-7">7 × Single ovens</option>
+                      <option value="single-8">8 × Single ovens</option>
+                      <option value="double-1">1 × Double oven</option>
+                      <option value="double-2">2 × Double ovens</option>
+                      <option value="double-3">3 × Double ovens</option>
+                      <option value="double-4">4 × Double ovens</option>
+                      <option value="double-5">5 × Double ovens</option>
+                      <option value="double-6">6 × Double ovens</option>
+                      <option value="double-7">7 × Double ovens</option>
+                      <option value="double-8">8 × Double ovens</option>
+                    </select>
                   </label>
                   <label class="checklist-item">
                     <input type="checkbox" id="res-kit-stovetop" name="res-kitchen" />
@@ -1204,7 +1269,7 @@
             </div>
           </summary>
           <div class="room-details">
-            <p style="color: #666; font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Select services you want to quote for this property</p>
+            <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Select services you want to quote for this property</p>
             
             <!-- Carpet Cleaning Dropdown -->
             <div class="meta-field" style="margin-bottom: var(--space-lg);">
@@ -1213,7 +1278,7 @@
                 data-type="dropdown"
                 data-service="carpet-cleaning"
                 data-service-code="carpet"
-                style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px;">
+                style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px; background: var(--color-white); color: var(--color-primary);">
                 <option value="">-- Select Number of Rooms --</option>
                 <option value="C1">1 Room</option>
                 <option value="C2">2 Rooms</option>
@@ -1233,7 +1298,7 @@
                 data-type="dropdown"
                 data-service="windows-cleaning"
                 data-service-code="windows"
-                style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px;">
+                style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px; background: var(--color-white); color: var(--color-primary);">
                 <option value="">-- Select Property Type --</option>
                 <option value="W2BR">2 Bedroom</option>
                 <option value="W3BR">3 Bedroom</option>
@@ -1441,6 +1506,30 @@
                     <span class="checkbox-custom"></span>
                     <span class="item-label">Microwave (outside & inside) sanitized</span>
                   </label>
+                  <label class="checklist-item" data-item-id="com-kit-oven-inside" data-room="com-kitchen" data-category="oven" data-hours="1.5" data-base-charge="150" data-variant-type="dropdown" data-options-key="oven_variants" data-difficulty="deep">
+                    <input type="checkbox" id="com-kit-oven-inside" name="com-kitchen" />
+                    <span class="checkbox-custom"></span>
+                    <span class="item-label">Oven (inside)</span>
+                    <select style="display: none;" data-options-select="oven_variants" class="variant-dropdown">
+                      <option value="">Choose oven...</option>
+                      <option value="single-1">1 × Single oven</option>
+                      <option value="single-2">2 × Single ovens</option>
+                      <option value="single-3">3 × Single ovens</option>
+                      <option value="single-4">4 × Single ovens</option>
+                      <option value="single-5">5 × Single ovens</option>
+                      <option value="single-6">6 × Single ovens</option>
+                      <option value="single-7">7 × Single ovens</option>
+                      <option value="single-8">8 × Single ovens</option>
+                      <option value="double-1">1 × Double oven</option>
+                      <option value="double-2">2 × Double ovens</option>
+                      <option value="double-3">3 × Double ovens</option>
+                      <option value="double-4">4 × Double ovens</option>
+                      <option value="double-5">5 × Double ovens</option>
+                      <option value="double-6">6 × Double ovens</option>
+                      <option value="double-7">7 × Double ovens</option>
+                      <option value="double-8">8 × Double ovens</option>
+                    </select>
+                  </label>
                   <label class="checklist-item">
                     <input type="checkbox" id="com-kit-oven-front" name="com-kitchen" />
                     <span class="checkbox-custom"></span>
@@ -1626,7 +1715,7 @@
             </div>
           </summary>
           <div class="room-details">
-            <p style="color: #666; font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Select services you want to quote for this property</p>
+            <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Select services you want to quote for this property</p>
             
             <!-- Carpet Cleaning Dropdown -->
             <div class="meta-field" style="margin-bottom: var(--space-lg);">
@@ -1635,7 +1724,7 @@
                 data-type="dropdown"
                 data-service="carpet-cleaning"
                 data-service-code="carpet"
-                style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px;">
+                style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px; background: var(--color-white); color: var(--color-primary);">
                 <option value="">-- Select Number of Rooms --</option>
                 <option value="C1">1 Room</option>
                 <option value="C2">2 Rooms</option>
@@ -1655,7 +1744,7 @@
                 data-type="dropdown"
                 data-service="windows-cleaning"
                 data-service-code="windows"
-                style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px;">
+                style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 400px; background: var(--color-white); color: var(--color-primary);">
                 <option value="">-- Select Property Type --</option>
                 <option value="W2BR">2 Bedroom</option>
                 <option value="W3BR">3 Bedroom</option>
@@ -1677,9 +1766,51 @@
 
       <!-- CUSTOM SERVICE TAB -->
       <div class="service-tab-content" data-service="custom" id="service-custom">
-        <div style="padding: var(--space-lg); text-align: center; color: var(--color-secondary);">
-          <p><em>Custom service template - configure your own checklist items</em></p>
-          <p>Coming soon: Custom service builder</p>
+        <div class="checklist-content">
+          <div class="room-section">
+            <details data-room="custom-items">
+              <summary>
+                <div class="summary-header">
+                  <span class="room-title">🧩 Custom Items</span>
+                  <span class="progress-badge">0/0</span>
+                </div>
+              </summary>
+              <div class="room-details">
+                <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
+                  Add extra checklist items here when they aren’t already on the list.
+                </p>
+
+                <div class="admin-only" id="custom-items-admin" aria-label="Custom items editor">
+                  <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+                    <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">➕ Custom Items (Admin)</h3>
+
+                    <input type="hidden" id="custom-item-id" value="">
+
+                    <div class="meta-field">
+                      <label for="custom-item-description">Item label</label>
+                      <input type="text" id="custom-item-description" maxlength="190" placeholder="e.g., Balcony sweep" autocomplete="off" />
+                    </div>
+                    <div class="meta-field">
+                      <label for="custom-item-details">Public description</label>
+                      <textarea id="custom-item-details" placeholder="Shown under Details" style="min-height: 80px;"></textarea>
+                    </div>
+                    <div class="meta-field">
+                      <label for="custom-item-internal-notes">Internal notes (staff only)</label>
+                      <textarea id="custom-item-internal-notes" placeholder="Not shown to clients" style="min-height: 80px;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: var(--space-md);">
+                      <button type="button" id="btn-save-custom-item" class="btn btn-primary" style="flex: 1;">💾 Save item</button>
+                      <button type="button" id="btn-clear-custom-item" class="btn btn-secondary" style="flex: 1;">↻ Clear</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="checklist-items" id="custom-items-checklist">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </details>
+          </div>
         </div>
       </div>
       <!-- END: CUSTOM SERVICE TAB -->
@@ -1688,18 +1819,13 @@
       <div class="service-tab-content" data-service="quotes" id="service-quotes">
         <div class="checklist-content">
           <div style="padding: var(--space-lg);">
-            <h2 style="margin-bottom: var(--space-md); color: var(--color-secondary);">Generate & Send Quote</h2>
-            <p style="color: var(--color-secondary); margin-bottom: var(--space-lg);">Find or create client, then generate a quote and send via email.</p>
+            <h2 style="margin-bottom: var(--space-md); color: var(--color-secondary);">Quotes</h2>
 
-            <!-- CLIENT SECTION (3-column layout) -->
-            <div style="border: 2px solid var(--color-accent); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg); background: rgba(28, 201, 80, 0.03);">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">👤 Client Information</h3>
-
-              <!-- HIDDEN: Store client_id and population_id for quote packet -->
-              <input type="hidden" id="quote-client-id" value="">
-              <input type="hidden" id="quote-population-id" value="">
-              <input type="hidden" id="quote-id" value="">
-              <input type="hidden" id="quote-packet" value="">
+            <!-- HIDDEN: Store client_id and population_id for quote packet -->
+            <input type="hidden" id="quote-client-id" value="">
+            <input type="hidden" id="quote-population-id" value="">
+            <input type="hidden" id="quote-id" value="">
+            <input type="hidden" id="quote-packet" value="">
 
               <!-- Find Existing Client -->
               <div class="meta-field">
@@ -1708,9 +1834,10 @@
                   type="text" 
                   id="quote-client-search" 
                   placeholder="Type name, email or phone..." 
-                  style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; width: 100%;"
+                  style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; width: 100%; background: var(--color-white); color: var(--color-primary);"
+                  autocomplete="off"
                 />
-                <div id="quote-client-suggestions" style="position: absolute; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 4px 4px; max-height: 200px; overflow-y: auto; width: 100%; z-index: 1000; display: none;">
+                <div id="quote-client-suggestions" style="position: absolute; background: var(--color-white); border: 1px solid var(--color-border); border-top: none; border-radius: 0 0 4px 4px; max-height: 200px; overflow-y: auto; width: 100%; z-index: 1000; display: none;">
                   <!-- Autocomplete suggestions will appear here -->
                 </div>
               </div>
@@ -1719,56 +1846,63 @@
               <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-md); margin-top: var(--space-md);">
                 <div class="meta-field">
                   <label for="quote-client-name">Client Name</label>
-                  <input type="text" id="quote-client-name" placeholder="Full name" />
+                  <input type="text" id="quote-client-name" placeholder="Full name" autocomplete="name" />
                 </div>
                 <div class="meta-field">
                   <label for="quote-client-email">Email <span style="color: var(--color-accent); font-weight: bold;">*</span></label>
-                  <input type="email" id="quote-client-email" placeholder="email@example.com" />
-                  <p style="color: #d32f2f; font-size: 12px; margin-top: 4px; display: none;" id="email-required-msg">Email is required to send quote</p>
+                  <input type="email" id="quote-client-email" placeholder="email@example.com" autocomplete="email" inputmode="email" />
+                  <p style="color: var(--color-error); font-size: 12px; margin-top: 4px; display: none;" id="email-required-msg">Email is required to send quote</p>
                 </div>
                 <div class="meta-field">
                   <label for="quote-client-phone">Phone</label>
-                  <input type="tel" id="quote-client-phone" placeholder="(555) 123-4567" />
+                  <input type="tel" id="quote-client-phone" placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel" />
                 </div>
               </div>
 
               <!-- Full Address Structure (mapped to wp_avs_population table) -->
-              <div style="background: #f9f9f9; border: 1px solid #eee; padding: var(--space-md); border-radius: 4px; margin-top: var(--space-md);">
-                <h4 style="color: var(--color-primary); margin-bottom: var(--space-sm);">📍 Property Address (population_id: <span id="display-population-id">-</span>)</h4>
+              <div style="background: var(--color-light); border: 1px solid var(--color-border); padding: var(--space-md); border-radius: 4px; margin-top: var(--space-md);">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                  <h4 style="color: var(--color-primary); margin: 0;">
+                    📍 Property Address
+                    <!-- Internal reference only (not shown publicly): population_id ties this address back to wp_avs_population -->
+                    <span class="dev-only">(population_id: <span id="display-population-id">-</span>)</span>
+                  </h4>
+                  <button type="button" id="btn-toggle-address-edit" class="btn btn-secondary" style="padding: 8px 12px; min-height: 36px;">Edit address</button>
+                </div>
                 
                 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-md);">
                   <div class="meta-field">
                     <label for="quote-address-line1">Address Line 1</label>
-                    <input type="text" id="quote-address-line1" placeholder="Street address" readonly style="background: #f5f5f5;" />
+                    <input type="text" id="quote-address-line1" placeholder="Street address" readonly autocomplete="address-line1" />
                   </div>
                   <div class="meta-field">
                     <label for="quote-address-line2">Address Line 2</label>
-                    <input type="text" id="quote-address-line2" placeholder="Apt, Suite, etc." readonly style="background: #f5f5f5;" />
+                    <input type="text" id="quote-address-line2" placeholder="Apt, Suite, etc." readonly autocomplete="address-line2" />
                   </div>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--space-md);">
                   <div class="meta-field">
                     <label for="quote-suburb">Suburb</label>
-                    <input type="text" id="quote-suburb" placeholder="Suburb" readonly style="background: #f5f5f5;" />
+                    <input type="text" id="quote-suburb" placeholder="Suburb" readonly autocomplete="address-level2" />
                   </div>
                   <div class="meta-field">
                     <label for="quote-city">City</label>
-                    <input type="text" id="quote-city" placeholder="City" readonly style="background: #f5f5f5;" />
+                    <input type="text" id="quote-city" placeholder="City" readonly autocomplete="address-level2" />
                   </div>
                   <div class="meta-field">
                     <label for="quote-region">Region</label>
-                    <input type="text" id="quote-region" placeholder="Region" readonly style="background: #f5f5f5;" />
+                    <input type="text" id="quote-region" placeholder="Region" readonly autocomplete="address-level1" />
                   </div>
                   <div class="meta-field">
                     <label for="quote-postcode">Postcode</label>
-                    <input type="text" id="quote-postcode" placeholder="Postcode" readonly style="background: #f5f5f5;" />
+                    <input type="text" id="quote-postcode" placeholder="Postcode" readonly autocomplete="postal-code" inputmode="numeric" />
                   </div>
                 </div>
                 
                 <div class="meta-field" style="margin-top: var(--space-sm);">
                   <label for="quote-country">Country</label>
-                  <input type="text" id="quote-country" placeholder="Country" readonly style="background: #f5f5f5;" />
+                  <input type="text" id="quote-country" placeholder="Country" readonly autocomplete="country-name" />
                 </div>
               </div>
 
@@ -1781,16 +1915,15 @@
                   ➕ Create New Client
                 </button>
               </div>
-            </div>
 
             <!-- SERVICE & BOOKING SECTION -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); margin-bottom: var(--space-lg);">
               <!-- Service Selection -->
-              <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg);">
+              <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg);">
                 <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🎯 Service</h3>
                 <div class="meta-field">
                   <label for="quote-service-type">Service Type</label>
-                  <select id="quote-service-type" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; width: 100%;">
+                  <select id="quote-service-type" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; width: 100%; background: var(--color-white); color: var(--color-primary);">
                     <option value="">-- Select Service --</option>
                     <option value="end-of-tenancy">End of Tenancy (Full Deep Clean)</option>
                     <option value="residential">Residential (Routine Tidying)</option>
@@ -1801,7 +1934,7 @@
               </div>
 
               <!-- Booking Date/Time -->
-              <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg);">
+              <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg);">
                 <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📅 Booking</h3>
                 <div class="meta-field">
                   <label for="quote-booking-date">Preferred Job Date</label>
@@ -1816,16 +1949,20 @@
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
                 <div>
-                  <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: 4px;">Items Checked</p>
-                  <p style="font-size: 24px; font-weight: bold; color: var(--color-accent);" id="quote-items-count">0</p>
+                  <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: 4px;">Subtotal</p>
+                  <p style="font-size: 24px; font-weight: bold; color: var(--color-accent);" id="quote-subtotal">$0.00</p>
                 </div>
                 <div>
-                  <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: 4px;">Estimated Hours</p>
-                  <p style="font-size: 24px; font-weight: bold; color: var(--color-accent);" id="quote-hours-total">0.0</p>
+                  <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: 4px;" id="quote-tax-label">GST</p>
+                  <p style="font-size: 24px; font-weight: bold; color: var(--color-accent);" id="quote-tax">$0.00</p>
                 </div>
               </div>
 
-              <div style="background: white; border-radius: 4px; padding: var(--space-md); margin-bottom: var(--space-lg);">
+              <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-lg);">
+                Estimate: <strong id="quote-items-count">0</strong> items • <strong id="quote-hours-total">0.0</strong> hours
+              </p>
+
+              <div id="quote-internal-breakdown" style="display: none; background: var(--color-white); border-radius: 4px; padding: var(--space-md); margin-bottom: var(--space-lg);">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                   <span>Base Hourly Cost:</span>
                   <span id="quote-base-cost">$0.00</span>
@@ -1834,27 +1971,44 @@
                   <span>Surcharges:</span>
                   <span id="quote-surcharges">$0.00</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid #ddd;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid var(--color-border);">
                   <span style="font-weight: bold;">Subtotal:</span>
-                  <span style="font-weight: bold;" id="quote-subtotal">$0.00</span>
+                  <span style="font-weight: bold;" id="quote-subtotal-detail">$0.00</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0;">
-                  <span style="color: var(--color-secondary);">Tax (10%):</span>
-                  <span style="color: var(--color-secondary);" id="quote-tax">$0.00</span>
+                  <span style="color: var(--color-secondary);" id="quote-tax-label-detail">GST</span>
+                  <span style="color: var(--color-secondary);" id="quote-tax-detail">$0.00</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--color-accent);">
-                  <span>Total:</span>
-                  <span style="color: var(--color-accent);" id="quote-total">$0.00</span>
-                </div>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--color-accent);">
+                <span>Total:</span>
+                <span style="color: var(--color-accent);" id="quote-total">$0.00</span>
+              </div>
+
+              <div id="quote-discount-row" style="display: none; justify-content: space-between; margin-top: 8px;">
+                <span style="color: var(--color-secondary);">Discount:</span>
+                <span style="color: var(--color-secondary);" id="quote-discount">-$0.00</span>
               </div>
 
               <button type="button" id="btn-generate-quote" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">
                 🔢 Calculate Quote
               </button>
+
+              <div id="quote-scope" style="background: var(--color-white); border-radius: 4px; padding: var(--space-md);">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px;">
+                  <h4 style="margin: 0; color: var(--color-secondary);">🧾 Included Scope</h4>
+                  <span id="quote-scope-count" style="color: var(--color-secondary); font-size: 12px;">0 items</span>
+                </div>
+                <p style="margin: 8px 0 12px; color: var(--color-secondary); font-size: var(--font-size-sm);">
+                  This is the itemized scope used to build the quote.
+                </p>
+                <div id="quote-line-items" style="font-size: var(--font-size-sm);"></div>
+              </div>
             </div>
 
             <!-- SEND OPTIONS SECTION -->
-            <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📤 Send Quote</h3>
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">How would you like to send this quote?</p>
 
@@ -1919,7 +2073,7 @@
                 <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">🔗 Shareable Quote Link</h4>
                 <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);">Copy this link and share with client:</p>
                 <div style="display: flex; gap: 8px;">
-                  <input type="text" id="quote-share-link" value="https://quotes.example.com/quote/abc123" readonly style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; flex: 1; background: #f5f5f5;" />
+                  <input type="text" id="quote-share-link" value="https://quotes.example.com/quote/abc123" readonly style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; flex: 1; background: var(--color-light); color: var(--color-primary);" />
                   <button type="button" id="btn-copy-link" class="btn btn-secondary">
                     📋 Copy
                   </button>
@@ -1928,10 +2082,11 @@
             </div>
 
             <!-- QUOTE NOTES -->
-            <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg);">
+            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg);">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📝 Notes</h3>
-              <textarea id="quote-notes" placeholder="Add any additional notes for the quote (not visible to client)..." style="width: 100%; min-height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;"></textarea>
+              <textarea id="quote-notes" placeholder="Add any additional notes for the quote (not visible to client)..." style="width: 100%; min-height: 80px; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; background: var(--color-white); color: var(--color-primary);"></textarea>
             </div>
+
           </div>
         </div>
       </div>
@@ -1945,7 +2100,7 @@
             <p style="color: var(--color-secondary); margin-bottom: var(--space-lg);">Configure pricing, services, and system options.</p>
 
             <!-- Pricing Settings Section -->
-            <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">💵 Pricing Settings</h3>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
@@ -1959,17 +2114,29 @@
                 </div>
                 <div class="meta-field">
                   <label for="setting-tax-rate">Tax Rate (%)</label>
-                  <input type="number" id="setting-tax-rate" value="10" step="1" min="0" max="100" />
+                  <input type="number" id="setting-tax-rate" value="15" step="1" min="0" max="100" />
                 </div>
                 <div class="meta-field">
                   <label for="setting-staff-multiplier">Multiple Staff Premium (%)</label>
                   <input type="number" id="setting-staff-multiplier" value="25" step="5" min="0" />
                 </div>
+                <div class="meta-field">
+                  <label for="setting-staff-extra-hourly-rate">Additional Staff Hourly Rate ($/hr)</label>
+                  <input type="number" id="setting-staff-extra-hourly-rate" value="30" step="1" min="0" />
+                </div>
+                <div class="meta-field">
+                  <label for="setting-discount-percent">Discount (%)</label>
+                  <input type="number" id="setting-discount-percent" value="0" step="1" min="0" max="50" />
+                </div>
+                <div class="meta-field">
+                  <label for="setting-discount-fixed">Discount ($)</label>
+                  <input type="number" id="setting-discount-fixed" value="0" step="5" min="0" />
+                </div>
               </div>
             </div>
 
             <!-- Surcharge Settings Section -->
-            <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">⭐ Surcharge Pricing</h3>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
@@ -2001,7 +2168,7 @@
             </div>
 
             <!-- Service Configuration Section -->
-            <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🎯 Service Configuration</h3>
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Link service types to API endpoints for dynamic data.</p>
               
@@ -2010,11 +2177,11 @@
                 <input type="url" id="service-api-endpoint" placeholder="https://api.example.com/services" />
               </div>
 
-              <div style="background: #f5f5f5; border-radius: 4px; padding: var(--space-md); margin: var(--space-md) 0;">
+              <div style="background: var(--color-light); border-radius: 4px; padding: var(--space-md); margin: var(--space-md) 0;">
                 <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Linked Services</h4>
                 <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                   <thead>
-                    <tr style="border-bottom: 2px solid #ddd;">
+                    <tr style="border-bottom: 2px solid var(--color-border);">
                       <th style="text-align: left; padding: 8px;">Service ID</th>
                       <th style="text-align: left; padding: 8px;">Service Name</th>
                       <th style="text-align: left; padding: 8px;">Type</th>
@@ -2022,18 +2189,18 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr style="border-bottom: 1px solid #ddd;">
+                    <tr style="border-bottom: 1px solid var(--color-border);">
                       <td style="padding: 8px;">SVC-001</td>
                       <td style="padding: 8px;">End of Tenancy</td>
-                      <td style="padding: 8px;"><span style="background: var(--color-accent); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">end-of-tenancy</span></td>
+                      <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">end-of-tenancy</span></td>
                       <td style="padding: 8px; text-align: center;">
                         <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
                       </td>
                     </tr>
-                    <tr style="border-bottom: 1px solid #ddd;">
+                    <tr style="border-bottom: 1px solid var(--color-border);">
                       <td style="padding: 8px;">SVC-002</td>
                       <td style="padding: 8px;">Residential Tidying</td>
-                      <td style="padding: 8px;"><span style="background: var(--color-accent); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">residential</span></td>
+                      <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">residential</span></td>
                       <td style="padding: 8px; text-align: center;">
                         <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
                       </td>
@@ -2047,7 +2214,7 @@
             </div>
 
             <!-- Customer ID Linking Section -->
-            <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🔗 Customer ID Linking</h3>
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Link this checklist to a customer workflow: Lead → Customer Data → Bookings → Invoicing</p>
               
@@ -2064,7 +2231,7 @@
             </div>
 
             <!-- System Options Section -->
-            <div style="border: 1px solid #ddd; border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">⚙️ System Options</h3>
               
               <div class="meta-field">
@@ -2074,12 +2241,24 @@
               </div>
               <div class="meta-field">
                 <label for="setting-currency">Currency</label>
-                <select id="setting-currency" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;">
+                <select id="setting-currency" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; background: var(--color-white); color: var(--color-primary);">
                   <option value="USD">US Dollar ($)</option>
+                  <option value="NZD">New Zealand Dollar (NZ$)</option>
                   <option value="AUD">Australian Dollar ($)</option>
                   <option value="GBP">British Pound (£)</option>
                   <option value="EUR">Euro (€)</option>
                 </select>
+              </div>
+
+              <div class="meta-field">
+                <label for="setting-theme-dark">Theme</label>
+                <div class="theme-toggle">
+                  <input type="checkbox" id="setting-theme-dark" />
+                  <label for="setting-theme-dark" class="theme-toggle-label">
+                    <span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span>
+                    <span class="theme-toggle-text">Dark mode</span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -2135,7 +2314,14 @@
         flatpickr('#checklist-date', {
           mode: 'single',
           dateFormat: 'Y-m-d',
-          defaultDate: new Date()
+          defaultDate: new Date(),
+          disableMobile: true
+        });
+
+        flatpickr('#quote-booking-date', {
+          mode: 'single',
+          dateFormat: 'Y-m-d',
+          disableMobile: true
         });
       }
     });

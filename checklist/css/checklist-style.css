@@ -30,6 +30,24 @@ body {
   padding: var(--space-md);
 }
 
+/* Screen-reader only (for aria-live/status text) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Internal-only UI helpers (keep data in DOM, hide from public view) */
+.dev-only {
+  display: none;
+}
+
 /* ============================================================================
    MAIN CONTAINER & HEADER
    ============================================================================ */
@@ -45,7 +63,7 @@ body {
 
 .checklist-header {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-  color: var(--color-white);
+  color: var(--color-on-dark);
   padding: var(--space-lg) var(--space-md);
   text-align: center;
   border-bottom: 4px solid var(--color-accent);
@@ -110,17 +128,33 @@ body {
 }
 
 .tab.is-tab-selected {
-  color: var(--color-white);
+  color: var(--color-on-accent);
   background-color: var(--color-accent);
   border-color: var(--color-accent);
   box-shadow: 0 2px 8px rgba(28, 201, 80, 0.3);
 }
 
 .tab.is-tab-selected:hover {
-  background-color: #15a03d;
-  color: var(--color-white);
-  border-color: #15a03d;
+  background-color: var(--color-accent);
+  color: var(--color-on-accent);
+  border-color: var(--color-accent);
   box-shadow: 0 3px 10px rgba(28, 201, 80, 0.4);
+}
+
+/* Quote client suggestions */
+.client-suggestion {
+  padding: 10px;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  background: var(--color-white);
+}
+
+.client-suggestion:hover {
+  background: var(--color-light);
+}
+
+.client-suggestion small {
+  color: var(--color-secondary);
 }
 
 /* ID-based selectors for inactive tab hover - higher specificity with animation */
@@ -135,10 +169,10 @@ body {
 
 @keyframes tabHoverPulse {
   0% {
-    background-color: #ccc;
+    background-color: var(--color-border);
   }
   100% {
-    background-color: #fff;
+    background-color: var(--color-white);
   }
 }
 
@@ -198,26 +232,261 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Settings tab: ensure labels are high-contrast and readable */
+.service-tab-content[data-service="settings"] .meta-field label {
+  color: var(--color-primary);
+}
+
+/* Theme toggle (Settings) */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle > input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.theme-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  user-select: none;
+  color: var(--color-primary);
+}
+
+.theme-toggle-track {
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-light);
+  position: relative;
+  flex: 0 0 auto;
+  transition: background-color var(--transition-base), border-color var(--transition-base);
+}
+
+.theme-toggle-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--color-white);
+  position: absolute;
+  left: 3px;
+  top: 2px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base);
+}
+
+.theme-toggle > input[type="checkbox"]:checked + .theme-toggle-label .theme-toggle-track {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.theme-toggle > input[type="checkbox"]:checked + .theme-toggle-label .theme-toggle-thumb {
+  transform: translateX(20px);
+}
+
+.theme-toggle > input[type="checkbox"]:focus + .theme-toggle-label .theme-toggle-track {
+  box-shadow: 0 0 0 3px rgba(28, 201, 80, 0.15);
+}
+
 .meta-field input,
+.meta-field select,
 .meta-field textarea {
   padding: var(--button-padding);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
+  color: var(--color-primary);
+  background: var(--color-white);
+  color-scheme: inherit;
   transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .meta-field input:focus,
+.meta-field select:focus,
 .meta-field textarea:focus {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(28, 201, 80, 0.1);
 }
 
+.meta-field input::placeholder,
+.meta-field textarea::placeholder {
+  color: var(--color-secondary);
+}
+
+.meta-field input[readonly],
+.meta-field textarea[readonly],
+.meta-field select:disabled {
+  background: var(--color-light);
+  color: var(--color-secondary);
+}
+
 .meta-field textarea {
   resize: vertical;
   min-height: 80px;
+}
+
+/* ============================================================================
+   VOICE DICTATION MIC BUTTON
+   Adds a small in-field mic button for supported browsers
+   ============================================================================ */
+
+.voice-wrap {
+  position: relative;
+}
+
+.voice-wrap input,
+.voice-wrap textarea {
+  padding-right: 48px;
+}
+
+.mic-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-base), border-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+}
+
+/* For textareas, pin near top-right (more natural than vertical centering) */
+.voice-wrap textarea + .mic-btn {
+  top: 10px;
+  transform: none;
+}
+
+.mic-btn:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+}
+
+.mic-btn:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(28, 201, 80, 0.12);
+}
+
+.mic-btn.is-listening {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+/* ============================================================================
+   VARIANT DROPDOWNS (Windows/Carpet variants inside checklist items)
+   ============================================================================ */
+
+.checklist-item .variant-dropdown {
+  width: 100%;
+  margin-top: var(--space-sm);
+  padding: var(--button-padding);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  color: var(--color-primary);
+  color-scheme: inherit;
+  -webkit-text-fill-color: var(--color-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+}
+
+.checklist-item .variant-dropdown option {
+  background: var(--color-white);
+  color: var(--color-primary);
+}
+
+/* ============================================================================
+   FLATPICKR (Date Picker)
+   Keep both date inputs consistent in light/dark theme
+   ============================================================================ */
+
+.flatpickr-calendar {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+}
+
+.flatpickr-calendar,
+.flatpickr-time,
+.flatpickr-innerContainer,
+.flatpickr-rContainer {
+  color: var(--color-primary);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+  color: var(--color-primary);
+}
+
+.flatpickr-weekdays {
+  background: var(--color-white);
+}
+
+span.flatpickr-weekday {
+  color: var(--color-secondary);
+}
+
+.flatpickr-day {
+  color: var(--color-primary);
+  border-radius: 999px;
+}
+
+.flatpickr-day.today {
+  border-color: var(--color-accent);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-white);
+  border-radius: 999px;
+}
+
+.flatpickr-day:hover {
+  background: var(--color-light);
+  border-color: var(--color-border);
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+  fill: var(--color-secondary);
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+  fill: var(--color-accent);
+}
+
+.checklist-item .variant-dropdown:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(28, 201, 80, 0.1);
 }
 
 /* ============================================================================
@@ -314,6 +583,25 @@ details[open] summary::before {
   padding: 4px 12px;
   border-radius: 20px;
   margin-left: var(--space-md);
+}
+
+/* Lightweight room progress bar (in summary) */
+.room-progressbar {
+  flex: 1;
+  max-width: 180px;
+  height: 8px;
+  margin: 0 var(--space-md);
+  background: var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.room-progressbar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--color-accent);
+  transition: width var(--transition-base);
 }
 
 details[open] .progress-badge {
@@ -470,12 +758,12 @@ details[open] .progress-badge {
 /* Primary button */
 .btn-primary {
   background: var(--color-accent);
-  color: var(--color-white);
+  color: var(--color-on-accent);
   box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #17a038;
+  background: var(--color-accent);
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
@@ -487,7 +775,7 @@ details[open] .progress-badge {
 /* Secondary button */
 .btn-secondary {
   background: var(--color-white);
-  color: #000;
+  color: var(--color-primary);
   border: 2px solid var(--color-border);
 }
 
@@ -522,8 +810,8 @@ details[open] .progress-badge {
    ============================================================================ */
 
 .checklist-footer {
-  background: var(--color-primary);
-  color: var(--color-white);
+  background: var(--color-light);
+  color: var(--color-primary);
   text-align: center;
   padding: var(--space-md);
   font-size: var(--font-size-xs);
