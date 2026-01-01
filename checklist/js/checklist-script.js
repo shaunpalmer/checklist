@@ -3026,7 +3026,11 @@
     initWindowsCleaningDropdowns();
   });
 
-  // Expose globally for debugging
+  // Expose globally for debugging and testing
   window.Checklist = Checklist;
+  window.VariantManager = VariantManager;
+  window.RoomTemplate = RoomTemplate;
+  window.CustomItemsStore = CustomItemsStore;
+  window.SnapshotBuilder = SnapshotBuilder;
 
 })(jQuery);
