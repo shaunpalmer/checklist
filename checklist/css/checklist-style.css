@@ -1036,6 +1036,28 @@ details[open] .progress-badge {
   }
 }
 
+/* Textarea utilities */
+.textarea-lg {
+  min-height: 100px;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: inherit;
+  width: 100%;
+  background: var(--color-white);
+  color: var(--color-primary);
+}
+
+.textarea-md {
+  min-height: 80px;
+}
+
+.price-label {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--color-accent);
+}
+
 /* ============================================================================
    PRINT STYLES
    ============================================================================ */

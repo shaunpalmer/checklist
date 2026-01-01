@@ -1784,11 +1784,11 @@
                     </div>
                     <div class="meta-field">
                       <label for="custom-item-details">Public description</label>
-                      <textarea id="custom-item-details" placeholder="Shown under Details" style="min-height: 80px;"></textarea>
+                      <textarea id="custom-item-details" placeholder="Shown under Details" class="textarea-md"></textarea>
                     </div>
                     <div class="meta-field">
                       <label for="custom-item-internal-notes">Internal notes (staff only)</label>
-                      <textarea id="custom-item-internal-notes" placeholder="Not shown to clients" style="min-height: 80px;"></textarea>
+                      <textarea id="custom-item-internal-notes" placeholder="Not shown to clients" class="textarea-md"></textarea>
                     </div>
 
                     <div style="display: flex; gap: var(--space-md);">
@@ -1942,11 +1942,11 @@
               <div class="grid grid-2col gap-md mb-lg">
                 <div>
                   <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: 4px;">Subtotal</p>
-                  <p style="font-size: 24px; font-weight: bold; color: var(--color-accent);" id="quote-subtotal">$0.00</p>
+                  <p class="price-label" id="quote-subtotal">$0.00</p>
                 </div>
                 <div>
                   <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: 4px;" id="quote-tax-label">GST</p>
-                  <p style="font-size: 24px; font-weight: bold; color: var(--color-accent);" id="quote-tax">$0.00</p>
+                  <p class="price-label" id="quote-tax">$0.00</p>
                 </div>
               </div>
 
@@ -2028,7 +2028,7 @@
                 </div>
                 <div class="meta-field">
                   <label for="quote-email-message">Message to Client</label>
-                  <textarea id="quote-email-message" placeholder="Hi [Client Name],\n\nHere's your cleaning quote...\n\nThank you,\n[Crew Name]" style="min-height: 100px;"></textarea>
+                  <textarea id="quote-email-message" placeholder="Hi [Client Name],\n\nHere's your cleaning quote...\n\nThank you,\n[Crew Name]" class="textarea-lg"></textarea>
                 </div>
                 <button type="button" id="btn-send-email-quote" class="btn btn-primary" style="width: 100%;">
                   ✉️ Send Email Quote
@@ -2040,7 +2040,7 @@
                 <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">💬 Send Quote via SMS</h4>
                 <div class="meta-field">
                   <label for="quote-sms-message">SMS Message</label>
-                  <textarea id="quote-sms-message" placeholder="Hi [Client Name], your quote is ready! Total: [TOTAL]. Reply to confirm." style="min-height: 60px; max-height: 80px;"></textarea>
+                  <textarea id="quote-sms-message" placeholder="Hi [Client Name], your quote is ready! Total: [TOTAL]. Reply to confirm." class="textarea-md" style="max-height: 80px;"></textarea>
                   <p style="color: var(--color-secondary); font-size: 12px; margin-top: 4px;">Character count: <span id="sms-char-count">0</span>/160</p>
                 </div>
                 <button type="button" id="btn-send-sms-quote" class="btn btn-primary" style="width: 100%;">
@@ -2076,7 +2076,7 @@
             <!-- QUOTE NOTES -->
             <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg);">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📝 Notes</h3>
-              <textarea id="quote-notes" placeholder="Add any additional notes for the quote (not visible to client)..." style="width: 100%; min-height: 80px; padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; background: var(--color-white); color: var(--color-primary);"></textarea>
+              <textarea id="quote-notes" placeholder="Add any additional notes for the quote (not visible to client)..." class="textarea-lg"></textarea>
             </div>
 
           </div>
