@@ -7,6 +7,9 @@
 # Keep a small repo-level README
 !README.md
 
+# Entry point for running under /checklist/ on localhost
+!index.html
+
 # Keep ONLY the checklist folder
 !checklist/
 !checklist/**
