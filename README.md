@@ -1,26 +1,35 @@
 # Checklist (Standalone Backup Repo)
 
-This repository is intentionally small: it tracks only the `checklist/` folder from a larger local workspace.
+This repository is intentionally focused: it tracks the checklist/ folder (core code) alongside 	ools/ (helpers) and docs/ (design specs), isolated from a larger workspace.
 
 ## What this is
 
-- A standalone HTML/CSS/JS “Cleaning Checklist” UI.
-- Stored here so it can evolve independently (and be safely backed up) before it’s integrated into the wider system.
+- A standalone HTML/CSS/JS "Cleaning Checklist" UI.
+- Frontend-only development (no server coupling yet).
+- Backed up here so it can evolve independently before integration into a larger system.
 
-## What’s tracked (on purpose)
+## What's tracked (on purpose)
 
-- `checklist/**`
-- `.gitignore`
-- `README.md`
-
-Everything else in the original workspace is ignored because it’s experimental / scratch work.
+- checklist/** — Core code: HTML, CSS, JS, worker logic
+- 	ools/** — Helpers: eaper.ps1 (checkpoint script)
+- docs/** — Design specs: ARCHITECTURE, PROGRESS, DATA-REFERENCE, etc.
+- .gitignore, README.md, index.html
 
 ## How to run
 
-- Open `checklist/checklist-modern.html` in a browser.
+- Open checklist/checklist-modern.html in a browser.
+- Admin-only features (Custom Items editor, Internal notes) are enabled by adding ?admin=1 to the URL.
 
-Admin-only features (e.g., Custom Items editor + Internal notes) are enabled by adding `?admin=1` to the URL once; it will persist in localStorage after that.
+## Checkpointing
+
+For sweeping changes, use the reaper checkpoint helper:
+
+`powershell
+pwsh tools/reaper.ps1 -Message "my change description" -Push
+`
+
+This stages, commits, and pushes everything in one go. For small edits, just commit normally.
 
 ## Future direction
 
-The long-term intent is that this checklist becomes an add-on/module for the main plugin/system (e.g., AYS). This repo keeps it isolated until that integration work is ready.
+The long-term intent is that this checklist becomes an integrated module in a larger system (e.g., WordPress plugin). This repo keeps it isolated and stable until that integration work is ready.
