@@ -57,6 +57,7 @@
      * Initialize the checklist
      */
     init: function() {
+      this.initAdminView();
       this.cacheDOM();
       this.applySettingsToUI();
       this.initCustomItems();
@@ -73,6 +74,28 @@
     },
 
     // ======== CUSTOM ITEMS (Custom Service tab) ========
+    initAdminView: function() {
+      try {
+        const params = new URLSearchParams(window.location.search || '');
+        const adminParam = String(params.get('admin') || '').trim().toLowerCase();
+        const wantsAdmin = ['1', 'true', 'yes', 'on'].includes(adminParam);
+
+        const storageKey = 'checklist_admin_view';
+        const storedAdmin = localStorage.getItem(storageKey) === '1';
+
+        if (wantsAdmin) {
+          localStorage.setItem(storageKey, '1');
+        }
+
+        const enabled = wantsAdmin || storedAdmin;
+        if (enabled && document.body) {
+          document.body.classList.add('view-admin');
+        }
+      } catch {
+        // ignore
+      }
+    },
+
     isAdminView: function() {
       return !!(document.body && document.body.classList.contains('view-admin'));
     },

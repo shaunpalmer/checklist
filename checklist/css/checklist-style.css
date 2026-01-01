@@ -48,15 +48,6 @@ body {
   display: none;
 }
 
-/* Role-gated UI helpers */
-.admin-only {
-  display: none;
-}
-
-body.view-admin .admin-only {
-  display: block;
-}
-
 /* ============================================================================
    MAIN CONTAINER & HEADER
    ============================================================================ */
