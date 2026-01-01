@@ -306,6 +306,8 @@ body {
   color: var(--color-primary);
   background: var(--color-white);
   color-scheme: inherit;
+  width: 100%;
+  box-sizing: border-box;
   transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
@@ -341,6 +343,7 @@ body {
 
 .voice-wrap {
   position: relative;
+  width: 100%;
 }
 
 .voice-wrap input,

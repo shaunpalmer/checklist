@@ -156,6 +156,11 @@
         }
 
         const items = this.loadCustomItems();
+        const activeCount = items.filter((it) => it && !it.archived).length;
+        if (!editId && activeCount >= 10) {
+          alert('You can have up to 10 active custom items. Archive one to add another.');
+          return;
+        }
         const hash = this.hashCustomItem(description, details);
 
         if (editId) {
@@ -221,6 +226,12 @@
         const items = this.loadCustomItems();
         const index = items.findIndex((it) => it && it.id === id);
         if (index < 0) return;
+
+        const activeCount = items.filter((it) => it && !it.archived).length;
+        if (activeCount >= 10) {
+          alert('You can have up to 10 active custom items. Archive one to restore another.');
+          return;
+        }
         items[index] = { ...items[index], archived: false, updated_at: new Date().toISOString() };
         this.saveCustomItems(items);
         this.renderCustomItems();
@@ -232,8 +243,20 @@
       if ($container.length === 0) return;
 
       const items = this.loadCustomItems();
-      const visible = items.filter((it) => it && !it.archived);
-      const archived = items.filter((it) => it && it.archived);
+      const toTs = (it) => {
+        const candidate = (it && (it.updated_at || it.created_at)) ? String(it.updated_at || it.created_at) : '';
+        const t = Date.parse(candidate);
+        return Number.isFinite(t) ? t : 0;
+      };
+
+      const visible = items
+        .filter((it) => it && !it.archived)
+        .slice()
+        .sort((a, b) => toTs(b) - toTs(a));
+      const archived = items
+        .filter((it) => it && it.archived)
+        .slice()
+        .sort((a, b) => toTs(b) - toTs(a));
 
       const parts = [];
       visible.forEach((item) => {
@@ -246,6 +269,7 @@
           <div>
             <label class="checklist-item" data-room="custom-items" data-category="custom" data-difficulty="basic" data-hours="0.5" data-base-charge="0" data-item-hash="${safeHash}" data-item-details="${safeDetails}">
               <input type="checkbox" id="${this.escapeHtml(checkboxId)}" />
+              <span class="checkbox-custom"></span>
               <span class="item-label">${safeLabel}</span>
             </label>
             ${item.details ? `
@@ -773,7 +797,8 @@
         '#quote-client-search',
         '#quote-client-name',
         '#quote-client-email',
-        '#quote-client-phone'
+        '#quote-client-phone',
+        '#custom-item-description'
       ];
       replaceSelectors.forEach((sel) => {
         const el = document.querySelector(sel);
@@ -798,12 +823,17 @@
       // Attach mic buttons to obvious notes/message fields
       const insertSelectors = [
         '#quote-email-message',
-        '#quote-sms-message'
+        '#quote-sms-message',
+        '#custom-item-details'
       ];
       insertSelectors.forEach((sel) => {
         const el = document.querySelector(sel);
         if (el) wrapFieldWithMic(el, 'insert');
       });
+
+      // Custom items internal notes: append (matches note taking)
+      const customNotesEl = document.querySelector('#custom-item-internal-notes');
+      if (customNotesEl) wrapFieldWithMic(customNotesEl, 'append');
 
       // Notes fields: append to end (matches real-world note taking)
       const notesAppendSelectors = [
@@ -1446,6 +1476,46 @@
           $dropdown.val(selected);
           $item.attr('data-selected-variant', selected);
         }
+      }
+
+      // Restore Custom Items (best-effort). Snapshot contains a public-safe subset.
+      if (Array.isArray(snapshot.customItemsSnapshot)) {
+        const existing = this.loadCustomItems();
+        const hasExisting = Array.isArray(existing) && existing.some((it) => it && !it.archived);
+
+        if (!hasExisting && snapshot.customItemsSnapshot.length) {
+          const ts = (typeof snapshot.updated_at === 'string' && snapshot.updated_at) ? snapshot.updated_at : new Date().toISOString();
+
+          const restored = snapshot.customItemsSnapshot
+            .map((s) => {
+              if (!s || typeof s !== 'object') return null;
+              const id = (s.item_id || s.id || '').toString().trim();
+              const description = (s.description || '').toString().trim();
+              const details = (s.details || '').toString().trim();
+              if (!id || !description) return null;
+              const hash = (s.hash || '').toString().trim() || this.hashCustomItem(description, details);
+              return {
+                id,
+                description,
+                details,
+                hash,
+                internal_notes: '',
+                archived: false,
+                created_at: ts,
+                updated_at: ts
+              };
+            })
+            .filter(Boolean);
+
+          try {
+            localStorage.setItem(STORAGE_KEYS.customItems, JSON.stringify(restored));
+          } catch (_) {
+            // ignore
+          }
+        }
+
+        // Ensure UI reflects latest stored custom items
+        this.renderCustomItems();
       }
 
       if (snapshot.client && typeof snapshot.client === 'object') {
