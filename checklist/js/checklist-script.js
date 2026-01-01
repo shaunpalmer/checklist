@@ -3026,10 +3026,119 @@
     initWindowsCleaningDropdowns();
   });
 
-  // Expose globally for debugging and testing
+  // ============================================================================
+  // DESIGN PATTERNS LIBRARY
+  // ============================================================================
+  // Single-responsibility objects: variant handling, room templates,
+  // custom items persistence, snapshot management.
+
+  const VariantManager = {
+    variants: {
+      oven: {
+        single: { hours: 1.5, charge: 150, label: 'Single Oven' },
+        double: { hours: 1.5, charge: 200, label: 'Double Oven' },
+        commercial: { hours: 2.5, charge: 400, label: 'Commercial Oven' }
+      },
+      windows: {
+        '2br': { hours: 2.0, charge: 65, label: '2BR' },
+        '3br': { hours: 2.0, charge: 85, label: '3BR' },
+        '4br': { hours: 2.0, charge: 110, label: '4BR' },
+        '2story': { hours: 1.0, charge: 40, label: '2-Story' }
+      }
+    },
+    getPrice(type, variant) {
+      const group = this.variants[type];
+      return group ? group[variant] : null;
+    },
+    calculateLineCost(type, variant, baseRate) {
+      const spec = this.getPrice(type, variant);
+      return spec ? (spec.hours * baseRate) + spec.charge : 0;
+    }
+  };
+
+  const CustomItemsStore = {
+    key: 'checklist_custom_items_v1',
+    load() {
+      try {
+        const raw = localStorage.getItem(this.key);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        console.warn('CustomItemsStore.load error:', e);
+        return [];
+      }
+    },
+    save(items) {
+      try {
+        localStorage.setItem(this.key, JSON.stringify(items));
+        return true;
+      } catch (e) {
+        console.error('CustomItemsStore.save error:', e);
+        return false;
+      }
+    },
+    add(item) {
+      const items = this.load();
+      items.push({
+        id: `ci_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        archived: false,
+        ...item
+      });
+      return this.save(items) ? items : null;
+    },
+    update(id, updates) {
+      const items = this.load();
+      const idx = items.findIndex(it => it && it.id === id);
+      if (idx < 0) return null;
+      items[idx] = { ...items[idx], ...updates, updated_at: new Date().toISOString() };
+      return this.save(items) ? items : null;
+    },
+    archive(id) {
+      return this.update(id, { archived: true });
+    },
+    getActive() {
+      const items = this.load();
+      return items.filter(it => it && !it.archived).sort((a, b) => {
+        const aTs = Date.parse(a.updated_at || a.created_at || 0);
+        const bTs = Date.parse(b.updated_at || b.created_at || 0);
+        return bTs - aTs;
+      });
+    },
+    getActiveCount() {
+      return this.getActive().length;
+    }
+  };
+
+  const SnapshotBuilder = {
+    build(state) {
+      return {
+        schema: 1,
+        timestamp: new Date().toISOString(),
+        crew: (state && state.crew) || '',
+        date: (state && state.date) || '',
+        service_type: (state && state.serviceType) || 'end-of-tenancy',
+        checklist_state: (state && state.checklistState) || {},
+        custom_items: (state && state.customItems) || [],
+        client_context: (state && state.clientContext) || {}
+      };
+    },
+    restore(snapshot) {
+      if (!snapshot) return null;
+      return {
+        crew: snapshot.crew || '',
+        date: snapshot.date || '',
+        serviceType: snapshot.service_type || 'end-of-tenancy',
+        checklistState: snapshot.checklist_state || {},
+        customItems: snapshot.custom_items || [],
+        clientContext: snapshot.client_context || {}
+      };
+    }
+  };
+
+  // Expose globally for testing
   window.Checklist = Checklist;
   window.VariantManager = VariantManager;
-  window.RoomTemplate = RoomTemplate;
   window.CustomItemsStore = CustomItemsStore;
   window.SnapshotBuilder = SnapshotBuilder;
 
