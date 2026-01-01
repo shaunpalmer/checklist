@@ -112,18 +112,27 @@
     loadCustomItems: function() {
       try {
         const raw = localStorage.getItem(STORAGE_KEYS.customItems);
+        console.log('[DEBUG] loadCustomItems - localStorage key:', STORAGE_KEYS.customItems, 'value length:', raw ? raw.length : 0);
         if (!raw) return [];
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return [];
         return parsed;
       } catch {
+        console.log('[DEBUG] loadCustomItems - ERROR parsing JSON from localStorage');
         return [];
       }
     },
 
     saveCustomItems: function(items) {
-      localStorage.setItem(STORAGE_KEYS.customItems, JSON.stringify(items));
-      this.saveSnapshot();
+      try {
+        const json = JSON.stringify(items);
+        console.log('[DEBUG] saveCustomItems - saving', items.length, 'items (', json.length, 'bytes) to localStorage');
+        localStorage.setItem(STORAGE_KEYS.customItems, json);
+        console.log('[DEBUG] saveCustomItems - localStorage write successful');
+        this.saveSnapshot();
+      } catch(e) {
+        console.error('[DEBUG] saveCustomItems - ERROR:', e);
+      }
     },
 
     newCustomItemId: function() {
@@ -166,12 +175,19 @@
       });
 
       $(document).on('click', '#btn-save-custom-item', () => {
-        if (!this.isAdminView()) return;
+        console.log('[DEBUG] Save button clicked');
+        if (!this.isAdminView()) {
+          console.log('[DEBUG] Not in admin view, aborting save');
+          return;
+        }
+        console.log('[DEBUG] Admin view confirmed, proceeding');
 
         const editId = String($('#custom-item-id').val() || '').trim();
         const description = String($('#custom-item-description').val() || '').trim();
         const details = String($('#custom-item-details').val() || '').trim();
         const internalNotes = String($('#custom-item-internal-notes').val() || '').trim();
+
+        console.log('[DEBUG] Form values:', { editId, description, details, internalNotes });
 
         if (!description) {
           alert('Please enter an item label.');
@@ -179,6 +195,7 @@
         }
 
         const items = this.loadCustomItems();
+        console.log('[DEBUG] Loaded items from storage:', items.length);
         const activeCount = items.filter((it) => it && !it.archived).length;
         if (!editId && activeCount >= 10) {
           alert('You can have up to 10 active custom items. Archive one to add another.');
@@ -211,9 +228,17 @@
           });
         }
 
+        console.log('[DEBUG] Calling saveCustomItems with', items.length, 'items');
         this.saveCustomItems(items);
+        console.log('[DEBUG] saveCustomItems completed');
+        
+        console.log('[DEBUG] Calling resetCustomItemEditor');
         this.resetCustomItemEditor();
+        console.log('[DEBUG] resetCustomItemEditor completed');
+        
+        console.log('[DEBUG] Calling renderCustomItems');
         this.renderCustomItems();
+        console.log('[DEBUG] renderCustomItems completed');
       });
 
       $(document).on('click', '[data-action="custom-item-edit"]', (e) => {
@@ -262,10 +287,16 @@
     },
 
     renderCustomItems: function() {
+      console.log('[DEBUG] renderCustomItems called');
       const $container = $('#custom-items-checklist');
-      if ($container.length === 0) return;
+      console.log('[DEBUG] Looking for #custom-items-checklist:', $container.length > 0 ? 'FOUND' : 'NOT FOUND');
+      if ($container.length === 0) {
+        console.log('[DEBUG] Container not found, returning early');
+        return;
+      }
 
       const items = this.loadCustomItems();
+      console.log('[DEBUG] renderCustomItems - loaded', items.length, 'items from storage');
       const toTs = (it) => {
         const candidate = (it && (it.updated_at || it.created_at)) ? String(it.updated_at || it.created_at) : '';
         const t = Date.parse(candidate);
@@ -342,6 +373,7 @@
       }
 
       $container.html(parts.join(''));
+      console.log('[DEBUG] renderCustomItems - injected', parts.length, 'items into HTML');
       this.cacheDOM();
       this.updateAllProgress();
     },
