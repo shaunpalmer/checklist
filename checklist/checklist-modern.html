@@ -2338,6 +2338,15 @@
   <!-- Initialize Flatpickr for date input -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the checklist application
+      if (typeof Checklist !== 'undefined' && Checklist.init) {
+        console.log('[APP] Initializing Checklist...');
+        Checklist.init();
+        console.log('[APP] Checklist initialized');
+      } else {
+        console.error('[APP] Checklist object not found or init method missing');
+      }
+
       if (typeof flatpickr !== 'undefined') {
         flatpickr('#checklist-date', {
           mode: 'single',
