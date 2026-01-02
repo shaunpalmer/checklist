@@ -1,0 +1,56 @@
+Project Goal
+
+Mobile-first load: reduce initial HTML size + DOM weight
+
+Single source of truth: no more copy/paste sections
+
+OOP-ish patterns in JS: build repeatable UI blocks
+
+Offline durability stays: worker + snapshot + restore unchanged
+
+Progressive enhancement stays: details/summary works without JS
+
+Success Criteria (definition of “done”)
+
+Initial HTML becomes a shell (header + mount point + template tags if needed)
+
+Checklist renders from data config + component classes
+
+Same visual output as today (styling preserved)
+
+Worker snapshot still restores state after reload
+
+Mic buttons still appear on text fields
+
+Performance: faster first render on phone (less HTML download + fewer DOM nodes at startup)
+
+Architecture Options (choose 1, I recommend #2)
+Option 1 — Pure OOP classes that generate HTML strings
+
+Fast to write, compact
+
+Harder to diff test, can get “stringy”
+
+✅ Option 2 — “Component factory” + small classes (recommended)
+
+Each component has:
+
+render() returns DOM node (not string)
+
+bind() attaches events
+
+Easy to test, less fragile
+
+Option 3 — Templates + data (template tags)
+
+Use <template> elements + clone
+
+Very clean and fast, still “component-like”
+
+Less “OOP vibe” but better for maintainability
+
+Phase 0 — Freeze the current build (30 mins)
+
+Goal: stop losing work.
+
+Create branch: refactor/ui-data-driven

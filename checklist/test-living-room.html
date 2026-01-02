@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Test: Living Room Component</title>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/checklist-variables.css" />
+  <link rel="stylesheet" href="css/checklist-style.css" />
+</head>
+
+<body>
+  <div class="checklist-wrapper">
+    <h1>Testing: Living Room Section (AysDisclosureCard)</h1>
+    <div id="rooms-container"></div>
+  </div>
+
+  <!-- Import Components -->
+  <script src="js/components/AysDisclosureCard.js"></script>
+  <script src="js/components/ChecklistItem.js"></script>
+
+  <script>
+    // Living Room Data
+    const livingRoomData = {
+      roomId: 'living-room',
+      emoji: '🛋️',
+      title: 'Living Room',
+      items: [
+        { itemId: 'living-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.3, difficulty: 'basic' },
+        { itemId: 'living-tile', label: 'Tile cleaned', category: 'floors', hours: 0.3, difficulty: 'basic' },
+        { itemId: 'living-walls', label: 'Spot cleaning of walls', category: 'walls', hours: 0.2, difficulty: 'basic' },
+        { itemId: 'living-decobing', label: 'Decobing (ceiling/walls)', category: 'high', hours: 0.4, difficulty: 'deep' },
+        { itemId: 'living-shelves', label: 'Shelves dusted', category: 'dust', hours: 0.2, difficulty: 'basic' },
+        { itemId: 'living-baseboards', label: 'Baseboards', category: 'trim', hours: 0.2, difficulty: 'basic' },
+        { itemId: 'living-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.1, difficulty: 'basic' }
+      ]
+    };
+
+    // Create Disclosure Card
+    const card = new AysDisclosureCard({
+      roomId: livingRoomData.roomId,
+      title: livingRoomData.emoji + ' ' + livingRoomData.title,
+      items: livingRoomData.items
+    });
+
+    // Render
+    const container = document.getElementById('rooms-container');
+    container.appendChild(card.render());
+    card.bind();
+
+    // Log for debugging
+    console.log('Living Room card created:', card);
+  </script>
+</body>
+
+</html>

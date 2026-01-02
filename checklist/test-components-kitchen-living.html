@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Test: Kitchen + Living Room Components</title>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/checklist-variables.css" />
+  <link rel="stylesheet" href="css/checklist-style.css" />
+  
+  <style>
+    .test-info {
+      background: #f0f0f0;
+      padding: 15px;
+      margin: 15px 0;
+      border-left: 4px solid #007bff;
+      font-size: 14px;
+    }
+    .test-info h3 {
+      margin-top: 0;
+      color: #007bff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="checklist-wrapper">
+    <h1>Component Integration Test</h1>
+    
+    <div class="test-info">
+      <h3>Testing Strategy</h3>
+      <p><strong>Goal:</strong> Verify AysDisclosureCard and ChecklistItem components render correctly with real data.</p>
+      <p><strong>What to Check:</strong></p>
+      <ul>
+        <li>✓ Both sections render with correct emoji, title, and progress badge</li>
+        <li>✓ All checklist items appear with checkboxes and labels</li>
+        <li>✓ Clicking items updates progress counter</li>
+        <li>✓ Disclosure card opens/closes properly</li>
+        <li>✓ No console errors</li>
+      </ul>
+      <p><strong>Next Step:</strong> Once verified, extract all 27 rooms into data structure and build generator.</p>
+    </div>
+
+    <div id="rooms-container"></div>
+  </div>
+
+  <!-- Import Components -->
+  <script src="js/components/AysDisclosureCard.js"></script>
+  <script src="js/components/ChecklistItem.js"></script>
+
+  <script>
+    // Data for both rooms
+    const roomsData = [
+      {
+        roomId: 'kitchen',
+        emoji: '🍳',
+        title: 'Kitchen',
+        items: [
+          { itemId: 'kitchen-sinks', label: 'Sinks and Faucets', category: 'basic', hours: 0.5 },
+          { itemId: 'kitchen-microwave-out', label: 'Microwave (outside)', category: 'basic', hours: 0.5 },
+          { itemId: 'kitchen-countertops', label: 'Countertops', category: 'basic', hours: 0.5 },
+          { itemId: 'kitchen-floors', label: 'Floors Mopped', category: 'basic', hours: 0.5 },
+          { itemId: 'kitchen-baseboards', label: 'Baseboards wiped', category: 'basic', hours: 0.5 },
+          { itemId: 'kitchen-garbage', label: 'Garbage bags removed', category: 'basic', hours: 0.5 },
+          { itemId: 'kitchen-stovetop', label: 'Stovetop wiped', category: 'basic', hours: 0.5 },
+          { itemId: 'kitchen-fridge-out', label: 'Refrig. (outside)', category: 'basic', hours: 0.5 },
+          { itemId: 'kitchen-drawers', label: 'Drawers/Pantry (empty & wipe) - $50', category: 'drawer', hours: 1, baseCharge: 50, serviceCode: 'KDRAW' },
+          { itemId: 'kitchen-lights', label: 'Light switches', category: 'basic', hours: 0.5 }
+        ]
+      },
+      {
+        roomId: 'living-room',
+        emoji: '🛋️',
+        title: 'Living Room',
+        items: [
+          { itemId: 'living-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.3, difficulty: 'basic' },
+          { itemId: 'living-tile', label: 'Tile cleaned', category: 'floors', hours: 0.3, difficulty: 'basic' },
+          { itemId: 'living-walls', label: 'Spot cleaning of walls', category: 'walls', hours: 0.2, difficulty: 'basic' },
+          { itemId: 'living-decobing', label: 'Decobing (ceiling/walls)', category: 'high', hours: 0.4, difficulty: 'deep' },
+          { itemId: 'living-shelves', label: 'Shelves dusted', category: 'dust', hours: 0.2, difficulty: 'basic' },
+          { itemId: 'living-baseboards', label: 'Baseboards', category: 'trim', hours: 0.2, difficulty: 'basic' },
+          { itemId: 'living-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.1, difficulty: 'basic' }
+        ]
+      }
+    ];
+
+    // Render all rooms
+    const container = document.getElementById('rooms-container');
+    roomsData.forEach(roomData => {
+      const card = new AysDisclosureCard({
+        roomId: roomData.roomId,
+        title: roomData.emoji + ' ' + roomData.title,
+        items: roomData.items
+      });
+
+      container.appendChild(card.render());
+      card.bind();
+
+      console.log(`✓ ${roomData.title} card created with ${roomData.items.length} items`);
+    });
+
+    console.log('✓ All components rendered successfully');
+  </script>
+</body>
+
+</html>

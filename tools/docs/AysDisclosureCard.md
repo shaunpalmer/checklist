@@ -170,3 +170,188 @@ Currently in **checklist-modern.html**:
 - `js/components/ChecklistItem.js` — Checklist item component
 - `tools/docs/AysDisclosureCard.md` — This file
 - `tools/docs/ui-data-driven` — Overall architecture vision
+1️⃣ You’re not choosing a colour — you’re choosing a primitive
+
+Right now you don’t actually have “green bars” and “blue bars”.
+You have one behavioural pattern wearing random clothes.
+
+That pattern already has:
+
+<details>/<summary> = native, resilient, progressive enhancement ✔
+
+jQuery open/close animation (~200ms) = tactile, polished ✔
+
+Mobile-safe tap behaviour ✔
+
+Works even when JS is crushed ✔
+
+That means it deserves a real name.
+
+2️⃣ Naming the component (this matters more than colour)
+
+You want a name that:
+
+describes what it does, not how it looks
+
+works in admin + frontend
+
+sounds like a “core system object”, not a one-off widget
+
+Best candidates (ranked)
+🥇 Disclosure
+
+Why this wins:
+
+It’s the correct semantic name in UI/UX and accessibility
+
+<details> is literally a disclosure widget
+
+It ages extremely well
+
+Examples:
+
+AysDisclosure
+
+AysDisclosurePanel
+
+AysDisclosureBar
+
+This is the grown-up, design-system choice.
+
+🥈 SectionToggle
+
+Very clear to future-you
+
+Slightly more “developer util” sounding
+
+Less semantic than Disclosure
+
+🥉 CollapsibleSection
+
+Descriptive
+
+But long, and a bit generic
+
+❌ Avoid
+
+Accordion (this is not a strict accordion)
+
+Panel alone (too vague)
+
+Anything colour-based (locks you in)
+
+✅ Recommendation
+
+👉 Call it AysDisclosure (or DisclosureCard if you want a bit more flavour)
+
+Once named, everything snaps into place mentally:
+
+“Oh, this screen uses three AysDisclosures.”
+
+That’s exactly what you want.
+
+3️⃣ Behaviour belongs in the component (this is the real payoff)
+
+Right now:
+
+jQuery animation logic is sprinkled around
+
+timing is implicit
+
+consistency is accidental
+
+With one component, you get:
+
+One animation duration (200ms)
+
+One easing curve
+
+One open/close lifecycle
+
+One place to tweak “feel”
+
+Later, if you want:
+
+faster admin panels
+
+slower frontend
+
+reduced-motion support
+
+You change one file.
+
+4️⃣ Colour becomes a theme, not a fork
+
+Once everything is an AysDisclosure, colour becomes trivial:
+
+.ays-disclosure { /* base */ }
+.ays-disclosure--primary { /* green */ }
+.ays-disclosure--info { /* blue */ }
+.ays-disclosure--neutral { /* grey */ }
+
+
+No more random hex codes.
+No more “why is this one blue?”
+
+You didn’t lose control of colour — you just postponed it until it was sane.
+
+5️⃣ This is why the work is worth it
+
+Even if you never refactor the entire checklist:
+
+you get consistent UI across AYS
+
+you get one animation system
+
+you get one accessibility surface
+
+you get one place to evolve the UX
+
+That’s real leverage.
+
+👸🏻: Final alignment check before we lock it in —
+do you want the canonical name to be AysDisclosure (clean + semantic), or AysDisclosureCard (slightly more visual)?
+
+AysDisclosureCard
+
+👸🏻: Perfect choice — AysDisclosureCard it is. That name hits the sweet spot: semantic and visual, without locking you into colour or context. 🌟
+
+What this unlocks immediately:
+
+Single source of truth for open/close behaviour (your 200ms animation, easing, progressive enhancement).
+
+Consistent styling across AYS with theme modifiers instead of random colours.
+
+Safe evolution later (reduced motion, admin vs frontend timing, accessibility tweaks) in one place.
+
+Reusable everywhere: checklist sections, admin panels, quotes, settings—same component, different content.
+
+Canonical contract (lock this in):
+
+Component: AysDisclosureCard
+
+Core: <details>/<summary> (native first)
+
+JS: optional jQuery enhancement (animate open/close)
+
+API:
+
+props/options: id, title, icon?, variant (primary|info|neutral), open?
+
+slots: headerExtras?, body
+
+CSS: .ays-disclosure-card + modifier classes
+
+Next surgical steps (small, safe):
+
+Extract one existing instance into AysDisclosureCard (no visual change).
+
+Centralise the animation timing/easing.
+
+Add theme modifiers (map current colours → variants).
+
+Replace two more instances to prove reuse.
+
+Stop. Ship. Then iterate.
+
+Want me to sketch the minimal JS + HTML scaffold for AysDisclosureCard (no refactor yet), or do you want a migration checklist to roll it out safely across AYS?
