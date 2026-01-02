@@ -5,7 +5,10 @@ description: Checkbox list item component - renders individual selectable items 
 category: form-control
 version: 1.0.0
 ---
-
+AysListItemCheckbox
+├─ Ays          (family name)
+├─ ListItem     (form/structure)
+└─ Checkbox     (function/toggle action)
 # AysListItemCheckbox
 
 **Component Name**: `AysListItemCheckbox`  

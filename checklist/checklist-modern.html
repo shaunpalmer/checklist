@@ -120,8 +120,11 @@
              ======================================== -->
         <div class="checklist-content">
 
-          <!-- KITCHEN -->
-          <div class="room-section">
+          <!-- GENERATED ROOMS: Populated by ChecklistPageGenerator -->
+          <div id="rooms-container"></div>
+
+          <!-- LEGACY: KITCHEN [REPLACED BY GENERATOR] -->
+          <div class="room-section" style="display:none;">
         <details data-room="kitchen">
           <summary>
             <div class="summary-header">
@@ -698,6 +701,7 @@
           </div>
         </details>
       </div>
+      </div>  <!-- END: LEGACY HARDCODED ROOMS (hidden) -->
 
       <!-- DEEP CLEANING -->
       <div class="room-section">
@@ -2334,6 +2338,24 @@
   </div> <!-- End class="checklist-wrapper" -->
 
   <!-- Scripts -->
+  <!-- Component System: AysDisclosureCard + AysListItemCheckbox -->
+  <script src="js/components/AysDisclosureCard.js"></script>
+  <script src="js/components/AysListItemCheckbox.js"></script>
+  <script src="js/data/checklist-config.js"></script>
+  <script src="js/generators/checklistPageGenerator.js"></script>
+
+  <!-- Initialize Generator for End of Tenancy Checklist -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Only generate if we're on the end-of-tenancy tab
+      const generator = new ChecklistPageGenerator('rooms-container');
+      if (typeof CHECKLIST_CONFIG !== 'undefined') {
+        generator.generate(CHECKLIST_CONFIG);
+        console.log('✓ Checklist generated:', generator.getCards().length, 'rooms');
+      }
+    });
+  </script>
+
   <script src="js/checklist-script.js"></script>
 
   <!-- Initialize Flatpickr for date input -->
