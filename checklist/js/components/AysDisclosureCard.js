@@ -22,7 +22,7 @@ class AysDisclosureCard {
     this.roomId = options.roomId || 'unknown';
     this.title = options.title || 'Section';
     this.emoji = options.emoji || '📋';
-    this.items = options.items || []; // Array of ChecklistItem configs
+    this.items = options.items || []; // Array of AysListItemCheckbox configs
     this.checkedCount = options.checkedCount || 0;
     this.totalCount = options.totalCount || this.items.length;
     this.animationClass = options.animationClass || 'slide-open';
@@ -92,7 +92,7 @@ class AysDisclosureCard {
 
     // Render items (as DOM nodes)
     this.items.forEach(itemConfig => {
-      const item = new ChecklistItem(itemConfig);
+      const item = new AysListItemCheckbox(itemConfig);
       this.itemsContainerElement.appendChild(item.render());
       item.bind();
     });
@@ -166,7 +166,7 @@ class AysDisclosureCard {
       return;
     }
 
-    const item = new ChecklistItem(itemConfig);
+    const item = new AysListItemCheckbox(itemConfig);
     this.itemsContainerElement.appendChild(item.render());
     item.bind();
 
