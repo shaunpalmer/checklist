@@ -19,8 +19,8 @@
   </div>
 
   <!-- Import Components -->
-  <script src="js/components/AysDisclosureCard.js"></script>
-  <script src="js/components/AysListItemCheckbox.js"></script>
+  <script src="js/components/AysDisclosureRoomCard.js"></script>
+  <script src="js/components/AysChecklistItemCheckbox.js"></script>
 
   <script>
     // Living Room Data
@@ -40,7 +40,7 @@
     };
 
     // Create Disclosure Card
-    const card = new AysDisclosureCard({
+    const card = new AysDisclosureRoomCard({
       roomId: livingRoomData.roomId,
       title: livingRoomData.emoji + ' ' + livingRoomData.title,
       items: livingRoomData.items

@@ -79,14 +79,14 @@
   </div>
 
   <!-- Import Components & Config -->
-  <script src="js/components/AysDisclosureCard.js"></script>
-  <script src="js/components/AysListItemCheckbox.js"></script>
+  <script src="js/components/AysDisclosureRoomCard.js"></script>
+  <script src="js/components/AysChecklistItemCheckbox.js"></script>
   <script src="js/data/checklist-config.js"></script>
-  <script src="js/generators/checklistPageGenerator.js"></script>
+  <script src="js/generators/AysChecklistFormFactory.js"></script>
 
   <script>
     // Initialize generator
-    const generator = new ChecklistPageGenerator('rooms-container');
+    const generator = new AysChecklistFormFactory('rooms-container');
 
     // Generate all rooms from config
     console.log('=== GENERATING CHECKLIST FROM CONFIG ===');

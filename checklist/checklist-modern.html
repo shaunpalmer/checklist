@@ -2355,17 +2355,17 @@
   </div> <!-- End class="checklist-wrapper" -->
 
   <!-- Scripts -->
-  <!-- Component System: AysDisclosureCard + AysListItemCheckbox -->
-  <script src="js/components/AysDisclosureCard.js"></script>
-  <script src="js/components/AysListItemCheckbox.js"></script>
+  <!-- Component System: AysDisclosureRoomCard + AysChecklistItemCheckbox -->
+  <script src="js/components/AysDisclosureRoomCard.js"></script>
+  <script src="js/components/AysChecklistItemCheckbox.js"></script>
   <script src="js/data/checklist-config.js"></script>
-  <script src="js/generators/checklistPageGenerator.js"></script>
+  <script src="js/generators/AysChecklistFormFactory.js"></script>
 
   <!-- Initialize Generator for End of Tenancy Checklist -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Only generate if we're on the end-of-tenancy tab
-      const generator = new ChecklistPageGenerator('rooms-container');
+      const generator = new AysChecklistFormFactory('rooms-container');
       if (typeof CHECKLIST_CONFIG !== 'undefined') {
         generator.generate(CHECKLIST_CONFIG);
         console.log('✓ Checklist generated:', generator.getCards().length, 'rooms');
