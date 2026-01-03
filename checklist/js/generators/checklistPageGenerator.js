@@ -61,27 +61,29 @@ class ChecklistPageGenerator {
 
   /**
    * Create multi-room disclosure card (with subsections)
+   * Now creates a SEPARATE card for each sub-room (Bedroom 1, 2, etc.)
+   * This enables:
+   * - Individual progress tracking per bedroom/bathroom
+   * - Worker accountability ("Which bedroom did you clean?")
+   * - Accurate pricing per room
    * @private
    */
   _createMultiRoomCard(room, container) {
-    // Flatten all items from sub-rooms
-    const allItems = [];
+    // Create a SEPARATE card for each sub-room
     room.subRooms.forEach(subRoom => {
-      allItems.push(...subRoom.items);
+      const card = new AysDisclosureCard({
+        roomId: subRoom.subRoomId,  // Use subRoomId for unique identification
+        title: `${room.emoji} ${subRoom.title}`,  // e.g., "🛏️ Bedroom 1"
+        items: subRoom.items
+      });
+
+      const element = card.render();
+      container.appendChild(element);
+      card.bind();
+
+      this.cards.push(card);
+      console.log(`✓ Created card: ${subRoom.title} (${subRoom.items.length} items)`);
     });
-
-    const card = new AysDisclosureCard({
-      roomId: room.roomId,
-      title: `${room.emoji} ${room.title}`,
-      items: allItems
-    });
-
-    const element = card.render();
-    container.appendChild(element);
-    card.bind();
-
-    this.cards.push(card);
-    console.log(`✓ Created card: ${room.title} (${allItems.length} total items across ${room.subRooms.length} sub-rooms)`);
   }
 
   /**

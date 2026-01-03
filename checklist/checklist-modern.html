@@ -116,6 +116,23 @@
       <!-- START: END OF TENANCY SERVICE TAB -->
       <div class="service-tab-content is-active" data-service="end-of-tenancy" id="service-end-of-tenancy">
         <!-- ========================================
+             PROPERTY SIZE SELECTOR
+             Controls how many bedrooms/bathrooms are rendered
+             ======================================== -->
+        <div class="property-size-selector">
+          <label for="property-bedrooms">Property Size:</label>
+          <div class="button-group" id="property-size-buttons">
+            <button class="size-btn" data-bedrooms="1" data-bathrooms="1">1 Bed</button>
+            <button class="size-btn" data-bedrooms="2" data-bathrooms="1">2 Bed</button>
+            <button class="size-btn" data-bedrooms="3" data-bathrooms="2">3 Bed</button>
+            <button class="size-btn" data-bedrooms="4" data-bathrooms="2" class="active">4 Bed</button>
+            <button class="size-btn" data-bedrooms="5" data-bathrooms="3">5 Bed</button>
+            <button class="size-btn" data-bedrooms="6" data-bathrooms="3">6 Bed</button>
+            <button class="size-btn" data-bedrooms="7" data-bathrooms="4">7 Bed</button>
+          </div>
+        </div>
+
+        <!-- ========================================
              MAIN CHECKLIST CONTENT
              ======================================== -->
         <div class="checklist-content">

@@ -4,14 +4,95 @@
  * This file contains all rooms and checklist items extracted from the hardcoded HTML.
  * Used by the page generator to dynamically create AysDisclosureCard components.
  * 
+ * FLEXIBLE ARCHITECTURE:
+ * - Specify number of bedrooms/bathrooms needed
+ * - Generator creates N rooms automatically
+ * - No HTML changes required for different property sizes
+ * 
  * Structure:
  * - Each room has: roomId, emoji, title, items array
  * - Each item has: itemId, label, category, hours, [optional fields]
  */
 
-const CHECKLIST_CONFIG = {
-  rooms: [
-    // ==================== BASIC ROOMS ====================
+// ========== CONFIGURATION ==========
+// Adjust these to match the property being cleaned
+const PROPERTY_CONFIG = {
+  numBedrooms: 4,      // Change to 5, 7, etc.
+  numBathrooms: 4,     // Change to 3, 5, etc.
+};
+
+// ========== ITEM TEMPLATES ==========
+// Reusable item templates for bedrooms
+const BEDROOM_ITEMS_TEMPLATE = [
+  { itemId: 'bed{N}-beds', label: 'Beds Made', category: 'beds', hours: 0.2, difficulty: 'basic' },
+  { itemId: 'bed{N}-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic' },
+  { itemId: 'bed{N}-wood', label: 'Wood Floors Cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
+  { itemId: 'bed{N}-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
+  { itemId: 'bed{N}-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' }
+];
+
+// Reusable item templates for bathrooms
+const BATHROOM_ITEMS_TEMPLATE = [
+  { itemId: 'bath{N}-sink', label: 'Sinks and Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic' },
+  { itemId: 'bath{N}-tub', label: 'Tub/Shower', category: 'shower', hours: 0.3, difficulty: 'basic' },
+  { itemId: 'bath{N}-toilet', label: 'Toilet Bowl & Tank', category: 'toilet', hours: 0.2, difficulty: 'basic' },
+  { itemId: 'bath{N}-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.1, difficulty: 'basic' },
+  { itemId: 'bath{N}-counter', label: 'Countertops', category: 'surfaces', hours: 0.1, difficulty: 'basic' },
+  { itemId: 'bath{N}-cabinets', label: 'Cabinets (outside)', category: 'cabinets', hours: 0.1, difficulty: 'basic' },
+  { itemId: 'bath{N}-floors', label: 'Floors Mopped', category: 'floors', hours: 0.2, difficulty: 'basic' },
+  { itemId: 'bath{N}-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
+  { itemId: 'bath{N}-lights', label: 'Light switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' },
+  { itemId: 'bath{N}-trash', label: 'Remove Trash Bags', category: 'trash', hours: 0.05, difficulty: 'basic' }
+];
+
+// ========== HELPER FUNCTIONS ==========
+/**
+ * Generate N bedroom sub-rooms from template
+ * @param {number} count - Number of bedrooms
+ * @returns {Array} Array of bedroom configurations
+ */
+function generateBedrooms(count) {
+  const bedrooms = [];
+  for (let i = 1; i <= count; i++) {
+    const items = BEDROOM_ITEMS_TEMPLATE.map(item => ({
+      ...item,
+      itemId: item.itemId.replace('{N}', i),
+      label: item.label
+    }));
+    
+    bedrooms.push({
+      subRoomId: `bedroom${i}`,
+      title: `Bedroom ${i}`,
+      items: items
+    });
+  }
+  return bedrooms;
+}
+
+/**
+ * Generate N bathroom sub-rooms from template
+ * @param {number} count - Number of bathrooms
+ * @returns {Array} Array of bathroom configurations
+ */
+function generateBathrooms(count) {
+  const bathrooms = [];
+  for (let i = 1; i <= count; i++) {
+    const items = BATHROOM_ITEMS_TEMPLATE.map(item => ({
+      ...item,
+      itemId: item.itemId.replace('{N}', i),
+      label: item.label
+    }));
+    
+    bathrooms.push({
+      subRoomId: `bathroom${i}`,
+      title: `Bathroom ${i}`,
+      items: items
+    });
+  }
+  return bathrooms;
+}
+
+// ========== DYNAMIC CONFIG GENERATION ==========
     {
       roomId: 'kitchen',
       emoji: '🍳',
@@ -71,130 +152,20 @@ const CHECKLIST_CONFIG = {
       ]
     },
 
-    // ==================== BATHROOMS (1-4) ====================
+    // ==================== BATHROOMS (Dynamic: 1-N) ====================
     {
       roomId: 'bathrooms',
       emoji: '🛁',
-      title: 'Bathrooms (1-4)',
-      subRooms: [
-        {
-          subRoomId: 'bathroom1',
-          title: 'Bathroom 1',
-          items: [
-            { itemId: 'bath1-sink', label: 'Sinks and Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath1-tub', label: 'Tub/Shower', category: 'shower', hours: 0.3, difficulty: 'basic' },
-            { itemId: 'bath1-toilet', label: 'Toilet Bowl & Tank', category: 'toilet', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath1-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath1-counter', label: 'Countertops', category: 'surfaces', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath1-cabinets', label: 'Cabinets (outside)', category: 'cabinets', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath1-floors', label: 'Floors Mopped', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath1-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath1-lights', label: 'Light switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' },
-            { itemId: 'bath1-trash', label: 'Remove Trash Bags', category: 'trash', hours: 0.05, difficulty: 'basic' }
-          ]
-        },
-        {
-          subRoomId: 'bathroom2',
-          title: 'Bathroom 2',
-          items: [
-            { itemId: 'bath2-sink', label: 'Sinks and Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath2-tub', label: 'Tub/Shower', category: 'shower', hours: 0.3, difficulty: 'basic' },
-            { itemId: 'bath2-toilet', label: 'Toilet Bowl & Tank', category: 'toilet', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath2-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath2-counter', label: 'Countertops', category: 'surfaces', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath2-cabinets', label: 'Cabinets (outside)', category: 'cabinets', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath2-floors', label: 'Floors Mopped', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath2-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath2-lights', label: 'Light switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' },
-            { itemId: 'bath2-trash', label: 'Remove Trash Bags', category: 'trash', hours: 0.05, difficulty: 'basic' }
-          ]
-        },
-        {
-          subRoomId: 'bathroom3',
-          title: 'Bathroom 3',
-          items: [
-            { itemId: 'bath3-sink', label: 'Sinks and Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath3-tub', label: 'Tub/Shower', category: 'shower', hours: 0.3, difficulty: 'basic' },
-            { itemId: 'bath3-toilet', label: 'Toilet Bowl & Tank', category: 'toilet', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath3-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath3-counter', label: 'Countertops', category: 'surfaces', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath3-cabinets', label: 'Cabinets (outside)', category: 'cabinets', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath3-floors', label: 'Floors Mopped', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath3-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath3-lights', label: 'Light switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' },
-            { itemId: 'bath3-trash', label: 'Remove Trash Bags', category: 'trash', hours: 0.05, difficulty: 'basic' }
-          ]
-        },
-        {
-          subRoomId: 'bathroom4',
-          title: 'Bathroom 4',
-          items: [
-            { itemId: 'bath4-sink', label: 'Sinks and Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath4-tub', label: 'Tub/Shower', category: 'shower', hours: 0.3, difficulty: 'basic' },
-            { itemId: 'bath4-toilet', label: 'Toilet Bowl & Tank', category: 'toilet', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath4-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath4-counter', label: 'Countertops', category: 'surfaces', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath4-cabinets', label: 'Cabinets (outside)', category: 'cabinets', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath4-floors', label: 'Floors Mopped', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bath4-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bath4-lights', label: 'Light switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' },
-            { itemId: 'bath4-trash', label: 'Remove Trash Bags', category: 'trash', hours: 0.05, difficulty: 'basic' }
-          ]
-        }
-      ]
+      title: `Bathrooms (1-${PROPERTY_CONFIG.numBathrooms})`,
+      subRooms: generateBathrooms(PROPERTY_CONFIG.numBathrooms)
     },
 
-    // ==================== BEDROOMS (1-4) ====================
+    // ==================== BEDROOMS (Dynamic: 1-N) ====================
     {
       roomId: 'bedrooms',
       emoji: '🛏️',
-      title: 'Bedrooms (1-4)',
-      subRooms: [
-        {
-          subRoomId: 'bedroom1',
-          title: 'Bedroom 1',
-          items: [
-            { itemId: 'bed1-beds', label: 'Beds Made', category: 'beds', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed1-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed1-wood', label: 'Wood Floors Cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed1-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bed1-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' }
-          ]
-        },
-        {
-          subRoomId: 'bedroom2',
-          title: 'Bedroom 2',
-          items: [
-            { itemId: 'bed2-beds', label: 'Beds Made', category: 'beds', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed2-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed2-wood', label: 'Wood Floors Cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed2-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bed2-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' }
-          ]
-        },
-        {
-          subRoomId: 'bedroom3',
-          title: 'Bedroom 3',
-          items: [
-            { itemId: 'bed3-beds', label: 'Beds Made', category: 'beds', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed3-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed3-wood', label: 'Wood Floors Cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed3-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bed3-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' }
-          ]
-        },
-        {
-          subRoomId: 'bedroom4',
-          title: 'Bedroom 4',
-          items: [
-            { itemId: 'bed4-beds', label: 'Beds Made', category: 'beds', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed4-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed4-wood', label: 'Wood Floors Cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'bed4-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-            { itemId: 'bed4-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' }
-          ]
-        }
-      ]
+      title: `Bedrooms (1-${PROPERTY_CONFIG.numBedrooms})`,
+      subRooms: generateBedrooms(PROPERTY_CONFIG.numBedrooms)
     }
   ]
 };

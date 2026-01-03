@@ -1,0 +1,427 @@
+# WHY AYS USES A FACTORY → COLLECTION → ENVELOPE ARCHITECTURE
+
+## Purpose
+
+AYS is not “just a form.” It’s a **field system** used on phones, on-site, under pressure, with patchy connectivity, and real-world properties that constantly surprise you (ensuites, separate toilets, granny flats, pool wings, saunas, bar rooms, extra lounges, rooms-within-rooms).
+
+This document explains **why AYS uses an object + templating approach** and why the **two-stage Factory/Collection → Envelope** pattern is the correct architecture for quoting + checklist capture.
+
+---
+
+## The Problem We’re Actually Solving
+
+A basic HTML form assumes:
+
+* the structure is known upfront
+* the user completes it in a single uninterrupted session
+* the UI can show everything at once
+* the payload can be built incrementally without risk
+---
+
+### How We Got Here: The Origin of Generated Objects
+
+This system didn't start with "let's use OOP." It started with a hard requirement that forced OOP.
+
+**The journey:**
+
+1. **Static HTML isn't enough**
+   - Initial form was hardcoded: Bedrooms 1–3, Bathrooms 1–2, static checklist items
+   - Works for cookie-cutter properties but fails in reality
+
+2. **The requirement: "Quote must fit the property"**
+   - A 1-bed flat ≠ a 7-bed mansion
+   - A property with ensuites ≠ a property with separate toilets
+   - The form must adapt to *what's actually there*
+   - This forces: generate rooms dynamically based on property config
+
+3. **Reality surprises you**
+   - Bedrooms are not all alike (master + ensuites; rooms-within-rooms)
+   - Bathrooms vary (ensuite ≠ family bathroom ≠ guest toilet)
+   - Kitchens differ (compact vs kitchen + scullery)
+   - Pool rooms, saunas, granny flats, bar wings appear late in the walk
+   - This forces: Room types, not just Room counts
+
+4. **Each room type needs different logic**
+   - EOT Bedroom ≠ Residential Bedroom (empty vs occupied physics)
+   - Ensuite cleaning differs from main bathroom cleaning
+   - Commercial kitchen ≠ residential kitchen
+   - This forces: polymorphism (extend Room class, override getItems())
+
+5. **You can't hardcode exceptions**
+   - "If bedroom is an ensuite, show these 5 items; if master, show these 7 items; if guest room, show these 4..."
+   - Quickly becomes unmaintainable if-statement hell
+   - This forces: inheritance and factory pattern (one way to create all rooms, each knows its own rules)
+
+6. **SOLID principles emerge as consequence, not choice**
+   - Can't add new room types without affecting others (forces Open/Closed principle)
+   - Each room must responsibly know its own items (Single Responsibility)
+   - Any room type must work in the same factory (Liskov Substitution)
+   - Components shouldn't depend on "big global room list" (Dependency Inversion)
+   - This forces: OOP architecture as the only viable path
+
+**In short:** The business requirement ("quote must accurately represent what's in the property") made OOP mandatory. It's not elegant architecture chosen for beauty—it's **engineering necessity forced by reality.**
+
+---
+**Reality in the cleaning industry is different:**
+
+* quoting can take **10–30+ minutes** while walking the property
+* new spaces are discovered late (“Oh… there’s also an ensuite / sauna / pool shower block”)
+* staff are on phones (small screens, interruptions, low signal)
+* the system must not lose work if the page reloads, the phone drops, or the user changes property size mid-way
+
+If the system pretends the world is tidy, it under-quotes, misreports, and breaks trust.
+
+---
+
+## Why We Moved From Big HTML to Objects + Templates
+
+### 1) Mobile performance and maintainability
+
+Large copy-pasted HTML (2,000+ lines) is fragile:
+
+* changes require editing many duplicated blocks
+* small mistakes create massive failures (unmatched tags, broken DOM)
+* the UI becomes inconsistent over time
+
+A data-driven approach replaces duplication with:
+
+* **templates** (what a “Bedroom” contains)
+* **objects/components** (how a “Room section” renders)
+* **loops** (instantiate Bedroom 1…7 instead of hardcoding ranges)
+
+### 2) Reality requires repeatable structure + discovery
+
+A 2-bedroom flat and a $5m home are not the same.
+
+We need both:
+
+* **Structured core** (bedrooms/bathrooms/toilets/kitchen/lounge)
+* **Discovery layer** (custom spaces added on-site when found)
+
+Objects + templates are the only sane way to scale this without turning the UI into a mess.
+
+---
+
+## Why “Wrap As You Go” (Incremental Envelope) Fails
+
+It’s tempting to build the final quote packet continuously as the user clicks.
+
+That approach fails because it creates **drift**:
+
+* property size changes cause partial rewrites
+* discovered rooms appear late and break assumptions
+* duplicate events (tap-spam) can cause double counting
+* pricing logic becomes scattered across dozens of interactions
+
+Result: you get “ghost line items,” missing extras, or mismatched totals.
+
+**In a quoting system, drift = money loss and disputes.**
+
+---
+
+## Design Methodology: HTML-First → Evidence-Driven Architecture
+
+This is important: **the architecture wasn't chosen upfront. It was discovered through building.**
+
+**The actual process:**
+
+1. **Build HTML first** (not "write specs")
+   - Prototype a form that can do quoting
+   - Rough out the pieces (rooms, items, controls)
+   - Write 2000+ lines of HTML to see what's needed
+   - This forces you to think concretely, not abstractly
+
+2. **Break it into test areas** (not "refactor everything")
+   - Isolated test files for individual components
+   - test-kitchen.html, test-living-room.html, etc.
+   - See patterns emerge: cards, checkboxes, room structure
+   - Discover what's repeating vs what's unique
+
+3. **Think about JS objects** ("we're going to need objects within...")
+   - Now that pieces are visible, ask: "How do we generate these?"
+   - "We can't hardcode 7 bedrooms—we need to instantiate them"
+   - "If we're generating them, we need a template system"
+   - Objects start to feel necessary, not optional
+
+4. **The trail leads inevitably to OOP + Factory**
+   - One object per room type (encapsulation)
+   - Factory to generate them (orchestration)
+   - Can't add new room types without OOP (reality forces the issue)
+   - SOLID principles emerge as *consequences*, not requirements
+
+**Result**: You didn't choose complexity. **The evidence led you there.** Reality demanded OOP.
+
+This is why we still have the HTML prototype (checklist-modern.html). It's not "legacy code to refactor away." It's the **working model that taught us what the architecture needs to be.** It's the proof.
+
+Future developers reading this should understand: **the 2400-line HTML is not a failure to generate. It's the evidence that generation is necessary.** Same with the test files—they're not "dead code," they're the **exploration that revealed patterns.**
+
+---
+
+### Stage 1 — Factory + Collection (Build the truth)
+
+**Goal:** Collect facts safely, over time, without committing to final output too early.
+
+* The UI is generated from templates:
+
+  * Bedrooms are instantiated as **Bedroom 1…N**
+  * Bathrooms, toilets, etc. are instantiated based on the property selector
+  * Discovery items (custom spaces) can be added when encountered
+
+* Objects are compositional (not monolithic):
+
+  * `AysRoomSection` is a composite made of:
+
+    * `AysDisclosureCard` (container)
+    * multiple `AysListItemCheckbox` (items)
+
+* State is durable and keyed by **itemId**, not by “room count”:
+
+  * If a user changes 3 bedrooms → 4 bedrooms, previously checked items remain intact
+  * New rooms appear empty
+
+This stage produces **stable, verifiable inputs** (facts), not a final quote.
+
+### Stage 2 — Envelope (Wrap once, at submit time)
+
+**Goal:** Create the final “moment of truth” payload.
+
+At submission:
+
+* collect all relevant data from the current state
+* compute pricing in a single place
+* validate completeness
+* attach metadata (property context, device/session context)
+* produce a single packet (the envelope) for sending/storage
+
+This stage is the only place we build:
+
+* `QuotePacket`
+* `LineItems`
+* final `Totals`
+
+**One build point = no drift.**
+
+---
+
+## Component Naming (Canonical)
+
+To avoid UI entropy, AYS uses named primitives everywhere:
+
+* **AysDisclosureCard** — the reusable `<details>/<summary>` disclosure bar + body container (themeable, progressive enhancement, optional animation)
+* **AysListItemCheckbox** — the reusable checklist/list checkbox row component
+
+These names are used in code, docs, tickets, and commits.
+
+---
+
+## End-to-end flow (canonical)
+
+**Objects → Factory → Form → Envelope → Web Worker**
+
+This is the backbone of the system and the order matters.
+
+---
+
+## System rules (the ones Copilot must follow)
+
+Use these rules to keep implementation “surgical” and prevent off-track rewrites.
+
+1. **Frontend-first scope**
+
+   * This workstream is **frontend JS + worker durability** unless explicitly stated otherwise.
+   * Do not pivot into PHP/backend refactors unless a task explicitly calls for it.
+
+2. **Templates before instances**
+
+   * Define **RoomTemplates** and **ItemTemplates** first.
+   * Rooms are **instances** created from templates based on property inputs and discoveries.
+
+3. **Room generation is data-driven**
+
+   * Do not hardcode bedroom ranges like “Bedrooms 1–4”.
+   * Generate **Bedroom 1…N** (N up to 7) via loop from config.
+
+4. **Deterministic IDs are mandatory**
+
+   * Every room and item must have a stable ID derived from:
+
+     * `serviceType + roomType + roomIndex + itemKey`
+   * IDs must not depend on render order or DOM position.
+
+5. **State follows item IDs, not room count**
+
+   * Changing property size must re-render rooms **without losing existing ticks/notes**.
+   * New rooms appear blank; existing rooms rehydrate from storage.
+
+6. **The Factory does orchestration, not business logic**
+
+   * Factory responsibilities:
+
+     * instantiate room instances
+     * hydrate/reconcile state
+     * output a render model for the Form
+   * Pricing and final payload building are **not** done inside the Factory.
+
+7. **Form is a projection**
+
+   * The Form renders the Factory output using primitives:
+
+     * `AysDisclosureCard` (containers)
+     * `AysListItemCheckbox` (rows)
+   * The Form does not own truth; it emits minimal events/state updates keyed by IDs.
+
+8. **Envelope is built once (moment of truth)**
+
+   * Do not incrementally mutate the final payload while the user is interacting.
+   * On submit:
+
+     * collect facts in one place
+     * validate
+     * compute totals
+     * wrap into one JSON envelope
+
+9. **Worker durability first**
+
+   * Persist before attempting network.
+   * IndexedDB (primary) + localStorage snapshot fallback.
+   * Batch sends, retry idempotently (fingerprint + cooldown/backoff).
+
+10. **No destructive edits**
+
+* No blanking files.
+* No large rewrites without an explicit plan.
+* Prefer small, in-place changes with clear diff boundaries.
+
+11. **Ask Shaun to test when behaviour changes**
+
+* If a change affects UI behaviour, state, room generation, or submission:
+
+  * stop and ask Shaun to run the specified test scenario.
+
+---
+
+## How to model rooms (templates first, then instances)
+
+A room object should be *built from smaller pieces*, not hard-coded HTML.
+
+### Preferred approach (composition + templates)
+
+* `AysRoomSection` is a composite:
+
+  * metadata (roomType, index, label, serviceType)
+  * template reference (which item set applies)
+  * UI container: **AysDisclosureCard**
+  * children: many **AysListItemCheckbox**
+
+This keeps rooms flexible and prevents class explosion.
+
+### Optional approach (inheritance for a few core types)
+
+If you prefer inheritance for clarity, keep it tight:
+
+* `BedroomRoom extends AysRoomSection`
+* `BathroomRoom extends AysRoomSection`
+* `KitchenRoom extends AysRoomSection`
+
+Even with inheritance, **items should still come from templates** keyed by `serviceType` and `features` (not hard-coded in subclasses).
+
+---
+
+## What “Factory holds state” really means
+
+The factory is not a bucket of random variables. It’s the orchestrator that ensures:
+
+* rooms are created consistently from the same rules
+* state is keyed by deterministic item IDs
+* changing property size re-renders without losing work
+
+**State itself lives in durable storage** (worker/IndexedDB). The factory *hydrates and reconciles* it into the currently-rendered form.
+
+Practical example:
+
+* Start as **3 bedrooms** → tick items in Bedroom 1 and Bedroom 2
+* Change to **4 bedrooms** (discover granny flat)
+
+  * Bedroom 1 & 2 remain ticked (same IDs)
+  * Bedroom 3 appears (blank)
+  * Bedroom 4 appears (blank)
+
+No drift. No wipe. No guessing.
+
+---
+
+## Practical Next Steps (Safe Build Order)
+
+1. **Property selectors**: bedroom/bath/toilet/lounge counts (structured core)
+2. **Room factory**: generate `AysRoomSection` instances from templates
+3. **Discovery flow**: “Add Custom Space” using templates + labels
+4. **Collect**: single function to gather quote facts (`collectQuoteLineItems()` / equivalent)
+5. **Envelope**: build once at submit (`generateQuote()`)
+6. **Transmit**: idempotent send + retry (`sendQuote()`)
+
+---
+
+## Testing Policy
+
+If the system needs testing, it must explicitly ask Shaun to test specific scenarios (mobile, reload, property-size change, discovery additions). No silent refactors.
+
+---
+
+# READ THIS FIRST: Copilot Prompt Header
+
+**Copy this block into any task/issue that touches the checklist, form, or quote system:**
+
+```
+═══════════════════════════════════════════════════════════════
+SYSTEM ARCHITECTURE: Objects → Form → Factory → Envelope → Web Worker
+═══════════════════════════════════════════════════════════════
+
+MANDATORY RULES (enforce these before any implementation):
+
+1. **Flow Order Matters**: Objects (templates defined) → Form (UI rendered) → 
+   Factory (instances created + state hydrated) → Envelope (atomic payload built 
+   once at submit) → Web Worker (persisted to IndexedDB, transmitted with retry)
+
+2. **Room Object Requirements**:
+   - Room must have deterministic ID: serviceType + roomType + roomIndex + itemKey
+   - Room type determines items (EOT Bedroom ≠ Residential Bedroom)
+   - State persists by itemId, survives property size changes
+   - Use AysDisclosureCard (container) + AysListItemCheckbox (items)
+
+3. **Factory Does Orchestration Only**:
+   - Generates room instances from config
+   - Hydrates/reconciles state from storage
+   - Does NOT build pricing or final envelope (that's Stage 2)
+
+4. **Envelope Built Once**:
+   - Built at submit time only
+   - Collects ALL facts in single place
+   - Validates completeness
+   - No incremental mutations while user interacts
+
+5. **Deterministic IDs Mandatory**:
+   - Every room and item must have stable ID
+   - IDs must NOT depend on render order or room count
+   - Changing property size must re-render WITHOUT losing ticks/notes
+
+6. **No Hardcoded Ranges**:
+   - Generate Bedroom 1…N via loop from config
+   - Don't hardcode "Bedrooms 1–4"
+   - 7-bedroom property must work same as 1-bedroom
+
+7. **State Locality**:
+   - Each checkbox owns its checked state
+   - Each Card owns its expanded state
+   - No global state mutation
+
+8. **If Behavior Changes**:
+   - Test scenarios: mobile, reload, property-size change, discovery additions
+   - Ask Shaun to verify before merging
+
+REFERENCE DOCUMENTS:
+- OBJECT-ORIENTED-ARCHITECTURE.md (full OOP + design patterns)
+- Why-ays-architecture (this file, system rules)
+═══════════════════════════════════════════════════════════════
+```
+
+**Usage**: Paste this at the top of GitHub issues, pull request descriptions, or task briefs to ensure architectural consistency and prevent scope creep into unrelated refactors.
