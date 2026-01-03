@@ -87,11 +87,27 @@ class AysChecklistFormFactory {
   }
 
   /**
-   * Get all cards that have been generated
-   * @returns {Array<AysDisclosureRoomCard>}
+   * Clear all cards and regenerate from new config
+   * Called when property type changes (e.g., user changes from residential_3bed to commercial_gym)
+   * CRITICAL: Called AFTER property type change is saved to PROPERTY_CONFIG
+   * @param {Object} config - New CHECKLIST_CONFIG object
+   * @returns {Array<AysDisclosureRoomCard>} New cards
    */
-  getCards() {
-    return this.cards;
+  regenerate(config) {
+    const container = document.getElementById(this.containerId);
+    if (!container) {
+      console.error(`Container with id '${this.containerId}' not found for regeneration`);
+      return [];
+    }
+
+    console.log(`[AysChecklistFormFactory] Regenerating with property type: ${config.propertyType || 'unknown'}`);
+
+    // Clear existing cards
+    container.innerHTML = '';
+    this.cards = [];
+
+    // Generate new cards with new config
+    return this.generate(config);
   }
 
   /**

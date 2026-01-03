@@ -2113,9 +2113,132 @@
             <h2 style="margin-bottom: var(--space-md); color: var(--color-secondary);">System Settings</h2>
             <p style="color: var(--color-secondary); margin-bottom: var(--space-lg);">Configure pricing, services, and system options.</p>
 
-            <!-- Pricing Settings Section -->
-            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">💵 Pricing Settings</h3>
+            <!-- Settings Tab Navigation -->
+            <div style="display: flex; gap: 8px; margin-bottom: var(--space-lg); border-bottom: 2px solid var(--color-border); padding-bottom: 0;">
+              <button class="settings-tab-button is-active" data-tab="property" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid var(--color-accent); margin-bottom: -2px;">
+                🏠 Property
+              </button>
+              <button class="settings-tab-button" data-tab="pricing" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
+                💵 Pricing
+              </button>
+              <button class="settings-tab-button" data-tab="production-rate" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
+                ⚡ Production Rate
+              </button>
+              <button class="settings-tab-button" data-tab="surcharges" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
+                🔧 Surcharges
+              </button>
+              <button class="settings-tab-button" data-tab="services" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
+                🎯 Services
+              </button>
+              <button class="settings-tab-button" data-tab="system" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
+                ⚙️ System
+              </button>
+            </div>
+
+            <!-- TAB 0: Property Configuration (SOURCE OF TRUTH) -->
+            <div class="settings-tab-content is-active" data-tab="property" style="display: block;">
+              <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🏠 Property Configuration</h3>
+                <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
+                  <strong>SOURCE OF TRUTH:</strong> Settings here control what appears on your checklist. 
+                  Change property type, bedrooms, bathrooms, or office count below.
+                </p>
+              
+                <!-- Property Type Selector -->
+                <div class="meta-field" style="margin-bottom: var(--space-lg);">
+                  <label for="setting-property-type" style="font-weight: 600;">Property Type:</label>
+                  <select id="setting-property-type" style="padding: 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 500px; background: var(--color-white); color: var(--color-primary); font-weight: 600;">
+                    <option value="residential">🏘️ Residential (Parametric)</option>
+                    <option value="residential_3bed">🏘️ Residential - 3 Bed, 2 Bath (Preset)</option>
+                    <option value="residential_4bed">🏘️ Residential - 4 Bed, 2 Bath (Preset)</option>
+                    <option value="residential_6bed">🏘️ Residential - 6 Bed, 3 Bath (Preset)</option>
+                    <option value="commercial_office">🏢 Commercial Office (Parametric)</option>
+                    <option value="commercial_gym">💪 Commercial Gym (Parametric)</option>
+                    <option value="commercial_retail">🛍️ Commercial Retail</option>
+                    <option value="commercial_warehouse">📦 Commercial Warehouse (Parametric)</option>
+                  </select>
+                </div>
+
+                <!-- Residential Parameters (shown/hidden based on property type) -->
+                <div id="property-residential-params" style="display: none; background: var(--color-light); padding: var(--space-md); border-radius: 4px; margin-bottom: var(--space-md);">
+                  <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Residential Configuration</h4>
+                  <div class="grid grid-2col gap-md">
+                    <div class="meta-field">
+                      <label for="setting-num-bedrooms">Bedrooms (1-10):</label>
+                      <input type="number" id="setting-num-bedrooms" min="1" max="10" value="3" step="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px;" />
+                    </div>
+                    <div class="meta-field">
+                      <label for="setting-num-bathrooms">Bathrooms (1-6):</label>
+                      <input type="number" id="setting-num-bathrooms" min="1" max="6" value="2" step="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px;" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Commercial Office Parameters -->
+                <div id="property-office-params" style="display: none; background: var(--color-light); padding: var(--space-md); border-radius: 4px; margin-bottom: var(--space-md);">
+                  <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Office Configuration</h4>
+                  <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);">
+                    Single-floor: set Office Count. Multi-floor: set Floors × Offices per Floor.
+                  </p>
+                  <div class="grid grid-2col gap-md">
+                    <div class="meta-field">
+                      <label for="setting-num-offices">Total Offices:</label>
+                      <input type="number" id="setting-num-offices" min="1" max="50" value="6" step="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px;" />
+                    </div>
+                    <div class="meta-field">
+                      <label for="setting-office-floors">OR Floors (multi-story):</label>
+                      <input type="number" id="setting-office-floors" min="0" max="20" value="0" step="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px;" />
+                    </div>
+                    <div class="meta-field">
+                      <label for="setting-offices-per-floor">Offices per Floor:</label>
+                      <input type="number" id="setting-offices-per-floor" min="0" max="20" value="0" step="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px;" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Gym Parameters -->
+                <div id="property-gym-params" style="display: none; background: var(--color-light); padding: var(--space-md); border-radius: 4px; margin-bottom: var(--space-md);">
+                  <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Gym Configuration</h4>
+                  <div class="grid grid-2col gap-md">
+                    <div class="meta-field">
+                      <label for="setting-num-showers">Showers (1-10):</label>
+                      <input type="number" id="setting-num-showers" min="1" max="10" value="3" step="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px;" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Warehouse Parameters -->
+                <div id="property-warehouse-params" style="display: none; background: var(--color-light); padding: var(--space-md); border-radius: 4px; margin-bottom: var(--space-md);">
+                  <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Warehouse Configuration</h4>
+                  <div class="grid grid-3col gap-md">
+                    <div class="meta-field">
+                      <label for="setting-num-loading-docks">Loading Docks:</label>
+                      <input type="number" id="setting-num-loading-docks" min="0" max="20" value="2" step="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px;" />
+                    </div>
+                    <div class="meta-field">
+                      <label for="setting-num-admin-offices">Admin Offices:</label>
+                      <input type="number" id="setting-num-admin-offices" min="0" max="10" value="1" step="1" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px;" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: var(--space-md);">
+                  <button type="button" id="btn-regenerate-checklist" class="btn btn-primary" style="padding: 12px 24px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <span id="regenerate-spinner" style="display: inline-block;">🔄</span>
+                    <span id="regenerate-text">Regenerate Checklist</span>
+                  </button>
+                  <p id="property-auto-regen-note" style="color: var(--color-secondary); font-size: var(--font-size-sm); margin: auto 0;">
+                    (Auto-regenerates in 200ms after changes)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 1: Pricing Settings -->
+            <div class="settings-tab-content" data-tab="pricing" style="display: none;">
+              <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">💵 Pricing Settings</h3>
               
               <div class="grid grid-2col gap-md">
                 <div class="meta-field">
@@ -2149,8 +2272,19 @@
               </div>
             </div>
 
-            <!-- Surcharge Settings Section -->
-            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <!-- TAB 2: Production Rate Settings -->
+            <div class="settings-tab-content" data-tab="production-rate" style="display: none;">
+              <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">⚡ Production Rate Settings</h3>
+                <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Configure how many square feet your team cleans per hour. This affects labor hour estimates for quotes.</p>
+                
+                <div id="production-rate-light-container" style="margin-bottom: var(--space-lg);"></div>
+                <div id="production-rate-heavy-container"></div>
+              </div>
+            </div>
+
+            <!-- TAB 3: Surcharges -->
+            <div class="settings-tab-content" data-tab="surcharges" style="display: none;">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">⭐ Window Cleaning - Dynamic Pricing (by BR count & panes)</h3>
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">35 panes = 1 hour. Minimum $120 for any job.</p>
               
@@ -2217,68 +2351,102 @@
               </div>
             </div>
 
-            <!-- Service Configuration Section -->
-            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <!-- TAB 4: Services -->
+            <div class="settings-tab-content" data-tab="services" style="display: none;">
               <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🎯 Service Configuration</h3>
-              <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Link service types to API endpoints for dynamic data.</p>
+              <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Select which optional services apply to this property type.</p>
               
-              <div class="meta-field">
-                <label for="service-api-endpoint">Service API Endpoint</label>
-                <input type="url" id="service-api-endpoint" placeholder="https://api.example.com/services" />
+              <!-- Service Toggles Container -->
+              <!-- Waits for ITEM_DEFINITIONS to load, shows loading indicator while waiting -->
+              <!-- CRITICAL: Everything downstream depends on this rendering correctly -->
+              <div id="service-toggles-container" style="
+                background: var(--color-light);
+                border-radius: 4px;
+                padding: var(--space-md);
+                margin-bottom: var(--space-md);
+                min-height: 80px;
+              ">
+                <!-- Filled by AysServiceToggleRenderer.render() -->
               </div>
 
-              <div style="background: var(--color-light); border-radius: 4px; padding: var(--space-md); margin: var(--space-md) 0;">
-                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Linked Services</h4>
-                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                  <thead>
-                    <tr style="border-bottom: 2px solid var(--color-border);">
-                      <th style="text-align: left; padding: 8px;">Service ID</th>
-                      <th style="text-align: left; padding: 8px;">Service Name</th>
-                      <th style="text-align: left; padding: 8px;">Type</th>
-                      <th style="text-align: center; padding: 8px;">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr style="border-bottom: 1px solid var(--color-border);">
-                      <td style="padding: 8px;">SVC-001</td>
-                      <td style="padding: 8px;">End of Tenancy</td>
-                      <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">end-of-tenancy</span></td>
-                      <td style="padding: 8px; text-align: center;">
-                        <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
-                      </td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--color-border);">
-                      <td style="padding: 8px;">SVC-002</td>
-                      <td style="padding: 8px;">Residential Tidying</td>
-                      <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">residential</span></td>
-                      <td style="padding: 8px; text-align: center;">
-                        <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <button type="button" class="btn btn-primary" style="margin-top: var(--space-md); width: 100%;">
-                  + Add Service
-                </button>
-              </div>
+              <!-- API Configuration Section (Advanced) -->
+              <details style="margin-top: var(--space-lg); cursor: pointer;">
+                <summary style="
+                  color: var(--color-secondary);
+                  font-weight: 600;
+                  padding: var(--space-sm);
+                  cursor: pointer;
+                  user-select: none;
+                ">
+                  ⚙️ API Configuration (Advanced)
+                </summary>
+                
+                <div style="padding: var(--space-md); background: var(--color-light); border-radius: 4px; margin-top: var(--space-md);">
+                  <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
+                    Optional: Link service types to API endpoints for dynamic data retrieval.
+                  </p>
+                  
+                  <div class="meta-field">
+                    <label for="service-api-endpoint">Service API Endpoint</label>
+                    <input type="url" id="service-api-endpoint" placeholder="https://api.example.com/services" />
+                  </div>
+
+                  <div style="background: var(--color-white); border-radius: 4px; padding: var(--space-md); margin: var(--space-md) 0;">
+                    <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Linked Services</h4>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                      <thead>
+                        <tr style="border-bottom: 2px solid var(--color-border);">
+                          <th style="text-align: left; padding: 8px;">Service ID</th>
+                          <th style="text-align: left; padding: 8px;">Service Name</th>
+                          <th style="text-align: left; padding: 8px;">Type</th>
+                          <th style="text-align: center; padding: 8px;">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                          <td style="padding: 8px;">SVC-001</td>
+                          <td style="padding: 8px;">End of Tenancy</td>
+                          <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">end-of-tenancy</span></td>
+                          <td style="padding: 8px; text-align: center;">
+                            <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
+                          </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                          <td style="padding: 8px;">SVC-002</td>
+                          <td style="padding: 8px;">Residential Tidying</td>
+                          <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">residential</span></td>
+                          <td style="padding: 8px; text-align: center;">
+                            <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" style="margin-top: var(--space-md); width: 100%;">
+                      + Add Service
+                    </button>
+                  </div>
+                </div>
+              </details>
             </div>
 
-            <!-- Customer ID Linking Section -->
-            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🔗 Customer ID Linking</h3>
-              <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Link this checklist to a customer workflow: Lead → Customer Data → Bookings → Invoicing</p>
-              
-              <div class="meta-field">
-                <label for="setting-customer-id-prefix">Customer ID Prefix</label>
-                <input type="text" id="setting-customer-id-prefix" value="CUST" maxlength="10" placeholder="e.g., CUST" />
+            <!-- TAB 5: System -->
+            <div class="settings-tab-content" data-tab="system" style="display: none;">
+              <!-- Customer ID Linking Section -->
+              <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🔗 Customer ID Linking</h3>
+                <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Link this checklist to a customer workflow: Lead → Customer Data → Bookings → Invoicing</p>
+                
+                <div class="meta-field">
+                  <label for="setting-customer-id-prefix">Customer ID Prefix</label>
+                  <input type="text" id="setting-customer-id-prefix" value="CUST" maxlength="10" placeholder="e.g., CUST" />
+                </div>
+                <div class="meta-field">
+                  <label for="setting-auto-generate-id">
+                    <input type="checkbox" id="setting-auto-generate-id" checked />
+                    Auto-Generate Customer IDs
+                  </label>
+                </div>
               </div>
-              <div class="meta-field">
-                <label for="setting-auto-generate-id">
-                  <input type="checkbox" id="setting-auto-generate-id" checked />
-                  Auto-Generate Customer IDs
-                </label>
-              </div>
-            </div>
 
             <!-- System Options Section -->
             <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
@@ -2310,6 +2478,7 @@
                   </label>
                 </div>
               </div>
+            </div>
             </div>
 
             <!-- Save Settings Button -->
@@ -2355,20 +2524,297 @@
   </div> <!-- End class="checklist-wrapper" -->
 
   <!-- Scripts -->
+  <!-- Type System: Property type hierarchy + polymorphic rendering -->
+  <script src="js/patterns/AysPropertyType.js"></script>
+  
+  <!-- Data Definitions: Item definitions for all services -->
+  <script src="js/data/ITEM_DEFINITIONS.js"></script>
+  
   <!-- Component System: AysDisclosureRoomCard + AysChecklistItemCheckbox -->
   <script src="js/components/AysDisclosureRoomCard.js"></script>
   <script src="js/components/AysChecklistItemCheckbox.js"></script>
+  <script src="js/components/AysProductionRateSettings.js"></script>
+  <script src="js/components/AysServiceToggleRenderer.js"></script>
+  
+  <!-- Configuration & Factory -->
   <script src="js/data/checklist-config.js"></script>
   <script src="js/generators/AysChecklistFormFactory.js"></script>
 
   <!-- Initialize Generator for End of Tenancy Checklist -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Only generate if we're on the end-of-tenancy tab
-      const generator = new AysChecklistFormFactory('rooms-container');
-      if (typeof CHECKLIST_CONFIG !== 'undefined') {
-        generator.generate(CHECKLIST_CONFIG);
-        console.log('✓ Checklist generated:', generator.getCards().length, 'rooms');
+      console.log('[Init] DOMContentLoaded firing - reading property config from Settings...');
+      
+      // CRITICAL: Read property configuration FROM SETTINGS FORM (not hardcoded in code!)
+      // Settings form inputs are the SOURCE OF TRUTH
+      const propertyTypeSelect = document.getElementById('setting-property-type');
+      const numBedroomsInput = document.getElementById('setting-num-bedrooms');
+      const numBathroomsInput = document.getElementById('setting-num-bathrooms');
+      const numOfficesInput = document.getElementById('setting-num-offices');
+      const numFloorsInput = document.getElementById('setting-office-floors');
+      const numOfficesPerFloorInput = document.getElementById('setting-offices-per-floor');
+      const numShowersInput = document.getElementById('setting-num-showers');
+      const numLoadingDocksInput = document.getElementById('setting-num-loading-docks');
+      const numAdminOfficesInput = document.getElementById('setting-num-admin-offices');
+      
+      /**
+       * Build params object from current form values
+       * Returns object with whatever parameters are relevant for the property type
+       */
+      function getPropertyConfigFromForms() {
+        const propertyType = propertyTypeSelect?.value || 'residential';
+        const params = {};
+        
+        // Add residential params if relevant
+        if (propertyType.includes('residential')) {
+          const beds = parseInt(numBedroomsInput?.value || 3);
+          const baths = parseInt(numBathroomsInput?.value || 2);
+          if (beds >= 1 && beds <= 10) params.numBedrooms = beds;
+          if (baths >= 1 && baths <= 6) params.numBathrooms = baths;
+        }
+        
+        // Add office params if relevant
+        if (propertyType.includes('office')) {
+          const floors = parseInt(numFloorsInput?.value || 0);
+          const officesPerFloor = parseInt(numOfficesPerFloorInput?.value || 0);
+          const offices = parseInt(numOfficesInput?.value || 6);
+          
+          if (floors > 0 && officesPerFloor > 0) {
+            params.numFloors = floors;
+            params.numOfficesPerFloor = officesPerFloor;
+          } else if (offices > 0) {
+            params.numOffices = offices;
+          }
+        }
+        
+        // Add gym params if relevant
+        if (propertyType.includes('gym')) {
+          const showers = parseInt(numShowersInput?.value || 3);
+          if (showers >= 1) params.numShowers = showers;
+        }
+        
+        // Add warehouse params if relevant
+        if (propertyType.includes('warehouse')) {
+          const docks = parseInt(numLoadingDocksInput?.value || 0);
+          const adminOffices = parseInt(numAdminOfficesInput?.value || 0);
+          if (docks >= 0) params.numLoadingDocks = docks;
+          if (adminOffices >= 0) params.numAdminOffices = adminOffices;
+        }
+        
+        return { propertyType, params };
+      }
+      
+      /**
+       * Show/hide parameter sections based on selected property type
+       */
+      function updatePropertyParamVisibility() {
+        const propertyType = propertyTypeSelect?.value || 'residential';
+        document.getElementById('property-residential-params').style.display = 
+          propertyType.includes('residential') ? 'block' : 'none';
+        document.getElementById('property-office-params').style.display = 
+          propertyType.includes('office') ? 'block' : 'none';
+        document.getElementById('property-gym-params').style.display = 
+          propertyType.includes('gym') ? 'block' : 'none';
+        document.getElementById('property-warehouse-params').style.display = 
+          propertyType.includes('warehouse') ? 'block' : 'none';
+      }
+      
+      // Initial visibility update
+      updatePropertyParamVisibility();
+      
+      // Show/hide params when property type changes
+      if (propertyTypeSelect) {
+        propertyTypeSelect.addEventListener('change', updatePropertyParamVisibility);
+      }
+      
+      // Get property config from forms (or restore from localStorage)
+      let savedPropertyConfig = null;
+      try {
+        const saved = localStorage.getItem('checklist_property_config');
+        if (saved) {
+          savedPropertyConfig = JSON.parse(saved);
+          console.log('[Init] Restored property config from localStorage:', savedPropertyConfig);
+          
+          // Apply saved values to form inputs
+          if (propertyTypeSelect && savedPropertyConfig.property_type) {
+            propertyTypeSelect.value = savedPropertyConfig.property_type;
+          }
+          if (savedPropertyConfig.params) {
+            if (savedPropertyConfig.params.numBedrooms && numBedroomsInput) {
+              numBedroomsInput.value = savedPropertyConfig.params.numBedrooms;
+            }
+            if (savedPropertyConfig.params.numBathrooms && numBathroomsInput) {
+              numBathroomsInput.value = savedPropertyConfig.params.numBathrooms;
+            }
+            if (savedPropertyConfig.params.numOffices && numOfficesInput) {
+              numOfficesInput.value = savedPropertyConfig.params.numOffices;
+            }
+            if (savedPropertyConfig.params.numFloors && numFloorsInput) {
+              numFloorsInput.value = savedPropertyConfig.params.numFloors;
+            }
+            if (savedPropertyConfig.params.numOfficesPerFloor && numOfficesPerFloorInput) {
+              numOfficesPerFloorInput.value = savedPropertyConfig.params.numOfficesPerFloor;
+            }
+            if (savedPropertyConfig.params.numShowers && numShowersInput) {
+              numShowersInput.value = savedPropertyConfig.params.numShowers;
+            }
+            if (savedPropertyConfig.params.numLoadingDocks && numLoadingDocksInput) {
+              numLoadingDocksInput.value = savedPropertyConfig.params.numLoadingDocks;
+            }
+            if (savedPropertyConfig.params.numAdminOffices && numAdminOfficesInput) {
+              numAdminOfficesInput.value = savedPropertyConfig.params.numAdminOffices;
+            }
+          }
+          updatePropertyParamVisibility();
+        }
+      } catch (error) {
+        console.warn('[Init] Failed to restore property config from localStorage:', error);
+      }
+      
+      // NOW generate checklist with the (saved or form-provided) config
+      function generateChecklistFromForms() {
+        const config = getPropertyConfigFromForms();
+        console.log('[Init] Generating checklist with config:', config);
+        
+        if (typeof PROPERTY_CONFIG !== 'undefined' && typeof PROPERTY_CONFIG.setPropertyType === 'function') {
+          PROPERTY_CONFIG.setPropertyType(config.propertyType, config.params);
+        }
+        
+        if (typeof CHECKLIST_CONFIG !== 'undefined') {
+          const generator = new AysChecklistFormFactory('rooms-container');
+          generator.generate(CHECKLIST_CONFIG);
+          console.log('✓ Initial checklist generated:', generator.getCards().length, 'rooms');
+          
+          // Store generator globally so property type changes can regenerate
+          window.checklistGenerator = generator;
+          
+          // Save config to localStorage
+          try {
+            localStorage.setItem('checklist_property_config', JSON.stringify(config));
+          } catch (error) {
+            console.warn('[Init] Failed to save property config:', error);
+          }
+        }
+      }
+      
+      generateChecklistFromForms();
+      
+      // Add change listeners to all property config inputs
+      // Use debounce (200ms) before regenerating to avoid rapid-fire regenerations
+      let regenerateTimeout;
+      function scheduleRegenerate() {
+        clearTimeout(regenerateTimeout);
+        regenerateTimeout = setTimeout(function() {
+          console.log('[Settings] Property config changed, regenerating...');
+          if (typeof Checklist !== 'undefined' && typeof Checklist.onPropertyTypeChanged === 'function') {
+            const config = getPropertyConfigFromForms();
+            Checklist.onPropertyTypeChanged(config.propertyType, config.params);
+          }
+        }, 200);  // Wait 200ms for user to stop typing
+      }
+      
+      [propertyTypeSelect, numBedroomsInput, numBathroomsInput, numOfficesInput,
+       numFloorsInput, numOfficesPerFloorInput, numShowersInput, 
+       numLoadingDocksInput, numAdminOfficesInput].forEach(input => {
+        if (input) {
+          input.addEventListener('change', scheduleRegenerate);
+          input.addEventListener('input', scheduleRegenerate);
+        }
+      });
+      
+      // Manual regenerate button
+      const regenerateBtn = document.getElementById('btn-regenerate-checklist');
+      if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', function() {
+          console.log('[Settings] Manual regenerate clicked');
+          
+          // Visual feedback: spin the icon
+          const spinner = document.getElementById('regenerate-spinner');
+          const text = document.getElementById('regenerate-text');
+          
+          // Add spinning animation via style
+          let rotation = 0;
+          regenerateBtn.disabled = true;
+          text.textContent = 'Regenerating...';
+          
+          const spinInterval = setInterval(() => {
+            rotation += 10;
+            spinner.style.transform = `rotate(${rotation}deg)`;
+          }, 20);
+          
+          // Trigger immediate regeneration (not debounced)
+          generateChecklistFromForms();
+          
+          // Reset after 600ms
+          setTimeout(() => {
+            clearInterval(spinInterval);
+            spinner.style.transform = 'rotate(0deg)';
+            regenerateBtn.disabled = false;
+            text.textContent = 'Regenerate Checklist';
+          }, 600);
+        });
+      }
+
+      // Initialize Settings Tab Navigation
+      const settingsTabButtons = document.querySelectorAll('.settings-tab-button');
+      const settingsTabContents = document.querySelectorAll('.settings-tab-content');
+
+      settingsTabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const tabName = this.getAttribute('data-tab');
+          
+          // Remove active state from all buttons and contents
+          settingsTabButtons.forEach(btn => btn.classList.remove('is-active'));
+          settingsTabContents.forEach(content => {
+            content.style.display = 'none';
+            content.classList.remove('is-active');
+          });
+          
+          // Add active state to clicked button and corresponding content
+          this.classList.add('is-active');
+          const activeContent = document.querySelector(`.settings-tab-content[data-tab="${tabName}"]`);
+          if (activeContent) {
+            activeContent.style.display = 'block';
+            activeContent.classList.add('is-active');
+          }
+          
+          // Update button styling
+          settingsTabButtons.forEach(btn => {
+            if (btn.getAttribute('data-tab') === tabName) {
+              btn.style.borderBottomColor = 'var(--color-accent)';
+              btn.style.color = 'var(--color-secondary)';
+            } else {
+              btn.style.borderBottomColor = 'transparent';
+            }
+          });
+        });
+      });
+
+      // Initialize Production Rate Settings Components
+      if (typeof AysProductionRateSettings !== 'undefined') {
+        const lightComponent = new AysProductionRateSettings({
+          classification: 'light',
+          onSave: (settings) => {
+            console.log('✓ Light commercial production rate saved:', settings);
+          }
+        });
+
+        const heavyComponent = new AysProductionRateSettings({
+          classification: 'heavy',
+          onSave: (settings) => {
+            console.log('✓ Heavy commercial production rate saved:', settings);
+          }
+        });
+
+        const lightContainer = document.getElementById('production-rate-light-container');
+        const heavyContainer = document.getElementById('production-rate-heavy-container');
+        
+        if (lightContainer) {
+          lightContainer.appendChild(lightComponent.render());
+        }
+        if (heavyContainer) {
+          heavyContainer.appendChild(heavyComponent.render());
+        }
       }
     });
   </script>

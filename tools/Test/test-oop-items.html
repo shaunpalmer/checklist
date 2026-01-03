@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>OOP Test - Dynamic Checklist Items</title>
+<style>
+body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+.section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.test-result { padding: 10px; margin: 10px 0; border-radius: 4px; }
+.pass { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.fail { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+h2 { color: #333; }
+button { padding: 10px 20px; margin: 10px 0; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; }
+button:hover { background: #0052a3; }
+
+/* Checklist item styles */
+.checklist-items { display: grid; gap: 8px; }
+.checklist-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color 0.2s;
+}
+.checklist-item:hover {
+  background-color: #f9f9f9;
+  border-color: #e0e0e0;
+}
+.checklist-item input[type="checkbox"] {
+  margin-right: 10px;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+.checkbox-custom {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
+  border-radius: 3px;
+  margin-right: 8px;
+  transition: all 0.2s;
+}
+.checklist-item input[type="checkbox"]:checked + .checkbox-custom {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+.item-label {
+  flex: 1;
+}
+.item-meta {
+  font-size: 11px;
+  color: #999;
+  margin-left: auto;
+  padding-left: 10px;
+  display: flex;
+  gap: 10px;
+}
+.item-meta-tag {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-family: monospace;
+}
+</style>
+</head>
+<body>
+
+<h1>OOP Test: Dynamic Checklist Items</h1>
+
+<div class="section">
+  <h2>ChecklistItem Object Pattern</h2>
+  <p>Renders individual checklist items with all dynamic data attributes:</p>
+  <ul>
+    <li>✓ Item ID</li>
+    <li>✓ Room assignment</li>
+    <li>✓ Category</li>
+    <li>✓ Hours estimate</li>
+    <li>✓ Difficulty level</li>
+    <li>✓ Label text</li>
+    <li>✓ Checked state</li>
+  </ul>
+  
+  <button id="btn-test">🔨 Generate Sample Items</button>
+  <div id="test-output"></div>
+</div>
+
+<div class="section">
+  <h2>What Gets Replaced</h2>
+  <p>Currently hardcoded (repeating many times):</p>
+  <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto;">
+&lt;label class="checklist-item" 
+  data-item-id="kitchen-sinks" 
+  data-room="kitchen" 
+  data-category="basic" 
+  data-hours="0.5" 
+  data-difficulty="basic"&gt;
+  &lt;input type="checkbox" id="kitchen-sinks" name="kitchen"&gt;
+  &lt;span class="checkbox-custom"&gt;&lt;/span&gt;
+  &lt;span class="item-label"&gt;Sinks and Faucets&lt;/span&gt;
+&lt;/label&gt;</pre>
+  <p>With OOP: One ChecklistItem object, thousands of instances generated dynamically.</p>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+// ====== CHECKLIST ITEM OBJECT ======
+// Replaces hardcoded checkbox items throughout the app
+// All data attributes are fully parameterized
+
+class ChecklistItem {
+  constructor(options = {}) {
+    this.itemId = options.itemId || 'item-' + Date.now();
+    this.label = options.label || 'Untitled Item';
+    this.room = options.room || 'unknown';
+    this.category = options.category || 'basic'; // basic, deep, special, etc.
+    this.hours = options.hours || 0.5;
+    this.difficulty = options.difficulty || 'basic'; // basic, intermediate, advanced
+    this.checked = options.checked || false;
+    this.name = options.name || this.room; // for form grouping
+  }
+
+  // Generate metadata HTML (shown in item-meta)
+  renderMetadata() {
+    return `
+      <div class="item-meta">
+        <span class="item-meta-tag" title="Category">${this.category}</span>
+        <span class="item-meta-tag" title="Hours">${this.hours}h</span>
+        <span class="item-meta-tag" title="Difficulty">${this.difficulty}</span>
+      </div>
+    `;
+  }
+
+  // Generate complete item HTML with all dynamic attributes
+  render() {
+    return `
+      <label class="checklist-item" 
+        data-item-id="${this.itemId}" 
+        data-room="${this.room}" 
+        data-category="${this.category}" 
+        data-hours="${this.hours}" 
+        data-difficulty="${this.difficulty}">
+        <input type="checkbox" 
+          id="${this.itemId}" 
+          name="${this.name}" 
+          ${this.checked ? 'checked' : ''} />
+        <span class="checkbox-custom"></span>
+        <span class="item-label">${this.label}</span>
+        ${this.renderMetadata()}
+      </label>
+    `;
+  }
+
+  // Inject into container
+  injectInto(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+      console.error(`Container #${containerId} not found`);
+      return false;
+    }
+    container.innerHTML += this.render();
+    return true;
+  }
+
+  // jQuery method
+  injectIntoJQuery(selector) {
+    $(selector).append(this.render());
+    return this;
+  }
+
+  // Update state
+  setChecked(checked) {
+    this.checked = checked;
+  }
+}
+
+// ====== BATCH ITEM GENERATOR ======
+// Creates multiple items at once
+class ChecklistItemBatch {
+  constructor(room, items = []) {
+    this.room = room;
+    this.items = items.map(item => new ChecklistItem({ ...item, room }));
+  }
+
+  render() {
+    return this.items.map(item => item.render()).join('');
+  }
+
+  injectInto(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return false;
+    container.innerHTML += this.render();
+    return true;
+  }
+}
+
+// ====== DEMONSTRATION ======
+document.getElementById('btn-test').addEventListener('click', function() {
+  document.getElementById('test-output').innerHTML = '';
+
+  // Create kitchen items
+  const kitchenItems = [
+    new ChecklistItem({
+      itemId: 'kitchen-sinks',
+      label: 'Sinks and Faucets',
+      room: 'kitchen',
+      category: 'basic',
+      hours: 0.5,
+      difficulty: 'basic'
+    }),
+    new ChecklistItem({
+      itemId: 'kitchen-microwave-out',
+      label: 'Microwave (outside)',
+      room: 'kitchen',
+      category: 'basic',
+      hours: 0.5,
+      difficulty: 'basic',
+      checked: true
+    }),
+    new ChecklistItem({
+      itemId: 'kitchen-countertops',
+      label: 'Countertops',
+      room: 'kitchen',
+      category: 'basic',
+      hours: 1,
+      difficulty: 'intermediate'
+    })
+  ];
+
+  // Create bathroom items (different difficulty)
+  const bathroomItems = [
+    new ChecklistItem({
+      itemId: 'bath-tiles',
+      label: 'Tiles (walls & floor)',
+      room: 'bathrooms',
+      category: 'deep',
+      hours: 2,
+      difficulty: 'advanced',
+      checked: true
+    }),
+    new ChecklistItem({
+      itemId: 'bath-mirrors',
+      label: 'Mirrors',
+      room: 'bathrooms',
+      category: 'basic',
+      hours: 0.25,
+      difficulty: 'basic'
+    })
+  ];
+
+  // Inject kitchen section
+  let html = '<h3>🍳 Kitchen Items</h3><div class="checklist-items">';
+  kitchenItems.forEach(item => {
+    html += item.render();
+  });
+  html += '</div>';
+
+  // Inject bathroom section
+  html += '<h3 style="margin-top: 20px;">🚿 Bathroom Items</h3><div class="checklist-items">';
+  bathroomItems.forEach(item => {
+    html += item.render();
+  });
+  html += '</div>';
+
+  document.getElementById('test-output').innerHTML = html;
+
+  // Show confirmation
+  const message = document.createElement('div');
+  message.className = 'test-result pass';
+  message.innerHTML = `
+    ✅ Successfully generated 5 ChecklistItem objects!<br>
+    <strong>Kitchen:</strong> 3 items | <strong>Bathrooms:</strong> 2 items<br>
+    <small>Each item has: ID, room, category, hours estimate, difficulty level - all dynamic.</small><br>
+    <small><strong>This pattern replaces hundreds of hardcoded checkbox items!</strong></small>
+  `;
+  document.getElementById('test-output').insertBefore(message, document.getElementById('test-output').firstChild);
+});
+
+window.addEventListener('load', function() {
+  console.log('ChecklistItem OOP pattern ready for testing');
+});
+</script>
+
+</body>
+</html>

@@ -71,6 +71,79 @@
       this.restoreClientContextBestEffort();
       this.loadProgress();
       this.updateAllProgress();
+      
+      // CRITICAL: Initialize service toggle renderer
+      // MUST wait for ITEM_DEFINITIONS to load before rendering toggles
+      // If this fails, the entire polymorphic property system cascades down
+      this.initServiceToggleRenderer();
+    },
+
+    /**
+     * Initialize service toggle renderer for current property type
+     * WAITS for ITEM_DEFINITIONS to load (defensive for slow networks)
+     * If this fails, service selection doesn't work → wrong items appear in checklist
+     */
+    initServiceToggleRenderer: function() {
+      // Check if renderer exists
+      if (typeof AysServiceToggleRenderer === 'undefined') {
+        console.error('[Checklist] AysServiceToggleRenderer not loaded');
+        return;
+      }
+
+      // Render toggles (waits for ITEM_DEFINITIONS to load)
+      AysServiceToggleRenderer.render()
+        .then(() => {
+          console.log('[Checklist] Service toggles rendered successfully');
+        })
+        .catch((error) => {
+          console.error('[Checklist] Failed to render service toggles:', error);
+          // Error is already displayed in the UI by the renderer
+        });
+    },
+
+    /**
+     * Listen for property type changes and regenerate checklist
+     * When user selects different property type in settings → factory regenerates with new config
+     * CRITICAL: Called AFTER user changes property type, saves it to PROPERTY_CONFIG
+     * SAVES to localStorage so next page load remembers their choice
+     * @private
+     */
+    onPropertyTypeChanged: function(newPropertyType, params) {
+      console.log(`[Checklist] Property type changed to: ${newPropertyType}`, params);
+
+      // Regenerate checklist with new property type config
+      if (typeof window.checklistGenerator !== 'undefined' && 
+          typeof PROPERTY_CONFIG.getConfig === 'function') {
+        
+        const newConfig = PROPERTY_CONFIG.getConfig();
+        window.checklistGenerator.regenerate(newConfig);
+        
+        console.log(`[Checklist] Checklist regenerated with ${newConfig.rooms.length} rooms`);
+        
+        // SAVE property config to localStorage so next load remembers this choice
+        try {
+          const configToSave = {
+            property_type: newPropertyType,
+            params: params || {},
+            timestamp: new Date().toISOString()
+          };
+          localStorage.setItem('checklist_property_config', JSON.stringify(configToSave));
+          console.log('[Checklist] Property config saved to localStorage:', configToSave);
+        } catch (error) {
+          console.warn('[Checklist] Failed to save property config to localStorage:', error);
+        }
+        
+        // Also regenerate service toggles for new property type
+        if (typeof AysServiceToggleRenderer !== 'undefined') {
+          AysServiceToggleRenderer.render()
+            .then(() => {
+              console.log('[Checklist] Service toggles updated for new property type');
+            })
+            .catch((error) => {
+              console.error('[Checklist] Failed to update toggles:', error);
+            });
+        }
+      }
     },
 
     // ======== CUSTOM ITEMS (Custom Service tab) ========

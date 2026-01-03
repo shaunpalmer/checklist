@@ -9,7 +9,7 @@
  * - client + IDs (client_id, population_id)
  * - address (7 fields)
  * - service details
- * - rooms array (AysRoomSection instances)
+ * - rooms array (AysRoomOrchestrator instances)
  * - all items (flattened checklist)
  * - quote summary (pricing, hours)
  * - crew info
@@ -56,7 +56,7 @@ class AysQuoteEnvelope {
       booking_date: null
     };
 
-    // Rooms (array of AysRoomSection)
+    // Rooms (array of AysRoomOrchestrator)
     this.rooms = [];
 
     // Flattened items (all checked items across all rooms)
@@ -195,7 +195,7 @@ class AysQuoteEnvelope {
   /**
    * Add a room to the envelope
    * Called when a room card is closed
-   * @param {AysRoomSection} roomSection
+   * @param {AysRoomOrchestrator} roomSection
    */
   addRoom(roomSection) {
     if (!roomSection || !roomSection.serialize) {
@@ -209,7 +209,7 @@ class AysQuoteEnvelope {
 
   /**
    * Add multiple rooms at once
-   * @param {Array<AysRoomSection>} roomSections
+   * @param {Array<AysRoomOrchestrator>} roomSections
    */
   addRooms(roomSections) {
     roomSections.forEach(room => this.addRoom(room));

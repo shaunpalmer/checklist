@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Custom Items Debug</title>
+<style>
+body { font-family: monospace; padding: 20px; }
+.console-log { 
+  border: 1px solid #ccc; 
+  padding: 15px; 
+  margin: 10px 0; 
+  background: #1e1e1e;
+  color: #00ff00;
+  font-size: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.error { color: #ff4444; }
+.success { color: #44ff44; }
+</style>
+</head>
+<body>
+
+<h1>Custom Items Debugging Console</h1>
+
+<div id="console-output" class="console-log">Loading checklist page...\n</div>
+
+<iframe id="app-frame" src="http://localhost/checklist/checklist/checklist-modern.html?admin=1" style="display: none;"></iframe>
+
+<script>
+const logDiv = document.getElementById('console-output');
+
+// Capture console output
+const originalLog = console.log;
+const originalError = console.error;
+
+console.log = function(...args) {
+  const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
+  logDiv.textContent += msg + '\n';
+  logDiv.scrollTop = logDiv.scrollHeight;
+  originalLog.apply(console, args);
+};
+
+console.error = function(...args) {
+  const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
+  logDiv.innerHTML += `<span class="error">${msg}</span>\n`;
+  logDiv.scrollTop = logDiv.scrollHeight;
+  originalError.apply(console, args);
+};
+
+// Wait for iframe to load then access its console
+const iframe = document.getElementById('app-frame');
+iframe.onload = () => {
+  console.log('\n=== IFRAME LOADED ===\n');
+  
+  // Inject console capture into iframe
+  try {
+    const iframeConsole = iframe.contentWindow.console;
+    const iframeLog = iframeConsole.log;
+    const iframeError = iframeConsole.error;
+    
+    iframeConsole.log = function(...args) {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
+      logDiv.textContent += '[IFRAME] ' + msg + '\n';
+      logDiv.scrollTop = logDiv.scrollHeight;
+      iframeLog.apply(iframeConsole, args);
+    };
+    
+    iframeConsole.error = function(...args) {
+      const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ');
+      logDiv.innerHTML += `<span class="error">[IFRAME] ${msg}</span>\n`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+      iframeError.apply(iframeConsole, args);
+    };
+  } catch(e) {
+    console.log('Could not inject into iframe console: ' + e.message);
+  }
+};
+
+console.log('Console capture ready. Open browser DevTools (F12) and check the Network and Console tabs.');
+console.log('The iframe with the checklist app is loading below.');
+</script>
+
+</body>
+</html>

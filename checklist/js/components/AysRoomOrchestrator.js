@@ -1,22 +1,29 @@
 /**
- * AysRoomSection
+ * AysRoomOrchestrator
  * 
- * Represents a single room (Bedroom 1, Bathroom 2, Kitchen, etc.)
- * as a composite object containing:
- * - Metadata (id, title, number, emoji, category)
- * - AysDisclosureCard (the collapsible container)
- * - Array of AysListItemCheckbox items
- * - State tracking (checked count, notes, pricing)
+ * Orchestrator component that manages a single room (Bedroom 1, Bathroom 2, Kitchen, etc.)
+ * Encapsulates:
+ * - Room metadata (id, title, number, emoji, category)
+ * - AysDisclosureRoomCard (the collapsible UI container)
+ * - Array of checklist items
+ * - State tracking (checked count, notes, custom services)
+ * - Business logic (serialization, state export/restore, calculations)
  * 
- * SOLID Principles:
- * - Single Responsibility: Manages one room's data + rendering
+ * Follows OOP Principles:
+ * - Single Responsibility: Orchestrates room data + UI rendering + state management
  * - Open/Closed: Extensible for custom fields without modification
- * - Liskov Substitution: Interchangeable room types (bedroom, bathroom, kitchen)
+ * - Liskov Substitution: Interchangeable room types (bedroom, bathroom, kitchen, etc.)
  * - Interface Segregation: Provides only necessary public methods
- * - Dependency Inversion: Depends on abstractions (card, items), not concrete UI
+ * - Dependency Inversion: Depends on abstractions (AysDisclosureRoomCard), not concrete UI
+ * 
+ * Flow:
+ *   1. AysChecklistFormFactory creates AysRoomOrchestrator instances
+ *   2. AysRoomOrchestrator creates and manages AysDisclosureRoomCard (UI)
+ *   3. User interacts with card, orchestrator tracks state
+ *   4. AysQuoteEnvelope collects orchestrator data at submit time
  */
 
-class AysRoomSection {
+class AysRoomOrchestrator {
   constructor(config) {
     // Metadata
     this.id = config.roomId || `room-${Date.now()}`;
@@ -26,10 +33,10 @@ class AysRoomSection {
     this.category = config.category || 'general'; // bedroom, bathroom, kitchen, etc.
     
     // Components
-    this.card = null; // AysDisclosureCard instance
-    this.items = config.items || []; // Array of AysListItemCheckbox
+    this.card = null; // AysDisclosureRoomCard instance
+    this.items = config.items || []; // Array of item configs
     
-    // State
+    // State tracking
     this.state = {
       isOpen: false,
       checkedCount: 0,
@@ -39,19 +46,19 @@ class AysRoomSection {
       timestamp: null
     };
     
-    // References for state management
+    // Internal references for state management
     this._cardElement = null;
     this._itemCheckboxes = [];
   }
 
   /**
-   * Create and render this room's AysDisclosureCard
+   * Create and render this room's AysDisclosureRoomCard
    * @returns {HTMLElement} The rendered card element
    */
   render() {
     if (!this.card) {
       // Create disclosure card with this room's items
-      this.card = new AysDisclosureCard({
+      this.card = new AysDisclosureRoomCard({
         roomId: this.id,
         title: `${this.emoji} ${this.title}`,
         items: this.items
@@ -95,6 +102,7 @@ class AysRoomSection {
   /**
    * Serialize this room to JSON
    * Includes metadata + all item states + notes
+   * Used by AysQuoteEnvelope to build final quote packet
    * @returns {Object} Serializable room object
    */
   serialize() {
@@ -116,7 +124,7 @@ class AysRoomSection {
   }
 
   /**
-   * Update notes for this room (e.g., staff observations)
+   * Update notes for this room (e.g., staff observations, special instructions)
    * @param {string} notes
    */
   setNotes(notes) {
@@ -179,4 +187,9 @@ class AysRoomSection {
     });
     return state;
   }
+}
+
+// Export for use in modules
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = AysRoomOrchestrator;
 }

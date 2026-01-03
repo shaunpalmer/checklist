@@ -1,5 +1,49 @@
 # 🎯 Next Session Roadmap
 
+## Phase 6: Future Service Type Framework (Complete)
+
+**Status**: ✅ PropertyService base class + Cleaning services implemented  
+**Vision**: Ays as a pluggable endpoint platform for multiple trades
+
+**Completed Service Types**:
+- ✅ PropertyWindowService (unit-based pricing + surcharges)
+- ✅ PropertyCarpetService (room-count packages with extras)
+- ✅ PropertyGardeningService (property-size parameterized)
+
+**Future Service Types** (Ready for implementation when needed):
+- PropertyPlumberService (fixture work, repairs, installation)
+- PropertyElectricalService (outlets, wiring, safety checks)
+- PropertyBuilderService (renovations, general repairs)
+- PropertyGutterService (cleaning, repairs, replacement)
+- PropertyHVACService (maintenance, filters, system checks)
+- PropertyPestService (treatments, inspections, prevention)
+
+**Implementation Pattern** (for any new service type):
+```javascript
+// 1. Create new service class extending PropertyService
+class PropertyNewService extends PropertyService {
+  constructor(params) { ... }
+  getItems() { ... }          // Return parameterized items
+  applyParameterModifications() { ... }  // Handle user choices
+  validateParameters() { ... } // Ensure valid configuration
+}
+
+// 2. Add to ITEM_DEFINITIONS.js
+const ITEM_DEFINITIONS = {
+  // ... existing services
+  new_service: [ /* item definitions */ ]
+}
+
+// 3. Add Settings toggle to SETTINGS_DEFAULTS.js
+include_new_service: false,  // Enable/disable service
+new_service_base_price: 0,   // Pricing configuration
+
+// 4. Factory picks it up automatically
+// No additional integration needed
+```
+
+---
+
 ## What We Have Ready
 
 ✅ **Complete Architecture** - Full system designed for 4 user portals  

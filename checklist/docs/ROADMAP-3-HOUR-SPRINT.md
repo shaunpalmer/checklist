@@ -13,7 +13,7 @@ From the master plan: **Tier 1 (Foundation) is 14 hours and blocks everything el
 
 An AI pass is ~3 hours. Breaking it down:
 - **Hour 1**: Create Room class hierarchy (base + subclasses)
-- **Hour 2**: Extract and centralize EOT item definitions into ITEM_TEMPLATES.js
+- **Hour 2**: Extract and centralize EOT item definitions into AYSITEM_DEFINITIONS.js
 - **Hour 3**: Create ROOM_METADATA.js with room types, variants, labels
 
 After this sprint, you'll have:

@@ -481,6 +481,186 @@ $_POST = [
 
 ---
 
+## Service Extensibility: Factory Object Collection Pattern with Polymorphic Type Hierarchy
+
+The Ays Checklist platform uses **polymorphism** to control what appears in quotes. Following OOP principles, the `property_type` setting defines the base FAMILY type, and all other choices are conditional on that type.
+
+### Polymorphic Type Hierarchy
+
+**Base Concept: Property**
+```
+Property (abstract)
+├── Residential (family)
+│   ├── residential_3bed (type) → Rooms: Bedroom(3), Bathroom(2), Kitchen, LivingArea, Laundry
+│   │   └── Services: Windows, Carpet, Gardening
+│   ├── residential_6bed (type) → Rooms: Bedroom(6), Bathroom(4), Kitchen, LivingArea, Laundry
+│   │   └── Services: Windows, Carpet, Gardening
+│   └── eot_residential (type) → Rooms: Bedroom(N), Bathroom(N), Kitchen, LivingArea, Laundry
+│       └── Services: Windows, Carpet
+│
+├── Commercial Office (family)
+│   └── commercial_office (type) → Rooms: Office(N), Reception, Lunchroom, Toilet, Circulation
+│       └── Services: Windows, Carpet (NOT Gardening)
+│
+├── Commercial Gym (family)
+│   └── commercial_gym (type) → Rooms: Showers(N), Locker rooms, Toilet, Lunchroom
+│       └── Services: Windows (NOT Carpet — wet areas)
+│
+├── Commercial Retail (family)
+│   └── commercial_retail (type) → Rooms: Sales floor, Stockroom, Office, Toilet, Circulation
+│       └── Services: Windows, Carpet
+│
+└── Commercial Industrial (family)
+    └── commercial_warehouse (type) → Rooms: Warehouse, Loading dock, Office
+        └── Services: Windows (NOT Carpet)
+```
+
+### Why This Matters: Polymorphism in Action
+
+**The Problem Without Type Hierarchy:**
+```
+User: "I'm doing a carpet cleaning quote only"
+System shows: Windows, Carpet, Gardening, Office, Toilet, Carpark, Lunchroom, Circulation, Warehouse, Trade
+User: "Why would I show a client all this? I just do carpet!"
+```
+
+**The Solution With Type Hierarchy:**
+```
+Settings: property_type = 'residential_3bed'
+Factory: "OK, this is residential. Show: Bedroom, Bathroom, Kitchen, LivingArea, Laundry"
+Factory: "For this type, available services are: Windows, Carpet, Gardening only"
+Settings toggles: ONLY show include_windows_cleaning, include_carpet_cleaning, include_gardening_services
+Result: User sees only relevant services. Carpet-only quote doesn't overwhelm client.
+```
+
+### Factory Logic: Check Type First
+
+**The Factory respects the type hierarchy:**
+
+```javascript
+// 1. READ property_type from Settings
+const propertyType = this.settings.property_type;  // e.g., 'residential_3bed'
+
+// 2. DETERMINE available room types based on property_type
+const roomsConfig = this.getRoomConfigForType(propertyType);
+// Returns: { bedrooms: 3, bathrooms: 2, kitchens: 1, ... }
+
+// 3. CREATE room instances
+roomsConfig.bedrooms.forEach(() => {
+  this.objects.push(new AysRoom('Bedroom', roomConfig));
+});
+
+// 4. DETERMINE available services for this property_type
+const availableServices = this.getServicesForType(propertyType);
+// Returns: ['windows', 'carpet', 'gardening']
+
+// 5. CHECK toggles ONLY for available services
+availableServices.forEach(service => {
+  const toggleKey = `include_${service}_services` || `include_${service}_cleaning`;
+  if (this.settings[toggleKey]) {
+    const serviceInstance = this.createService(service, settings);
+    this.objects.push(new PropertyServiceOrchestrator(serviceInstance));
+  }
+});
+
+// 6. WRAP and send to web worker
+const envelope = new AysQuoteEnvelope(this.objects);
+webWorker.postMessage(envelope);
+```
+
+### Example: Different property_types, Same Code
+
+**Scenario 1: Residential 3-bedroom**
+```javascript
+property_type: 'residential_3bed'
+
+Factory generates:
+  - Bedroom × 3
+  - Bathroom × 2
+  - Kitchen
+  - LivingArea
+  - Laundry
+  - (if include_windows_cleaning) PropertyWindowService
+  - (if include_carpet_cleaning) PropertyCarpetService
+  - (if include_gardening_services) PropertyGardeningService
+
+Result: Compact, focused quote showing only residential services
+```
+
+**Scenario 2: Commercial Gym**
+```javascript
+property_type: 'commercial_gym'
+
+Factory generates:
+  - Showers × N (parameterized)
+  - Locker rooms
+  - Toilet block
+  - Lunchroom
+  - (if include_windows_cleaning) PropertyWindowService
+  - (NOT include_carpet_cleaning — wet areas, toggle hidden)
+  - (NOT gardening — not relevant)
+
+Result: Quote focused on gym-specific areas, no irrelevant services
+```
+
+**Scenario 3: Commercial Office**
+```javascript
+property_type: 'commercial_office'
+
+Factory generates:
+  - Office × N (parameterized)
+  - Reception
+  - Lunchroom
+  - Toilet block
+  - Circulation (hallways, entries)
+  - (if include_windows_cleaning) PropertyWindowService
+  - (if include_carpet_cleaning) PropertyCarpetService
+  - (NOT gardening — commercial, not residential)
+
+Result: Office-specific form, no bedrooms or gardening
+```
+
+### Implementation Rules (OOP Principles)
+
+**1. Type determines Structure**
+- `property_type` is set ONCE in Settings
+- Cannot be changed on the form (that would restructure everything)
+- Different types show different room classes
+
+**2. Toggles are Conditional**
+- Only relevant toggles appear for each property_type
+- Gym: no carpet toggle (not applicable)
+- Residential only: gardening toggle available
+- Commercial only: office/toilet toggles available
+
+**3. Services are Polymorphic**
+- Same code handles all service types
+- Factory just checks type and adds relevant services
+- No special cases; polymorphism handles it
+
+**4. Extensibility Without Modification**
+- Add new property_type? Just define rooms + services
+- No changes to factory logic
+- Everything else follows OOP rules
+
+### Summary: Why OOP Matters
+
+Without polymorphic type hierarchy:
+- 4000+ lines of HTML with conditional shows/hides
+- No control over what appears
+- Same services shown regardless of property type
+- User confusion and overwhelm
+
+With polymorphic type hierarchy:
+- Type determines structure (bedrooms vs. offices vs. showers)
+- Toggles are conditional (only show relevant services)
+- Factory code is clean and reusable
+- Each property type is a complete, coherent quote
+
+**This is why we can't skip OOP principles.** They solve real problems. Different property types must show different content.
+
+---
+
 ## Summary
 
 This system elegantly scales from a simple checklist (customer view) to a full business tool (admin view) using:
@@ -492,8 +672,10 @@ This system elegantly scales from a simple checklist (customer view) to a full b
 
 The **same HTML source code** serves three different audiences with zero duplication.
 
+Beyond the core cleaning quoting engine, the **factory + envelope + web worker** architecture combined with **polymorphic type hierarchy** enables Ays to serve as a **WooCommerce-for-Services platform**. Different operators (residential cleaners, gym specialists, office cleaners) configure their `property_type` and relevant service toggles, and the system shows only what's relevant to their business.
+
 ---
 
-**Status**: Architecture Complete ✅  
-**Next**: Implement role-based PHP views  
-**Ready**: For WordPress plugin conversion  
+**Status**: Architecture Complete ✅ (with proper OOP hierarchy)  
+**Next**: Update factory implementation to respect polymorphic type system  
+**Ready**: For web worker endpoint integration  
