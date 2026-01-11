@@ -35,10 +35,14 @@ const ITEM_DEFINITIONS = {
         category: 'windows',
         parameterized: true,
         parameter: 'number_of_large_panes',
-        priceSetting: 'window_large_pane_price',  // References SETTINGS, not hardcoded
+        priceSetting: 'window_large_pane_price',
         baseHours: 0.15,
         optional: true,
-        description: 'Large storefront/windows (1.5m+ wide). Inside + outside.'
+        description: 'Large storefront/windows (1.5m+ wide). Inside + outside.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['glass_cleaner', 'squeegee', 'microfiber_cloth'],
+        staffCount: 1
       },
       small_pane: {
         itemId: 'site-window_small_pane',
@@ -46,10 +50,14 @@ const ITEM_DEFINITIONS = {
         category: 'windows',
         parameterized: true,
         parameter: 'number_of_small_panes',
-        priceSetting: 'window_small_pane_price',  // References SETTINGS, not hardcoded
+        priceSetting: 'window_small_pane_price',
         baseHours: 0.08,
         optional: true,
-        description: 'Small/odd-sized windows (60cm × 30cm+). Bathrooms, skylights, narrow windows.'
+        description: 'Small/odd-sized windows (60cm × 30cm+). Bathrooms, skylights, narrow windows.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['glass_cleaner', 'cloth', 'microfiber_cloth'],
+        staffCount: 1
       },
       door_pane: {
         itemId: 'site-window_door_pane',
@@ -57,10 +65,14 @@ const ITEM_DEFINITIONS = {
         category: 'windows',
         parameterized: true,
         parameter: 'number_of_door_panes',
-        priceSetting: 'window_door_pane_price',  // References SETTINGS, not hardcoded
+        priceSetting: 'window_door_pane_price',
         baseHours: 0.20,
         optional: true,
-        description: 'Entrance doors, interior glass doors. Both sides + frame + handle.'
+        description: 'Entrance doors, interior glass doors. Both sides + frame + handle.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['glass_cleaner', 'squeegee', 'microfiber_cloth'],
+        staffCount: 1
       },
 
       // Building height surcharges (non-parameterized, SETTINGS-referenced)
@@ -69,35 +81,45 @@ const ITEM_DEFINITIONS = {
         label: 'Ground floor (1-storey)',
         category: 'windows_height',
         parameterized: false,
-        priceSetting: 'window_ground_floor_surcharge',  // References SETTINGS (typically $0)
+        priceSetting: 'window_ground_floor_surcharge',
         optional: true,
         description: 'Building is single storey. One staff member. No extra cost.',
         staffCount: 1,
-        heightMultiplier: 1.0
+        heightMultiplier: 1.0,
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['glass_cleaner', 'squeegee', 'microfiber_cloth']
       },
       two_storey: {
         itemId: 'site-window_two_storey',
         label: 'Two-storey building',
         category: 'windows_height',
         parameterized: false,
-        priceSetting: 'window_two_storey_surcharge',  // References SETTINGS (typically $100)
+        priceSetting: 'window_two_storey_surcharge',
         optional: true,
         description: 'Building is 2-storey. Equipment surcharge. If > 6 hrs, +$50/hr extra staff.',
         staffCount: 1,
         heightMultiplier: 1.0,
-        extraStaffRateSetting: 'window_extra_staff_rate',  // References SETTINGS ($50/hr)
-        extraStaffThresholdSetting: 'window_extra_staff_threshold'  // References SETTINGS (6 hrs)
+        extraStaffRateSetting: 'window_extra_staff_rate',
+        extraStaffThresholdSetting: 'window_extra_staff_threshold',
+        workType: 'labor',
+        skillLevel: 'advanced',
+        products: ['glass_cleaner', 'squeegee', 'microfiber_cloth', 'equipment_rental']
       },
       multi_storey: {
         itemId: 'site-window_multi_storey',
         label: 'Multi-storey (3+ floors)',
         category: 'windows_height',
         parameterized: false,
-        priceSetting: 'CUSTOM_QUOTE',  // Manual quote, not in SETTINGS
+        priceSetting: 'CUSTOM_QUOTE',
         optional: true,
         description: 'Contact for custom quote. Equipment rental $1000+ base + $500/day + extra staff.',
         note: 'Rare (3-4 jobs/career). Requires email/phone quote.',
-        requiresManualQuote: true
+        requiresManualQuote: true,
+        workType: 'labor',
+        skillLevel: 'advanced',
+        products: ['glass_cleaner', 'squeegee', 'microfiber_cloth', 'heavy_equipment_rental'],
+        staffCount: 2
       }
     },
 
@@ -114,7 +136,11 @@ const ITEM_DEFINITIONS = {
         pricePerUnit: 15,
         baseHours: 0.05,
         optional: true,
-        description: 'Small rubbish tin (60L). Cleared and removed.'
+        description: 'Small rubbish tin (60L). Cleared and removed.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['gloves', 'trash_bags'],
+        staffCount: 1
       },
       medium_bin: {
         itemId: 'site-rubbish_medium_bin',
@@ -125,7 +151,11 @@ const ITEM_DEFINITIONS = {
         pricePerUnit: 30,
         baseHours: 0.10,
         optional: true,
-        description: 'Medium rubbish bin (120L). Cleared and removed.'
+        description: 'Medium rubbish bin (120L). Cleared and removed.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['gloves', 'trash_bags'],
+        staffCount: 1
       },
       large_bin: {
         itemId: 'site-rubbish_large_bin',
@@ -136,7 +166,11 @@ const ITEM_DEFINITIONS = {
         pricePerUnit: 50,
         baseHours: 0.15,
         optional: true,
-        description: 'Large rubbish bin (240L+). Cleared and removed.'
+        description: 'Large rubbish bin (240L+). Cleared and removed.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['gloves', 'trash_bags'],
+        staffCount: 1
       },
       rubbish_transport: {
         itemId: 'site-rubbish_transport',
@@ -144,10 +178,14 @@ const ITEM_DEFINITIONS = {
         category: 'rubbish',
         parameterized: true,
         parameter: 'transport_distance_meters',
-        pricePerUnit: 0.10,  // per meter
-        baseHours: 0.20,  // base for typical distance
+        pricePerUnit: 0.10,
+        baseHours: 0.20,
         optional: true,
-        description: 'Transport rubbish to dumpster station. Charged per meter distance.'
+        description: 'Transport rubbish to dumpster station. Charged per meter distance.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['gloves'],
+        staffCount: 1
       }
     },
 
@@ -164,7 +202,11 @@ const ITEM_DEFINITIONS = {
         price: 45,
         baseHours: 0.5,
         optional: true,
-        description: 'Single private office. Floors, surfaces, trash.'
+        description: 'Single private office. Floors, surfaces, trash.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'vacuum_cleaner', 'cloth'],
+        staffCount: 1
       },
       open_plan_desk: {
         itemId: 'site-office_open_plan',
@@ -175,7 +217,11 @@ const ITEM_DEFINITIONS = {
         price: 25,
         baseHours: 0.25,
         optional: true,
-        description: 'Individual desk in open-plan area. Surfaces, trash.'
+        description: 'Individual desk in open-plan area. Surfaces, trash.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'microfiber_cloth'],
+        staffCount: 1
       },
       boardroom: {
         itemId: 'site-office_boardroom',
@@ -186,7 +232,11 @@ const ITEM_DEFINITIONS = {
         price: 75,
         baseHours: 1.0,
         optional: true,
-        description: 'Conference room. Table, chairs, floor, trash.'
+        description: 'Conference room. Table, chairs, floor, trash.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'vacuum_cleaner', 'cloth'],
+        staffCount: 1
       },
       reception: {
         itemId: 'site-office_reception',
@@ -197,7 +247,11 @@ const ITEM_DEFINITIONS = {
         price: 50,
         baseHours: 0.5,
         optional: true,
-        description: 'Reception desk area. Surfaces, waiting area, trash.'
+        description: 'Reception desk area. Surfaces, waiting area, trash.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'vacuum_cleaner', 'cloth'],
+        staffCount: 1
       }
     },
 
@@ -214,7 +268,11 @@ const ITEM_DEFINITIONS = {
         price: 25,
         baseHours: 0.25,
         optional: true,
-        description: 'Single toilet/urinal. Cleaned, sanitized, paper/soap restocked.'
+        description: 'Single toilet/urinal. Cleaned, sanitized, paper/soap restocked.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['toilet_cleaner', 'toilet_brush', 'disinfectant', 'toilet_paper', 'soap'],
+        staffCount: 1
       },
       stall: {
         itemId: 'site-toilet_stall',
@@ -225,7 +283,11 @@ const ITEM_DEFINITIONS = {
         price: 30,
         baseHours: 0.3,
         optional: true,
-        description: 'Private toilet stall. Cleaned, sanitized, paper restocked.'
+        description: 'Private toilet stall. Cleaned, sanitized, paper restocked.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['toilet_cleaner', 'toilet_brush', 'disinfectant', 'toilet_paper'],
+        staffCount: 1
       },
       sink_station: {
         itemId: 'site-toilet_sink',
@@ -236,7 +298,11 @@ const ITEM_DEFINITIONS = {
         price: 20,
         baseHours: 0.2,
         optional: true,
-        description: 'Sink and counter area. Cleaned, mirrors, soap restocked.'
+        description: 'Sink and counter area. Cleaned, mirrors, soap restocked.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['bathroom_cleaner', 'microfiber_cloth', 'glass_cleaner', 'soap'],
+        staffCount: 1
       }
     },
 
@@ -250,10 +316,14 @@ const ITEM_DEFINITIONS = {
         category: 'carpark',
         parameterized: true,
         parameter: 'number_of_open_spaces',
-        price: 0,  // Often included or minimal
+        price: 0,
         baseHours: 0,
         optional: true,
-        description: 'Open carpark. Swept, basic maintenance.'
+        description: 'Open carpark. Swept, basic maintenance.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['broom', 'hose'],
+        staffCount: 1
       },
       covered_carpark: {
         itemId: 'site-carpark_covered',
@@ -264,7 +334,11 @@ const ITEM_DEFINITIONS = {
         price: 10,
         baseHours: 0.1,
         optional: true,
-        description: 'Covered carpark. Cleaned, swept, basic maintenance.'
+        description: 'Covered carpark. Cleaned, swept, basic maintenance.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['broom', 'hose', 'surface_cleaner'],
+        staffCount: 1
       },
       street_parking: {
         itemId: 'site-carpark_street',
@@ -273,7 +347,11 @@ const ITEM_DEFINITIONS = {
         parameterized: false,
         price: 0,
         optional: true,
-        description: 'No dedicated carpark. Street parking only.'
+        description: 'No dedicated carpark. Street parking only.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: [],
+        staffCount: 0
       }
     },
 
@@ -290,7 +368,11 @@ const ITEM_DEFINITIONS = {
         price: 60,
         baseHours: 0.75,
         optional: true,
-        description: 'Lunchroom/kitchen. Counters, sink, appliances, floor, trash, dishes.'
+        description: 'Lunchroom/kitchen. Counters, sink, appliances, floor, trash, dishes.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'kitchen_cleaner', 'mop', 'cloth'],
+        staffCount: 1
       },
       microwave: {
         itemId: 'site-lunchroom_microwave',
@@ -301,7 +383,11 @@ const ITEM_DEFINITIONS = {
         price: 15,
         baseHours: 0.15,
         optional: true,
-        description: 'Microwave interior and exterior cleaned.'
+        description: 'Microwave interior and exterior cleaned.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['kitchen_cleaner', 'cloth'],
+        staffCount: 1
       }
     },
 
@@ -318,7 +404,11 @@ const ITEM_DEFINITIONS = {
         price: 40,
         baseHours: 0.5,
         optional: true,
-        description: 'Hallway or corridor (100m²). Floors swept/mopped, dusting, trash.'
+        description: 'Hallway or corridor (100m²). Floors swept/mopped, dusting, trash.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['floor_cleaner', 'mop', 'microfiber_cloth'],
+        staffCount: 1
       },
       entry_foyer: {
         itemId: 'site-circulation_entry',
@@ -329,7 +419,11 @@ const ITEM_DEFINITIONS = {
         price: 35,
         baseHours: 0.4,
         optional: true,
-        description: 'Entry foyer. Doors cleaned, floors, mats, trash.'
+        description: 'Entry foyer. Doors cleaned, floors, mats, trash.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['glass_cleaner', 'floor_cleaner', 'mop', 'cloth'],
+        staffCount: 1
       }
     },
 
@@ -346,7 +440,12 @@ const ITEM_DEFINITIONS = {
         price: 50,
         baseHours: 0.6,
         optional: true,
-        description: 'Utility room. Shelves dusted, floors, trash, organization.'
+        description: 'Utility room. Shelves, storage, equipment, floors, trash.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'floor_cleaner', 'microfiber_cloth'],
+        staffCount: 1
+      }
       },
       staircase: {
         itemId: 'site-staircase',
@@ -432,7 +531,11 @@ const ITEM_DEFINITIONS = {
         priceSetting: 'carpet_base_2room_price',
         baseHours: 1.5,
         optional: true,
-        description: 'Professional carpet cleaning for 2 rooms. Inside + outside clean, vacuum included.'
+        description: 'Professional carpet cleaning for 2 rooms. Inside + outside clean, vacuum included.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['carpet_cleaning_solution', 'carpet_cleaner_machine', 'vacuum_cleaner'],
+        staffCount: 1
       },
       base_3_room: {
         itemId: 'site-carpet_3room',
@@ -442,7 +545,11 @@ const ITEM_DEFINITIONS = {
         priceSetting: 'carpet_base_3room_price',
         baseHours: 2.0,
         optional: true,
-        description: 'Professional carpet cleaning for 3 rooms. Inside + outside clean, vacuum included.'
+        description: 'Professional carpet cleaning for 3 rooms. Inside + outside clean, vacuum included.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['carpet_cleaning_solution', 'carpet_cleaner_machine', 'vacuum_cleaner'],
+        staffCount: 1
       },
       base_4_room: {
         itemId: 'site-carpet_4room',
@@ -452,7 +559,11 @@ const ITEM_DEFINITIONS = {
         priceSetting: 'carpet_base_4room_price',
         baseHours: 2.5,
         optional: true,
-        description: 'Professional carpet cleaning for 4 rooms. Inside + outside clean, vacuum included.'
+        description: 'Professional carpet cleaning for 4 rooms. Inside + outside clean, vacuum included.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['carpet_cleaning_solution', 'carpet_cleaner_machine', 'vacuum_cleaner'],
+        staffCount: 1
       },
       base_5_room: {
         itemId: 'site-carpet_5room',
@@ -462,7 +573,11 @@ const ITEM_DEFINITIONS = {
         priceSetting: 'carpet_base_5room_price',
         baseHours: 3.0,
         optional: true,
-        description: 'Professional carpet cleaning for 5 rooms. Inside + outside clean, vacuum included.'
+        description: 'Professional carpet cleaning for 5 rooms. Inside + outside clean, vacuum included.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['carpet_cleaning_solution', 'carpet_cleaner_machine', 'vacuum_cleaner'],
+        staffCount: 1
       },
       base_6_room: {
         itemId: 'site-carpet_6room',
@@ -472,7 +587,11 @@ const ITEM_DEFINITIONS = {
         priceSetting: 'carpet_base_6room_price',
         baseHours: 4.0,
         optional: true,
-        description: 'Professional carpet cleaning for 6 rooms. Inside + outside clean, vacuum included.'
+        description: 'Professional carpet cleaning for 6 rooms. Inside + outside clean, vacuum included.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['carpet_cleaning_solution', 'carpet_cleaner_machine', 'vacuum_cleaner'],
+        staffCount: 1
       },
 
       // Optional extras (form choices, parameterized)
@@ -487,7 +606,11 @@ const ITEM_DEFINITIONS = {
         optional: true,
         description: 'Stain removal per stain (5-15 stains). Steam or chemical treatment. After 15, contact insurance company.',
         maxItems: 15,
-        note: 'Beyond 15 stains requires custom quote'
+        note: 'Beyond 15 stains requires custom quote',
+        workType: 'labor',
+        skillLevel: 'advanced',
+        products: ['stain_removal_solution', 'steam_cleaner'],
+        staffCount: 1
       },
       carpet_protection: {
         itemId: 'site-carpet_protection',
@@ -499,7 +622,11 @@ const ITEM_DEFINITIONS = {
         baseHours: 0.15,
         optional: true,
         description: 'Carpet protection treatment per room. Stain resistant coating.',
-        unit: 'per room'
+        unit: 'per room',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['stain_resistant_coating'],
+        staffCount: 1
       },
       extra_room: {
         itemId: 'site-carpet_extra_room',
@@ -511,7 +638,11 @@ const ITEM_DEFINITIONS = {
         baseHours: 0.5,
         optional: true,
         description: 'Any rooms beyond the base package.',
-        unit: 'per additional room'
+        unit: 'per additional room',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['carpet_cleaning_solution', 'carpet_cleaner_machine'],
+        staffCount: 1
       },
       stairs: {
         itemId: 'site-carpet_stairs',
@@ -523,7 +654,11 @@ const ITEM_DEFINITIONS = {
         baseHours: 0.5,
         optional: true,
         description: 'Carpet on stairs. Cleaned and protected.',
-        unit: 'per flight of stairs'
+        unit: 'per flight of stairs',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['carpet_cleaning_solution', 'carpet_cleaner_machine'],
+        staffCount: 1
       },
 
       // Surcharges (distance-based, location-based)
@@ -558,7 +693,11 @@ const ITEM_DEFINITIONS = {
         priceSetting: 'gardening_base_small_price',
         baseHours: 0.5,
         optional: true,
-        description: 'Small residential property (< 500 sqm outdoor). Lawn mow, basic trim.'
+        description: 'Small residential property (< 500 sqm outdoor). Lawn mow, basic trim.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['lawnmower', 'trimmer', 'gloves'],
+        staffCount: 1
       },
       base_medium: {
         itemId: 'site-gardening_medium',
@@ -568,7 +707,11 @@ const ITEM_DEFINITIONS = {
         priceSetting: 'gardening_base_medium_price',
         baseHours: 1.5,
         optional: true,
-        description: 'Medium residential property (500-1500 sqm outdoor). Lawn, garden, basic trim.'
+        description: 'Medium residential property (500-1500 sqm outdoor). Lawn, garden, basic trim.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['lawnmower', 'trimmer', 'hedge_trimmer', 'gloves'],
+        staffCount: 1
       },
       base_large: {
         itemId: 'site-gardening_large',
@@ -578,7 +721,11 @@ const ITEM_DEFINITIONS = {
         priceSetting: 'gardening_base_large_price',
         baseHours: 3.0,
         optional: true,
-        description: 'Large residential property (1500+ sqm outdoor). Full lawn, gardens, hedges.'
+        description: 'Large residential property (1500+ sqm outdoor). Full lawn, gardens, hedges.',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['lawnmower', 'trimmer', 'hedge_trimmer', 'leaf_blower', 'gloves'],
+        staffCount: 2
       },
       base_commercial: {
         itemId: 'site-gardening_commercial',
@@ -589,7 +736,11 @@ const ITEM_DEFINITIONS = {
         baseHours: 8.0,
         optional: true,
         description: 'Commercial outdoor space. Custom estimate. Full grounds maintenance.',
-        note: 'May require multiple staff'
+        note: 'May require multiple staff',
+        workType: 'labor',
+        skillLevel: 'advanced',
+        products: ['lawnmower', 'trimmer', 'hedge_trimmer', 'leaf_blower', 'power_washer'],
+        staffCount: 3
       },
 
       // Optional services (parameterized, form choices)
@@ -600,10 +751,14 @@ const ITEM_DEFINITIONS = {
         parameterized: true,
         parameter: 'lawn_area_sqm',
         priceSetting: 'gardening_lawn_mow_price',
-        baseHours: 0.001,  // ~0.001 hours per sqm (1 sqm = ~3.6 seconds)
+        baseHours: 0.001,
         optional: true,
         description: 'Professional lawn mowing per square meter.',
-        unit: 'per sqm'
+        unit: 'per sqm',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['lawnmower', 'leaf_blower'],
+        staffCount: 1
       },
       garden_trimming: {
         itemId: 'site-gardening_trim',
@@ -612,10 +767,14 @@ const ITEM_DEFINITIONS = {
         parameterized: true,
         parameter: 'garden_bed_count',
         priceSetting: 'gardening_trim_price',
-        baseHours: 0.5,  // ~30 minutes per bed
+        baseHours: 0.5,
         optional: true,
         description: 'Garden bed trimming, shaping, cleanup.',
-        unit: 'per garden bed'
+        unit: 'per garden bed',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['trimmer', 'shears', 'gloves'],
+        staffCount: 1
       },
       hedge_trimming: {
         itemId: 'site-gardening_hedge',
@@ -624,10 +783,14 @@ const ITEM_DEFINITIONS = {
         parameterized: true,
         parameter: 'hedge_linear_meters',
         priceSetting: 'gardening_hedge_price',
-        baseHours: 0.05,  // ~3 minutes per linear meter
+        baseHours: 0.05,
         optional: true,
         description: 'Professional hedge trimming and shaping.',
-        unit: 'per linear meter'
+        unit: 'per linear meter',
+        workType: 'labor',
+        skillLevel: 'intermediate',
+        products: ['hedge_trimmer', 'shears', 'gloves'],
+        staffCount: 1
       },
       weed_removal: {
         itemId: 'site-gardening_weeds',
@@ -636,11 +799,15 @@ const ITEM_DEFINITIONS = {
         parameterized: true,
         parameter: 'weed_area_sqm',
         priceSetting: 'gardening_weed_removal_price',
-        baseHours: 0.004,  // ~0.004 hours per sqm (hand weeding is slow)
+        baseHours: 0.004,
         optional: true,
         description: 'Hand weeding, removal of unwanted vegetation.',
         unit: 'per sqm',
-        note: 'Hand weeding is labor-intensive. Consider chemical treatment for large areas.'
+        note: 'Hand weeding is labor-intensive. Consider chemical treatment for large areas.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['gloves', 'hand_tools'],
+        staffCount: 1
       },
       deck_driveway_clean: {
         itemId: 'site-gardening_deck_clean',

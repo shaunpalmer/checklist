@@ -26,38 +26,93 @@
 // ============================================================
 
 const BEDROOM_ITEMS_TEMPLATE = [
-  { itemId: 'bed{N}-beds', label: 'Beds Made', category: 'beds', hours: 0.2, difficulty: 'basic' },
-  { itemId: 'bed{N}-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic' },
-  { itemId: 'bed{N}-wood', label: 'Wood Floors Cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
-  { itemId: 'bed{N}-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-  { itemId: 'bed{N}-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' }
+  { 
+    itemId: 'bed{N}-beds', 
+    label: 'Beds Made', 
+    category: 'beds', 
+    hours: 0.2, 
+    difficulty: 'basic',
+    workType: 'labor',
+    skillLevel: 'basic',
+    description: 'Change linens, make bed, organize pillows',
+    products: [],
+    staffCount: 1
+  },
+  { 
+    itemId: 'bed{N}-carpet', 
+    label: 'Carpet Vacuum', 
+    category: 'floors', 
+    hours: 0.2, 
+    difficulty: 'basic',
+    workType: 'labor',
+    skillLevel: 'basic',
+    description: 'Vacuum carpet thoroughly',
+    products: ['vacuum_cleaner'],
+    staffCount: 1
+  },
+  { 
+    itemId: 'bed{N}-wood', 
+    label: 'Wood Floors Cleaned', 
+    category: 'floors', 
+    hours: 0.2, 
+    difficulty: 'basic',
+    workType: 'labor',
+    skillLevel: 'basic',
+    description: 'Sweep and mop wood floors',
+    products: ['wood_cleaner', 'mop'],
+    staffCount: 1
+  },
+  { 
+    itemId: 'bed{N}-baseboards', 
+    label: 'Baseboards Wiped', 
+    category: 'trim', 
+    hours: 0.1, 
+    difficulty: 'basic',
+    workType: 'labor',
+    skillLevel: 'basic',
+    description: 'Wipe baseboards to remove dust and marks',
+    products: ['microfiber_cloth'],
+    staffCount: 1
+  },
+  { 
+    itemId: 'bed{N}-lights', 
+    label: 'Light Switches', 
+    category: 'touchpoints', 
+    hours: 0.05, 
+    difficulty: 'basic',
+    workType: 'labor',
+    skillLevel: 'basic',
+    description: 'Wipe light switches and outlet covers',
+    products: ['disinfectant', 'cloth'],
+    staffCount: 1
+  }
 ];
 
 const BATHROOM_ITEMS_TEMPLATE = [
-  { itemId: 'bath{N}-sink', label: 'Sinks and Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic' },
-  { itemId: 'bath{N}-tub', label: 'Tub/Shower', category: 'shower', hours: 0.3, difficulty: 'basic' },
-  { itemId: 'bath{N}-toilet', label: 'Toilet Bowl & Tank', category: 'toilet', hours: 0.2, difficulty: 'basic' },
-  { itemId: 'bath{N}-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.1, difficulty: 'basic' },
-  { itemId: 'bath{N}-counter', label: 'Countertops', category: 'surfaces', hours: 0.1, difficulty: 'basic' },
-  { itemId: 'bath{N}-cabinets', label: 'Cabinets (outside)', category: 'cabinets', hours: 0.1, difficulty: 'basic' },
-  { itemId: 'bath{N}-floors', label: 'Floors Mopped', category: 'floors', hours: 0.2, difficulty: 'basic' },
-  { itemId: 'bath{N}-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic' },
-  { itemId: 'bath{N}-lights', label: 'Light switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' },
-  { itemId: 'bath{N}-trash', label: 'Remove Trash Bags', category: 'trash', hours: 0.05, difficulty: 'basic' }
+  { itemId: 'bath{N}-sink', label: 'Sinks and Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean and polish sinks and faucets', products: ['bathroom_cleaner', 'cloth'], staffCount: 1 },
+  { itemId: 'bath{N}-tub', label: 'Tub/Shower', category: 'shower', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Scrub and clean tub or shower stall', products: ['bathroom_cleaner', 'scrub_brush'], staffCount: 1 },
+  { itemId: 'bath{N}-toilet', label: 'Toilet Bowl & Tank', category: 'toilet', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean interior bowl and exterior tank', products: ['toilet_cleaner', 'toilet_brush'], staffCount: 1 },
+  { itemId: 'bath{N}-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean mirrors and glass surfaces', products: ['glass_cleaner', 'cloth'], staffCount: 1 },
+  { itemId: 'bath{N}-counter', label: 'Countertops', category: 'surfaces', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe and sanitize counter surfaces', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+  { itemId: 'bath{N}-cabinets', label: 'Cabinets (outside)', category: 'cabinets', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe external cabinet surfaces', products: ['microfiber_cloth'], staffCount: 1 },
+  { itemId: 'bath{N}-floors', label: 'Floors Mopped', category: 'floors', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Mop tile or vinyl floors', products: ['floor_cleaner', 'mop'], staffCount: 1 },
+  { itemId: 'bath{N}-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe baseboards to remove dust and splashes', products: ['microfiber_cloth'], staffCount: 1 },
+  { itemId: 'bath{N}-lights', label: 'Light switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe light switches and outlet covers', products: ['disinfectant', 'cloth'], staffCount: 1 },
+  { itemId: 'bath{N}-trash', label: 'Remove Trash Bags', category: 'trash', hours: 0.05, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Remove and replace trash bags', products: ['trash_bags'], staffCount: 1 }
 ];
 
 const SHOWER_ITEMS_TEMPLATE = [
-  { itemId: 'shower{N}-stalls', label: 'Shower Stalls', category: 'shower', hours: 0.5, difficulty: 'basic' },
-  { itemId: 'shower{N}-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.2, difficulty: 'basic' },
-  { itemId: 'shower{N}-hooks', label: 'Hooks & Rails', category: 'fixtures', hours: 0.1, difficulty: 'basic' }
+  { itemId: 'shower{N}-stalls', label: 'Shower Stalls', category: 'shower', hours: 0.5, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Scrub and clean shower stalls', products: ['bathroom_cleaner', 'scrub_brush'], staffCount: 1 },
+  { itemId: 'shower{N}-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean mirrors and glass partitions', products: ['glass_cleaner', 'cloth'], staffCount: 1 },
+  { itemId: 'shower{N}-hooks', label: 'Hooks & Rails', category: 'fixtures', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe hooks, rails, and fixtures', products: ['microfiber_cloth'], staffCount: 1 }
 ];
 
 const OFFICE_ITEMS_TEMPLATE = [
-  { itemId: 'office{N}-desks', label: 'Desks Wiped', category: 'surfaces', hours: 0.3, difficulty: 'basic' },
-  { itemId: 'office{N}-chairs', label: 'Chairs Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic' },
-  { itemId: 'office{N}-floor', label: 'Carpet Vacuum', category: 'floors', hours: 0.3, difficulty: 'basic' },
-  { itemId: 'office{N}-trash', label: 'Remove Trash', category: 'trash', hours: 0.1, difficulty: 'basic' },
-  { itemId: 'office{N}-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic' }
+  { itemId: 'office{N}-desks', label: 'Desks Wiped', category: 'surfaces', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe down desks and work surfaces', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+  { itemId: 'office{N}-chairs', label: 'Chairs Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe office chairs and seating', products: ['microfiber_cloth'], staffCount: 1 },
+  { itemId: 'office{N}-floor', label: 'Carpet Vacuum', category: 'floors', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Vacuum carpets and floors', products: ['vacuum_cleaner'], staffCount: 1 },
+  { itemId: 'office{N}-trash', label: 'Remove Trash', category: 'trash', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Empty waste baskets and replace liners', products: ['trash_bags'], staffCount: 1 },
+  { itemId: 'office{N}-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.05, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe light switches and handles', products: ['disinfectant', 'cloth'], staffCount: 1 }
 ];
 
 // ============================================================
@@ -69,16 +124,16 @@ const KITCHEN_ROOM = {
   emoji: '🍳',
   title: 'Kitchen',
   items: [
-    { itemId: 'kitchen-sinks', label: 'Sinks and Faucets', category: 'basic', hours: 0.5 },
-    { itemId: 'kitchen-microwave-out', label: 'Microwave (outside)', category: 'basic', hours: 0.5 },
-    { itemId: 'kitchen-countertops', label: 'Countertops', category: 'basic', hours: 0.5 },
-    { itemId: 'kitchen-floors', label: 'Floors Mopped', category: 'basic', hours: 0.5 },
-    { itemId: 'kitchen-baseboards', label: 'Baseboards wiped', category: 'basic', hours: 0.5 },
-    { itemId: 'kitchen-garbage', label: 'Garbage bags removed', category: 'basic', hours: 0.5 },
-    { itemId: 'kitchen-stovetop', label: 'Stovetop wiped', category: 'basic', hours: 0.5 },
-    { itemId: 'kitchen-fridge-out', label: 'Refrig. (outside)', category: 'basic', hours: 0.5 },
-    { itemId: 'kitchen-drawers', label: 'Drawers/Pantry (empty & wipe) - $50', category: 'drawer', hours: 1, baseCharge: 50, serviceCode: 'KDRAW', difficulty: 'basic' },
-    { itemId: 'kitchen-lights', label: 'Light switches', category: 'basic', hours: 0.5 }
+    { itemId: 'kitchen-sinks', label: 'Sinks and Faucets', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Clean and polish sinks and faucets', products: ['kitchen_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-microwave-out', label: 'Microwave (outside)', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe exterior of microwave', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-countertops', label: 'Countertops', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe and sanitize counter surfaces', products: ['kitchen_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-floors', label: 'Floors Mopped', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Mop kitchen floors', products: ['floor_cleaner', 'mop'], staffCount: 1 },
+    { itemId: 'kitchen-baseboards', label: 'Baseboards wiped', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe kitchen baseboards', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'kitchen-garbage', label: 'Garbage bags removed', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Remove and replace garbage bags', products: ['trash_bags'], staffCount: 1 },
+    { itemId: 'kitchen-stovetop', label: 'Stovetop wiped', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Clean and wipe stovetop surface', products: ['kitchen_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-fridge-out', label: 'Refrig. (outside)', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe exterior of refrigerator', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-drawers', label: 'Drawers/Pantry (empty & wipe) - $50', category: 'drawer', hours: 1, baseCharge: 50, serviceCode: 'KDRAW', difficulty: 'basic', workType: 'labor', skillLevel: 'intermediate', description: 'Empty and wipe drawers and pantry shelves', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-lights', label: 'Light switches', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe light switches and handles', products: ['disinfectant', 'cloth'], staffCount: 1 }
   ]
 };
 
@@ -87,13 +142,13 @@ const LIVING_AREA_ROOM = {
   emoji: '🛋️',
   title: 'Living Room',
   items: [
-    { itemId: 'living-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.3, difficulty: 'basic' },
-    { itemId: 'living-tile', label: 'Tile cleaned', category: 'floors', hours: 0.3, difficulty: 'basic' },
-    { itemId: 'living-walls', label: 'Spot cleaning of walls', category: 'walls', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'living-decobing', label: 'Decobing (ceiling/walls)', category: 'high', hours: 0.4, difficulty: 'deep' },
-    { itemId: 'living-shelves', label: 'Shelves dusted', category: 'dust', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'living-baseboards', label: 'Baseboards', category: 'trim', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'living-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.1, difficulty: 'basic' }
+    { itemId: 'living-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Vacuum carpet thoroughly', products: ['vacuum_cleaner'], staffCount: 1 },
+    { itemId: 'living-tile', label: 'Tile cleaned', category: 'floors', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean tile floors', products: ['floor_cleaner', 'mop'], staffCount: 1 },
+    { itemId: 'living-walls', label: 'Spot cleaning of walls', category: 'walls', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Spot clean walls for marks and scuffs', products: ['wall_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'living-decobing', label: 'Decobing (ceiling/walls)', category: 'high', hours: 0.4, difficulty: 'deep', workType: 'labor', skillLevel: 'intermediate', description: 'Remove cobwebs from ceiling and walls', products: ['duster'], staffCount: 1 },
+    { itemId: 'living-shelves', label: 'Shelves dusted', category: 'dust', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Dust shelves and surfaces', products: ['microfiber_cloth', 'duster'], staffCount: 1 },
+    { itemId: 'living-baseboards', label: 'Baseboards', category: 'trim', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe baseboards', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'living-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe light switches', products: ['disinfectant', 'cloth'], staffCount: 1 }
   ]
 };
 
@@ -102,11 +157,11 @@ const ENTRYWAY_ROOM = {
   emoji: '🚪',
   title: 'Entryway',
   items: [
-    { itemId: 'entryway-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'entryway-tile', label: 'Tile cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'entryway-wood', label: 'Wood cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'entryway-shelves', label: 'Shelves dusted', category: 'dust', hours: 0.15, difficulty: 'basic' },
-    { itemId: 'entryway-baseboards', label: 'Baseboards', category: 'trim', hours: 0.15, difficulty: 'basic' }
+    { itemId: 'entryway-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Vacuum entryway carpet', products: ['vacuum_cleaner'], staffCount: 1 },
+    { itemId: 'entryway-tile', label: 'Tile cleaned', category: 'floors', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean tile floors', products: ['floor_cleaner', 'mop'], staffCount: 1 },
+    { itemId: 'entryway-wood', label: 'Wood cleaned', category: 'floors', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean and polish wood floors', products: ['wood_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'entryway-shelves', label: 'Shelves dusted', category: 'dust', hours: 0.15, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Dust shelves and decorative items', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'entryway-baseboards', label: 'Baseboards', category: 'trim', hours: 0.15, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe baseboards', products: ['microfiber_cloth'], staffCount: 1 }
   ]
 };
 
@@ -115,14 +170,14 @@ const LAUNDRY_ROOM = {
   emoji: '🧺',
   title: 'Laundry Room',
   items: [
-    { itemId: 'laundry-sink', label: 'Sink Tub (stainless steel)', category: 'fixtures', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'laundry-faucets', label: 'Faucets & Taps wiped', category: 'fixtures', hours: 0.1, difficulty: 'basic' },
-    { itemId: 'laundry-machines', label: 'Machines Wiped', category: 'appliances', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'laundry-floors', label: 'Floors cleaned', category: 'floors', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'laundry-cabinets', label: 'Cabinets wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'laundry-doors', label: 'Cabinet doors & handles', category: 'touchpoints', hours: 0.1, difficulty: 'basic' },
-    { itemId: 'laundry-shelves', label: 'Shelving cleaned', category: 'dust', hours: 0.1, difficulty: 'basic' },
-    { itemId: 'laundry-baseboards', label: 'Baseboards & Light switches', category: 'trim', hours: 0.1, difficulty: 'basic' }
+    { itemId: 'laundry-sink', label: 'Sink Tub (stainless steel)', category: 'fixtures', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean stainless steel sink/tub', products: ['stainless_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'laundry-faucets', label: 'Faucets & Taps wiped', category: 'fixtures', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Polish faucets and taps', products: ['chrome_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'laundry-machines', label: 'Machines Wiped', category: 'appliances', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe exterior of washer and dryer', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'laundry-floors', label: 'Floors cleaned', category: 'floors', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean and dry laundry room floors', products: ['floor_cleaner', 'mop'], staffCount: 1 },
+    { itemId: 'laundry-cabinets', label: 'Cabinets wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe cabinet surfaces', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'laundry-doors', label: 'Cabinet doors & handles', category: 'touchpoints', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe cabinet doors and handles', products: ['disinfectant', 'cloth'], staffCount: 1 },
+    { itemId: 'laundry-shelves', label: 'Shelving cleaned', category: 'dust', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Dust shelves', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'laundry-baseboards', label: 'Baseboards & Light switches', category: 'trim', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe baseboards and light switches', products: ['microfiber_cloth'], staffCount: 1 }
   ]
 };
 
@@ -131,11 +186,11 @@ const LUNCHROOM_ROOM = {
   emoji: '🍴',
   title: 'Lunchroom',
   items: [
-    { itemId: 'lunchroom-tables', label: 'Tables Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'lunchroom-chairs', label: 'Chairs Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'lunchroom-fridge', label: 'Refrigerator (outside)', category: 'appliances', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'lunchroom-sink', label: 'Sink/Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'lunchroom-floors', label: 'Floors Cleaned', category: 'floors', hours: 0.3, difficulty: 'basic' }
+    { itemId: 'lunchroom-tables', label: 'Tables Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe and sanitize lunch tables', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'lunchroom-chairs', label: 'Chairs Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe chairs', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'lunchroom-fridge', label: 'Refrigerator (outside)', category: 'appliances', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe refrigerator exterior', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'lunchroom-sink', label: 'Sink/Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean sink and faucets', products: ['bathroom_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'lunchroom-floors', label: 'Floors Cleaned', category: 'floors', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Mop lunchroom floors', products: ['floor_cleaner', 'mop'], staffCount: 1 }
   ]
 };
 
@@ -144,11 +199,11 @@ const CIRCULATION_ROOM = {
   emoji: '🚶',
   title: 'Circulation (Hallways/Entry)',
   items: [
-    { itemId: 'circ-carpets', label: 'Carpets Vacuumed', category: 'floors', hours: 0.5, difficulty: 'basic' },
-    { itemId: 'circ-tile', label: 'Tile Floors Cleaned', category: 'floors', hours: 0.5, difficulty: 'basic' },
-    { itemId: 'circ-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.3, difficulty: 'basic' },
-    { itemId: 'circ-doors', label: 'Door handles & frames', category: 'touchpoints', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'circ-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.1, difficulty: 'basic' }
+    { itemId: 'circ-carpets', label: 'Carpets Vacuumed', category: 'floors', hours: 0.5, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Vacuum all carpets in hallways', products: ['vacuum_cleaner'], staffCount: 1 },
+    { itemId: 'circ-tile', label: 'Tile Floors Cleaned', category: 'floors', hours: 0.5, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean tile floors throughout circulation areas', products: ['floor_cleaner', 'mop'], staffCount: 1 },
+    { itemId: 'circ-baseboards', label: 'Baseboards Wiped', category: 'trim', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe baseboards in hallways', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'circ-doors', label: 'Door handles & frames', category: 'touchpoints', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe door handles and frames', products: ['disinfectant', 'cloth'], staffCount: 1 },
+    { itemId: 'circ-lights', label: 'Light Switches', category: 'touchpoints', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe light switches', products: ['disinfectant', 'cloth'], staffCount: 1 }
   ]
 };
 
@@ -157,10 +212,10 @@ const RECEPTION_ROOM = {
   emoji: '📞',
   title: 'Reception/Front Desk',
   items: [
-    { itemId: 'reception-desk', label: 'Reception Desk Wiped', category: 'surfaces', hours: 0.3, difficulty: 'basic' },
-    { itemId: 'reception-chairs', label: 'Waiting Area Chairs', category: 'surfaces', hours: 0.2, difficulty: 'basic' },
-    { itemId: 'reception-floors', label: 'Floors Cleaned', category: 'floors', hours: 0.3, difficulty: 'basic' },
-    { itemId: 'reception-windows', label: 'Windows & Glass Doors', category: 'glass', hours: 0.3, difficulty: 'basic' }
+    { itemId: 'reception-desk', label: 'Reception Desk Wiped', category: 'surfaces', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe and sanitize reception desk', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'reception-chairs', label: 'Waiting Area Chairs', category: 'surfaces', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe waiting area seating', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'reception-floors', label: 'Floors Cleaned', category: 'floors', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean reception area floors', products: ['floor_cleaner', 'mop'], staffCount: 1 },
+    { itemId: 'reception-windows', label: 'Windows & Glass Doors', category: 'glass', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean windows and glass doors', products: ['glass_cleaner', 'cloth'], staffCount: 1 }
   ]
 };
 // ============================================================
