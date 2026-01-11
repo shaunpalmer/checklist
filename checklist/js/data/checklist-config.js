@@ -218,36 +218,198 @@ const RECEPTION_ROOM = {
     { itemId: 'reception-windows', label: 'Windows & Glass Doors', category: 'glass', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean windows and glass doors', products: ['glass_cleaner', 'cloth'], staffCount: 1 }
   ]
 };
+
+// ============================================================
+// ROOM CLASS REGISTRY - Map room types to constructors + configs
+// ============================================================
+
+const ROOM_CLASS_REGISTRY = {
+  Bedroom: {
+    constructor: typeof Bedroom !== 'undefined' ? Bedroom : null,
+    label: 'Bedroom',
+    emoji: '🛏️',
+    buildConfig: (builder, roomSpec) => {
+      const count = roomSpec.count ?? builder.params.numBedrooms;
+      if (!count) {
+        return null;
+      }
+      return {
+        roomId: 'bedrooms',
+        emoji: '🛏️',
+        title: `Bedrooms (1-${count})`,
+        subRooms: generateRoomInstances(BEDROOM_ITEMS_TEMPLATE, count, 'Bedroom')
+      };
+    }
+  },
+  Bathroom: {
+    constructor: typeof Bathroom !== 'undefined' ? Bathroom : null,
+    label: 'Bathroom',
+    emoji: '🛁',
+    buildConfig: (builder, roomSpec) => {
+      const count = roomSpec.count ?? builder.params.numBathrooms;
+      if (!count) {
+        return null;
+      }
+      return {
+        roomId: 'bathrooms',
+        emoji: '🛁',
+        title: `Bathrooms (1-${count})`,
+        subRooms: generateRoomInstances(BATHROOM_ITEMS_TEMPLATE, count, 'Bathroom')
+      };
+    }
+  },
+  Kitchen: {
+    constructor: typeof Kitchen !== 'undefined' ? Kitchen : null,
+    label: 'Kitchen',
+    emoji: '🍳',
+    buildConfig: () => KITCHEN_ROOM
+  },
+  LivingArea: {
+    constructor: typeof LivingArea !== 'undefined' ? LivingArea : null,
+    label: 'Living Area',
+    emoji: '🛋️',
+    buildConfig: () => LIVING_AREA_ROOM
+  },
+  Laundry: {
+    constructor: typeof Laundry !== 'undefined' ? Laundry : null,
+    label: 'Laundry',
+    emoji: '🧺',
+    buildConfig: () => LAUNDRY_ROOM
+  },
+  Shower: {
+    constructor: typeof Room !== 'undefined' ? Room : null,
+    label: 'Shower',
+    emoji: '🚿',
+    buildConfig: (builder, roomSpec) => {
+      const count = roomSpec.count ?? builder.params.numShowers;
+      if (!count) {
+        return null;
+      }
+      return {
+        roomId: 'showers',
+        emoji: '🚿',
+        title: `Showers (1-${count})`,
+        subRooms: generateRoomInstances(SHOWER_ITEMS_TEMPLATE, count, 'Shower')
+      };
+    }
+  },
+  Office: {
+    constructor: typeof Office !== 'undefined' ? Office : typeof Room !== 'undefined' ? Room : null,
+    label: 'Office',
+    emoji: '💼',
+    buildConfig: (builder, roomSpec) => {
+      const count = roomSpec.count ?? builder.params.numOffices;
+      if (!count) {
+        return null;
+      }
+      if (builder.params.numFloors) {
+        return {
+          roomId: 'offices',
+          emoji: '💼',
+          title: `Offices (${builder.params.numFloors} floors × ${builder.params.numOfficesPerFloor} offices = ${builder.params.numOffices} total)`,
+          subRooms: builder._generateMultiStoryOffices()
+        };
+      }
+      return {
+        roomId: 'offices',
+        emoji: '💼',
+        title: `Offices (1-${count})`,
+        subRooms: generateRoomInstances(OFFICE_ITEMS_TEMPLATE, count, 'Office')
+      };
+    }
+  },
+  Reception: {
+    constructor: typeof Reception !== 'undefined' ? Reception : typeof Room !== 'undefined' ? Room : null,
+    label: 'Reception',
+    emoji: '📞',
+    buildConfig: () => RECEPTION_ROOM
+  },
+  Lunchroom: {
+    constructor: typeof Room !== 'undefined' ? Room : null,
+    label: 'Lunchroom',
+    emoji: '🍴',
+    buildConfig: () => LUNCHROOM_ROOM
+  },
+  Circulation: {
+    constructor: typeof Room !== 'undefined' ? Room : null,
+    label: 'Circulation',
+    emoji: '🚶',
+    buildConfig: () => CIRCULATION_ROOM
+  },
+  LoadingDock: {
+    constructor: typeof Room !== 'undefined' ? Room : null,
+    label: 'Loading Dock',
+    emoji: '🚚',
+    buildConfig: (builder, roomSpec) => {
+      const count = roomSpec.count ?? builder.params.numLoadingDocks;
+      if (!count) {
+        return null;
+      }
+      return {
+        roomId: 'loading-docks',
+        emoji: '🚚',
+        title: `Loading Docks (1-${count})`,
+        subRooms: generateRoomInstances(OFFICE_ITEMS_TEMPLATE, count, 'Dock')
+      };
+    }
+  },
+  Dock: {
+    constructor: typeof Room !== 'undefined' ? Room : null,
+    label: 'Dock',
+    emoji: '🚚'
+  },
+  Toilet: {
+    constructor: typeof Room !== 'undefined' ? Room : null,
+    label: 'Toilet',
+    emoji: '🚽',
+    buildConfig: () => ({
+      roomId: 'toilets',
+      emoji: '🚽',
+      title: 'Restrooms',
+      items: [
+        { itemId: 'toilet-stalls', label: 'Stalls Cleaned', category: 'fixtures', hours: 0.5, difficulty: 'basic' },
+        { itemId: 'toilet-sinks', label: 'Sinks & Faucets', category: 'fixtures', hours: 0.3, difficulty: 'basic' },
+        { itemId: 'toilet-mirrors', label: 'Mirrors Cleaned', category: 'glass', hours: 0.2, difficulty: 'basic' },
+        { itemId: 'toilet-floors', label: 'Floors Mopped', category: 'floors', hours: 0.3, difficulty: 'basic' },
+        { itemId: 'toilet-trash', label: 'Trash Removed', category: 'trash', hours: 0.1, difficulty: 'basic' }
+      ]
+    })
+  },
+  Warehouse: {
+    constructor: typeof Room !== 'undefined' ? Room : null,
+    label: 'Warehouse',
+    emoji: '📦',
+    buildConfig: () => ({
+      roomId: 'warehouse',
+      emoji: '📦',
+      title: 'Warehouse Floor',
+      items: [
+        { itemId: 'warehouse-floors', label: 'Concrete Floors Swept', category: 'floors', hours: 1, difficulty: 'basic' },
+        { itemId: 'warehouse-shelving', label: 'Shelving Wiped', category: 'surfaces', hours: 1, difficulty: 'basic' },
+        { itemId: 'warehouse-trash', label: 'Trash Removed', category: 'trash', hours: 0.5, difficulty: 'basic' }
+      ]
+    })
+  }
+};
 // ============================================================
 // HELPER FUNCTIONS - Generate N instances of templated rooms
 // ============================================================
 
 function generateRoomInstances(template, count, roomType) {
   const rooms = [];
+  const registryEntry = ROOM_CLASS_REGISTRY[roomType];
+  const titleBase = registryEntry?.label || roomType;
+  const emoji = registryEntry?.emoji || '📋';
   for (let i = 1; i <= count; i++) {
     const items = template.map(item => ({
       ...item,
       itemId: item.itemId.replace('{N}', i),
       label: item.label
     }));
-    
-    const title = {
-      'Bedroom': `Bedroom ${i}`,
-      'Bathroom': `Bathroom ${i}`,
-      'Shower': `Shower ${i}`,
-      'Office': `Office ${i}`
-    }[roomType] || `${roomType} ${i}`;
-
-    const emoji = {
-      'Bedroom': '🛏️',
-      'Bathroom': '🛁',
-      'Shower': '🚿',
-      'Office': '💼'
-    }[roomType] || '📋';
 
     rooms.push({
       subRoomId: `${roomType.toLowerCase()}${i}`,
-      title: title,
+      title: `${titleBase} ${i}`,
       emoji: emoji,
       items: items
     });
@@ -382,88 +544,21 @@ class AysChecklistConfigBuilder {
     
     // Add rooms based on property type configuration
     for (const roomSpec of this.typeConfig.rooms) {
-      if (roomSpec.type === 'Bedroom' && roomSpec.count === null) {
-        rooms.push({
-          roomId: 'bedrooms',
-          emoji: '🛏️',
-          title: `Bedrooms (1-${this.params.numBedrooms})`,
-          subRooms: generateRoomInstances(BEDROOM_ITEMS_TEMPLATE, this.params.numBedrooms, 'Bedroom')
-        });
-      } else if (roomSpec.type === 'Bathroom' && roomSpec.count === null) {
-        rooms.push({
-          roomId: 'bathrooms',
-          emoji: '🛁',
-          title: `Bathrooms (1-${this.params.numBathrooms})`,
-          subRooms: generateRoomInstances(BATHROOM_ITEMS_TEMPLATE, this.params.numBathrooms, 'Bathroom')
-        });
-      } else if (roomSpec.type === 'Kitchen') {
-        rooms.push(KITCHEN_ROOM);
-      } else if (roomSpec.type === 'LivingArea') {
-        rooms.push(LIVING_AREA_ROOM);
-      } else if (roomSpec.type === 'Laundry') {
-        rooms.push(LAUNDRY_ROOM);
-      } else if (roomSpec.type === 'Shower') {
-        rooms.push({
-          roomId: 'showers',
-          emoji: '🚿',
-          title: `Showers (1-${this.params.numShowers})`,
-          subRooms: generateRoomInstances(SHOWER_ITEMS_TEMPLATE, this.params.numShowers, 'Shower')
-        });
-      } else if (roomSpec.type === 'Office') {
-        // Multi-story: show floors
-        if (this.params.numFloors) {
-          rooms.push({
-            roomId: 'offices',
-            emoji: '💼',
-            title: `Offices (${this.params.numFloors} floors × ${this.params.numOfficesPerFloor} offices = ${this.params.numOffices} total)`,
-            subRooms: this._generateMultiStoryOffices()
-          });
-        } else {
-          // Single floor
-          rooms.push({
-            roomId: 'offices',
-            emoji: '💼',
-            title: `Offices (1-${this.params.numOffices})`,
-            subRooms: generateRoomInstances(OFFICE_ITEMS_TEMPLATE, this.params.numOffices, 'Office')
-          });
-        }
-      } else if (roomSpec.type === 'Reception') {
-        rooms.push(RECEPTION_ROOM);
-      } else if (roomSpec.type === 'Lunchroom') {
-        rooms.push(LUNCHROOM_ROOM);
-      } else if (roomSpec.type === 'Circulation') {
-        rooms.push(CIRCULATION_ROOM);
-      } else if (roomSpec.type === 'LoadingDock') {
-        rooms.push({
-          roomId: 'loading-docks',
-          emoji: '🚚',
-          title: `Loading Docks (1-${this.params.numLoadingDocks})`,
-          subRooms: generateRoomInstances(OFFICE_ITEMS_TEMPLATE, this.params.numLoadingDocks, 'Dock')
-        });
-      } else if (roomSpec.type === 'Toilet') {
-        rooms.push({
-          roomId: 'toilets',
-          emoji: '🚽',
-          title: 'Restrooms',
-          items: [
-            { itemId: 'toilet-stalls', label: 'Stalls Cleaned', category: 'fixtures', hours: 0.5, difficulty: 'basic' },
-            { itemId: 'toilet-sinks', label: 'Sinks & Faucets', category: 'fixtures', hours: 0.3, difficulty: 'basic' },
-            { itemId: 'toilet-mirrors', label: 'Mirrors Cleaned', category: 'glass', hours: 0.2, difficulty: 'basic' },
-            { itemId: 'toilet-floors', label: 'Floors Mopped', category: 'floors', hours: 0.3, difficulty: 'basic' },
-            { itemId: 'toilet-trash', label: 'Trash Removed', category: 'trash', hours: 0.1, difficulty: 'basic' }
-          ]
-        });
-      } else if (roomSpec.type === 'Warehouse') {
-        rooms.push({
-          roomId: 'warehouse',
-          emoji: '📦',
-          title: 'Warehouse Floor',
-          items: [
-            { itemId: 'warehouse-floors', label: 'Concrete Floors Swept', category: 'floors', hours: 1, difficulty: 'basic' },
-            { itemId: 'warehouse-shelving', label: 'Shelving Wiped', category: 'surfaces', hours: 1, difficulty: 'basic' },
-            { itemId: 'warehouse-trash', label: 'Trash Removed', category: 'trash', hours: 0.5, difficulty: 'basic' }
-          ]
-        });
+      const registryEntry = ROOM_CLASS_REGISTRY[roomSpec.type];
+      if (!registryEntry?.buildConfig) {
+        console.warn(`[AysChecklistConfigBuilder] No room registry entry for type: ${roomSpec.type}`);
+        continue;
+      }
+
+      const roomConfig = registryEntry.buildConfig(this, roomSpec);
+      if (!roomConfig) {
+        continue;
+      }
+
+      if (Array.isArray(roomConfig)) {
+        rooms.push(...roomConfig);
+      } else {
+        rooms.push(roomConfig);
       }
     }
 
