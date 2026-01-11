@@ -23,6 +23,60 @@
  */
 
 const ITEM_DEFINITIONS = {
+  eot: {
+    property_wide: {
+      standard: [
+        {
+          itemId: 'property-vacuum',
+          label: 'Vacuum entire property',
+          category: 'property-wide',
+          hours: 1.5,
+          difficulty: 'basic',
+          workType: 'labor',
+          skillLevel: 'basic',
+          description: 'Vacuum all rooms and hallways throughout the property.',
+          products: ['vacuum_cleaner'],
+          staffCount: 1
+        },
+        {
+          itemId: 'property-mop',
+          label: 'Mop hard floors throughout',
+          category: 'property-wide',
+          hours: 1.0,
+          difficulty: 'basic',
+          workType: 'labor',
+          skillLevel: 'basic',
+          description: 'Mop all hard flooring areas across the property.',
+          products: ['floor_cleaner', 'mop'],
+          staffCount: 1
+        },
+        {
+          itemId: 'property-dust',
+          label: 'Dust high and low surfaces',
+          category: 'property-wide',
+          hours: 0.8,
+          difficulty: 'basic',
+          workType: 'labor',
+          skillLevel: 'basic',
+          description: 'Dust shelves, ledges, and accessible high points across rooms.',
+          products: ['microfiber_cloth', 'duster'],
+          staffCount: 1
+        },
+        {
+          itemId: 'property-interior-windows',
+          label: 'Interior windows cleaned',
+          category: 'property-wide',
+          hours: 0.6,
+          difficulty: 'basic',
+          workType: 'labor',
+          skillLevel: 'basic',
+          description: 'Clean interior glass, frames, and tracks throughout.',
+          products: ['glass_cleaner', 'microfiber_cloth'],
+          staffCount: 1
+        }
+      ]
+    }
+  },
   commercial: {
     // ============================================================
     // WINDOW CLEANING ITEMS
