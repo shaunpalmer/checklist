@@ -1,23 +1,11 @@
-# Ignore everything by default
-*
+# Don't ignore anything - this is a private backup repo
+# All documentation and code should be preserved
 
-# But keep the ignore file itself
-!.gitignore
-
-# Keep a small repo-level README
-!README.md
-
-# Entry point for running under /checklist/ on localhost
-!index.html
-
-# Keep the checklist folder (core code)
-!checklist/
-!checklist/**
-
-# Keep tools (helpers, scripts)
-!tools/
-!tools/**
-
-# Keep docs (design specs, architecture)
-!docs/
-!docs/**
+# Ignore only system files and temporary items
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+.env
+*.swp
+*.swo
