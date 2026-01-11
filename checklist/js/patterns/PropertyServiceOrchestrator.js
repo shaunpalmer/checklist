@@ -329,6 +329,7 @@ class PropertyServiceDisclosure {
     this.orchestrator = config.orchestrator;
     this.isExpanded = config.isExpanded !== false;
     this.domElement = null;
+    this.summaryElements = null;
   }
 
   /**
@@ -344,14 +345,11 @@ class PropertyServiceDisclosure {
     // Create summary
     const summary = document.createElement('summary');
     summary.className = 'service-summary';
-    summary.innerHTML = `
-      <span class="service-emoji">${this.service.getEmoji()}</span>
-      <span class="service-label">${this.service.getLabel()}</span>
-      <span class="service-summary-text">${this.service.getSummary()}</span>
-      <span class="service-stats">
-        ${this.service.getTotalHours().toFixed(1)}h · $${this.service.getTotalCost().toFixed(2)}
-      </span>
-    `;
+    this.summaryElements = this.createSummaryElements();
+    summary.appendChild(this.summaryElements.emoji);
+    summary.appendChild(this.summaryElements.label);
+    summary.appendChild(this.summaryElements.summaryText);
+    summary.appendChild(this.summaryElements.stats);
     details.appendChild(summary);
 
     // Create content container
@@ -445,10 +443,17 @@ class PropertyServiceDisclosure {
       const label = document.createElement('label');
       label.htmlFor = checkbox.id;
       label.className = 'item-label';
-      label.innerHTML = `
-        <span class="item-title">${item.label}</span>
-        <span class="item-hours">${(item.hours || 0).toFixed(1)}h</span>
-      `;
+
+      const title = document.createElement('span');
+      title.className = 'item-title';
+      title.textContent = item.label;
+
+      const hours = document.createElement('span');
+      hours.className = 'item-hours';
+      hours.textContent = `${(item.hours || 0).toFixed(1)}h`;
+
+      label.appendChild(title);
+      label.appendChild(hours);
 
       itemDiv.appendChild(checkbox);
       itemDiv.appendChild(label);
@@ -485,17 +490,62 @@ class PropertyServiceDisclosure {
     if (!this.domElement) return;
 
     // Update summary
-    const summary = this.domElement.querySelector('.service-summary');
-    if (summary) {
-      summary.innerHTML = `
-        <span class="service-emoji">${this.service.getEmoji()}</span>
-        <span class="service-label">${this.service.getLabel()}</span>
-        <span class="service-summary-text">${this.service.getSummary()}</span>
-        <span class="service-stats">
-          ${this.service.getTotalHours().toFixed(1)}h · $${this.service.getTotalCost().toFixed(2)}
-        </span>
-      `;
+    if (!this.summaryElements) {
+      const summary = this.domElement.querySelector('.service-summary');
+      if (summary) {
+        this.summaryElements = this.createSummaryElements();
+        summary.replaceChildren(
+          this.summaryElements.emoji,
+          this.summaryElements.label,
+          this.summaryElements.summaryText,
+          this.summaryElements.stats
+        );
+      }
     }
+
+    if (this.summaryElements) {
+      this.summaryElements.emoji.textContent = this.service.getEmoji();
+      this.summaryElements.label.textContent = this.service.getLabel();
+      this.summaryElements.summaryText.textContent = this.service.getSummary();
+      this.summaryElements.stats.textContent = this.formatStats();
+    }
+  }
+
+  /**
+   * Create summary element nodes
+   * @returns {Object} Summary element references
+   */
+  createSummaryElements() {
+    const emoji = document.createElement('span');
+    emoji.className = 'service-emoji';
+    emoji.textContent = this.service.getEmoji();
+
+    const label = document.createElement('span');
+    label.className = 'service-label';
+    label.textContent = this.service.getLabel();
+
+    const summaryText = document.createElement('span');
+    summaryText.className = 'service-summary-text';
+    summaryText.textContent = this.service.getSummary();
+
+    const stats = document.createElement('span');
+    stats.className = 'service-stats';
+    stats.textContent = this.formatStats();
+
+    return {
+      emoji,
+      label,
+      summaryText,
+      stats
+    };
+  }
+
+  /**
+   * Format summary stats string
+   * @returns {string} Stats summary
+   */
+  formatStats() {
+    return `${this.service.getTotalHours().toFixed(1)}h · $${this.service.getTotalCost().toFixed(2)}`;
   }
 
   /**

@@ -198,6 +198,33 @@ class AysPropertyType {
         numLoadingDocks: null,    // 1, 2, 3 docks
         numAdminOffices: null     // 2-5 admin offices
       }
+    },
+
+    // ============================================================
+    // END OF TENANCY RESIDENTIAL TYPE
+    // ============================================================
+    'eot_residential': {
+      name: 'eot_residential',
+      family: 'eot',
+      label: 'End of Tenancy - Residential',
+      description: 'End of tenancy clean for residential properties',
+      rooms: [
+        { type: 'Bedroom', count: null },
+        { type: 'Bathroom', count: null },
+        { type: 'Kitchen', count: 1 },
+        { type: 'LivingArea', count: 1 },
+        { type: 'Laundry', count: 1 },
+        { type: 'Entryway', count: 1 }
+      ],
+      availableServices: ['windows', 'carpet'],
+      config: {
+        numBedrooms: 2,
+        maxBedrooms: 10,
+        minBedrooms: 1,
+        numBathrooms: 1,
+        maxBathrooms: 6,
+        minBathrooms: 1
+      }
     }
   };
 
