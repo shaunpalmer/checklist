@@ -9,8 +9,9 @@
  */
 
 class AysChecklistFormFactory {
-  constructor(containerId = 'rooms-container') {
+  constructor(containerId = 'rooms-container', propertyWideContainerId = 'property-wide-container') {
     this.containerId = containerId;
+    this.propertyWideContainerId = propertyWideContainerId;
     this.cards = [];
   }
 
@@ -26,6 +27,8 @@ class AysChecklistFormFactory {
       return null;
     }
 
+    this._renderPropertyWideItems(config);
+
     // Process each room in config
     config.rooms.forEach(room => {
       if (room.subRooms) {
@@ -38,6 +41,37 @@ class AysChecklistFormFactory {
     });
 
     return container;
+  }
+
+  /**
+   * Render property-wide checklist items in a dedicated section
+   * @private
+   */
+  _renderPropertyWideItems(config) {
+    const propertyWideContainer = document.getElementById(this.propertyWideContainerId);
+    if (!propertyWideContainer) {
+      return;
+    }
+
+    propertyWideContainer.innerHTML = '';
+
+    const items = Array.isArray(config.propertyWide) ? config.propertyWide : [];
+    if (items.length === 0) {
+      return;
+    }
+
+    const card = new AysDisclosureRoomCard({
+      roomId: 'property-wide',
+      title: '🏠 Property-wide Items',
+      items: items
+    });
+
+    const element = card.render();
+    propertyWideContainer.appendChild(element);
+    card.bind();
+
+    this.cards.push(card);
+    console.log(`✓ Created property-wide card (${items.length} items)`);
   }
 
   /**

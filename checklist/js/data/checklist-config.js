@@ -467,10 +467,15 @@ class AysChecklistConfigBuilder {
       }
     }
 
+    const propertyWideItems = Array.isArray(ITEM_DEFINITIONS?.eot?.property_wide?.standard)
+      ? ITEM_DEFINITIONS.eot.property_wide.standard.map(item => ({ ...item }))
+      : [];
+
     return {
       propertyType: this.propertyType,
       params: this.params,
       rooms: rooms,
+      propertyWide: propertyWideItems,
       warnings: this.warnings || []  // UI can read and display these
     };
   }
