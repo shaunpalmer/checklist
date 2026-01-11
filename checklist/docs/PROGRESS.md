@@ -4,6 +4,12 @@
 
 ---
 
+## Recent Updates
+
+- ✅ Factory now stores rendered disclosure elements and safely resolves them during progress/reset calculations (prevents undefined card element lookups).  
+
+---
+
 ## Project Vision
 A **multi-tenant, role-based cleaning checklist system** that adapts to **four user types**:
 - **Customers** (Public Token) - View proof of service, photos, signature
@@ -179,6 +185,19 @@ checklist/
 ---
 
 ## Notes & Decisions
+
+**Recent Updates**
+- Refactored PropertyServiceDisclosure to build summary and item rows with DOM nodes (no innerHTML) for object-first rendering and safer updates.
+- Expanded EndOfTenancyCleaning metadata to include kitchens, entryways, laundry rooms, and property-wide services (vacuum, window cleaning, carpet cleaning).
+- Added EOT kitchen item definitions in the object catalog to support generator output.
+- Added EOT bedroom item definitions in the object catalog to support generator output.
+- Added EOT bathroom item definitions in the object catalog to support generator output.
+- Added EOT laundry and living area item definitions in the object catalog to support generator output.
+- Added residential bathroom item definitions in the object catalog to support generator output.
+- Added residential bedroom, kitchen, living area, and laundry item definitions in the object catalog to support generator output.
+- Added EOT entryway, basement, utility/special rooms, home office, outdoor, and property-wide item definitions in the object catalog to support generator output.
+- Wired checklist config to use room registry for items and insert property-wide sections when available.
+- Added EOT residential property type and a Toilet room class to support generated rooms without hardcoded HTML.
 
 **Why role-based on the same HTML?**
 - Single source of truth
