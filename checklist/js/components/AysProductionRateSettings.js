@@ -168,14 +168,14 @@ class AysProductionRateSettings {
     if (value && (value < 100 || value > 1000)) {
       this.inputCustomRate.classList.add('warning');
       if (value < 100) {
-        this.displayCurrent.innerHTML = '⚠️ <span class="warning-text">Very low rate. Check your entry?</span>';
+        console.warn('[AysProductionRateSettings] Unusually low production rate entered:', value);
       } else {
-        this.displayCurrent.innerHTML = '⚠️ <span class="warning-text">Very high rate. Check your entry?</span>';
+        console.warn('[AysProductionRateSettings] Unusually high production rate entered:', value);
       }
     } else {
       this.inputCustomRate.classList.remove('warning');
-      this.updateCurrentDisplay();
     }
+    this.updateCurrentDisplay();
   }
 
   /**

@@ -256,6 +256,231 @@ const ITEM_DEFINITIONS = {
     },
 
     // ============================================================
+    // SALES FLOOR ITEMS
+    // ============================================================
+    sales_floor: {
+      sales_floor_area_100m2: {
+        itemId: 'site-sales_floor_area',
+        label: 'Sales floor area (100m²)',
+        category: 'sales_floor',
+        parameterized: true,
+        parameter: 'number_of_sales_floor_areas_100m2',
+        optional: true,
+        description: 'Sales floor area. Sweep/vacuum, spot clean, trash removal.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['floor_cleaner', 'vacuum_cleaner', 'microfiber_cloth'],
+        staffCount: 1
+      },
+      display_fixture: {
+        itemId: 'site-sales_floor_display_fixture',
+        label: 'Display fixture wiped',
+        category: 'sales_floor',
+        parameterized: true,
+        parameter: 'number_of_display_fixtures',
+        optional: true,
+        description: 'Display fixtures and shelving wiped down.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'microfiber_cloth'],
+        staffCount: 1
+      },
+      checkout_counter: {
+        itemId: 'site-sales_floor_checkout_counter',
+        label: 'Checkout counter cleaned',
+        category: 'sales_floor',
+        parameterized: true,
+        parameter: 'number_of_checkout_counters',
+        optional: true,
+        description: 'Checkout counters and bagging areas cleaned.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'disinfectant', 'microfiber_cloth'],
+        staffCount: 1
+      }
+    },
+
+    // ============================================================
+    // STOCKROOM ITEMS
+    // ============================================================
+    stockroom: {
+      stockroom_area_50m2: {
+        itemId: 'site-stockroom_area',
+        label: 'Stockroom area (50m²)',
+        category: 'stockroom',
+        parameterized: true,
+        parameter: 'number_of_stockroom_areas_50m2',
+        optional: true,
+        description: 'Stockroom area. Sweep, dust accessible surfaces, remove debris.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['broom', 'dust_pan', 'microfiber_cloth'],
+        staffCount: 1
+      },
+      stock_shelving: {
+        itemId: 'site-stockroom_shelving',
+        label: 'Stock shelving wiped',
+        category: 'stockroom',
+        parameterized: true,
+        parameter: 'number_of_stock_shelving_units',
+        optional: true,
+        description: 'Shelving wiped and organized if accessible.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'microfiber_cloth'],
+        staffCount: 1
+      },
+      pallet_zone: {
+        itemId: 'site-stockroom_pallet_zone',
+        label: 'Pallet zone sweep',
+        category: 'stockroom',
+        parameterized: true,
+        parameter: 'number_of_pallet_zones',
+        optional: true,
+        description: 'Pallet storage zones swept and cleared.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['broom', 'dust_pan'],
+        staffCount: 1
+      }
+    },
+
+    // ============================================================
+    // LOCKER ROOM ITEMS
+    // ============================================================
+    locker_room: {
+      locker_room_area_50m2: {
+        itemId: 'site-locker_room_area',
+        label: 'Locker room area (50m²)',
+        category: 'locker_room',
+        parameterized: true,
+        parameter: 'number_of_locker_room_areas_50m2',
+        optional: true,
+        description: 'Locker room floors and surfaces cleaned.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['floor_cleaner', 'disinfectant', 'microfiber_cloth'],
+        staffCount: 1
+      },
+      locker_bank: {
+        itemId: 'site-locker_room_locker_bank',
+        label: 'Locker bank wipe',
+        category: 'locker_room',
+        parameterized: true,
+        parameter: 'number_of_locker_banks',
+        optional: true,
+        description: 'Locker doors and handles wiped down.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['disinfectant', 'microfiber_cloth'],
+        staffCount: 1
+      },
+      bench_seating: {
+        itemId: 'site-locker_room_bench',
+        label: 'Bench seating cleaned',
+        category: 'locker_room',
+        parameterized: true,
+        parameter: 'number_of_locker_benches',
+        optional: true,
+        description: 'Benches and seating surfaces wiped.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'microfiber_cloth'],
+        staffCount: 1
+      }
+    },
+
+    // ============================================================
+    // SHOWER ITEMS
+    // ============================================================
+    shower: {
+      shower_stall: {
+        itemId: 'site-shower_stall',
+        label: 'Shower stall cleaned',
+        category: 'shower',
+        parameterized: true,
+        parameter: 'number_of_shower_stalls',
+        optional: true,
+        description: 'Shower walls and fixtures cleaned and sanitized.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['bathroom_cleaner', 'scrub_brush', 'disinfectant'],
+        staffCount: 1
+      },
+      shower_floor: {
+        itemId: 'site-shower_floor',
+        label: 'Shower floor scrub',
+        category: 'shower',
+        parameterized: true,
+        parameter: 'number_of_shower_floors',
+        optional: true,
+        description: 'Shower floors scrubbed and rinsed.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['bathroom_cleaner', 'scrub_brush'],
+        staffCount: 1
+      },
+      shower_glass: {
+        itemId: 'site-shower_glass',
+        label: 'Shower glass wiped',
+        category: 'shower',
+        parameterized: true,
+        parameter: 'number_of_shower_glass_panels',
+        optional: true,
+        description: 'Shower glass panels and screens wiped.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['glass_cleaner', 'microfiber_cloth'],
+        staffCount: 1
+      }
+    },
+
+    // ============================================================
+    // LOADING DOCK ITEMS
+    // ============================================================
+    loading_dock: {
+      dock_bay: {
+        itemId: 'site-loading_dock_bay',
+        label: 'Loading dock bay',
+        category: 'loading_dock',
+        parameterized: true,
+        parameter: 'number_of_loading_dock_bays',
+        optional: true,
+        description: 'Dock bay swept, debris cleared, basic wipe down.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['broom', 'dust_pan', 'gloves'],
+        staffCount: 1
+      },
+      dock_door: {
+        itemId: 'site-loading_dock_door',
+        label: 'Dock door wipe',
+        category: 'loading_dock',
+        parameterized: true,
+        parameter: 'number_of_loading_dock_doors',
+        optional: true,
+        description: 'Dock doors and handles wiped.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['surface_cleaner', 'microfiber_cloth'],
+        staffCount: 1
+      },
+      dock_floor_strip: {
+        itemId: 'site-loading_dock_floor_strip',
+        label: 'Dock floor strip',
+        category: 'loading_dock',
+        parameterized: true,
+        parameter: 'number_of_loading_dock_floor_strips',
+        optional: true,
+        description: 'Dock floor strip swept and spot cleaned.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['floor_cleaner', 'mop'],
+        staffCount: 1
+      }
+    },
+
+    // ============================================================
     // TOILET BLOCK ITEMS
     // ============================================================
     toilets: {
@@ -289,6 +514,19 @@ const ITEM_DEFINITIONS = {
         products: ['toilet_cleaner', 'toilet_brush', 'disinfectant', 'toilet_paper'],
         staffCount: 1
       },
+      accessible_stall: {
+        itemId: 'site-toilet_accessible_stall',
+        label: 'Accessible toilet stall',
+        category: 'toilets',
+        parameterized: true,
+        parameter: 'number_of_accessible_stalls',
+        optional: true,
+        description: 'Accessible stall. Cleaned, sanitized, paper restocked.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['toilet_cleaner', 'toilet_brush', 'disinfectant', 'toilet_paper'],
+        staffCount: 1
+      },
       sink_station: {
         itemId: 'site-toilet_sink',
         label: 'Sink/washbasin station',
@@ -303,6 +541,54 @@ const ITEM_DEFINITIONS = {
         skillLevel: 'basic',
         products: ['bathroom_cleaner', 'microfiber_cloth', 'glass_cleaner', 'soap'],
         staffCount: 1
+      },
+      jumbo_roll_refill: {
+        itemId: 'site-toilet_jumbo_roll_refill',
+        label: 'Jumbo toilet roll refill',
+        category: 'toilets_consumables',
+        parameterized: true,
+        parameter: 'number_of_jumbo_roll_refills',
+        optional: true,
+        description: 'Replace jumbo roll dispensers.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['jumbo_toilet_roll']
+      },
+      paper_towel_refill: {
+        itemId: 'site-toilet_paper_towel_refill',
+        label: 'Paper towel refill',
+        category: 'toilets_consumables',
+        parameterized: true,
+        parameter: 'number_of_paper_towel_refills',
+        optional: true,
+        description: 'Restock paper towel dispensers.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['paper_towels']
+      },
+      sanitary_bin_service: {
+        itemId: 'site-toilet_sanitary_bin_service',
+        label: 'Sanitary bin service',
+        category: 'toilets_consumables',
+        parameterized: true,
+        parameter: 'number_of_sanitary_bins',
+        optional: true,
+        description: 'Service sanitary bins (replace liners as needed).',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['sanitary_bin_liners']
+      },
+      hand_dryer_wipe: {
+        itemId: 'site-toilet_hand_dryer_wipe',
+        label: 'Hand dryer exterior wipe',
+        category: 'toilets_fixtures',
+        parameterized: true,
+        parameter: 'number_of_hand_dryers',
+        optional: true,
+        description: 'Wipe down hand dryers and touchpoints.',
+        workType: 'labor',
+        skillLevel: 'basic',
+        products: ['disinfectant', 'cloth']
       }
     },
 
@@ -514,6 +800,39 @@ const ITEM_DEFINITIONS = {
         optional: true,
         description: 'Workbench. Cleaned, organized, trash removed.'
       }
+    },
+
+    // ============================================================
+    // PROPERTY-WIDE COMMERCIAL ITEMS
+    // ============================================================
+    property_wide: {
+      standard: [
+        {
+          itemId: 'commercial-property-wide-vacuum',
+          label: 'Property-wide floors vacuum (carpeted areas)',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'commercial-property-wide-mop',
+          label: 'Property-wide floors mop (hard surface areas)',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'commercial-property-wide-touchpoints',
+          label: 'Property-wide touchpoints wipe (handles, switches)',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'commercial-property-wide-glass',
+          label: 'Property-wide internal glass (if included in scope)',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'commercial-property-wide-walkthrough',
+          label: 'Final walkthrough / quality check',
+          category: 'property_wide'
+        }
+      ]
     },
 
     // ============================================================
@@ -834,6 +1153,2413 @@ const ITEM_DEFINITIONS = {
         description: '10% discount for quarterly maintenance contracts (4× per year).',
         note: 'Typical schedule: March, June, September, December for lawns'
       }
+    }
+  }
+  ,
+  // ============================================================
+  // END OF TENANCY CLEANING ITEMS
+  // ============================================================
+  eot: {
+    bedroom: {
+      standard: [
+        {
+          itemId: 'eot-bedroom-walls',
+          label: 'Walls (spot clean marks, scuffs)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-bedroom-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'eot-bedroom-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'eot-bedroom-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bedroom-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bedroom-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bedroom-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-bedroom-door-handle',
+          label: 'Door handle',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-bedroom-wardrobe-exterior',
+          label: 'Wardrobe exterior',
+          category: 'wardrobe'
+        },
+        {
+          itemId: 'eot-bedroom-wardrobe-shelving',
+          label: 'Wardrobe interior shelving',
+          category: 'wardrobe'
+        },
+        {
+          itemId: 'eot-bedroom-wardrobe-hanging-rail',
+          label: 'Wardrobe hanging rail',
+          category: 'wardrobe'
+        },
+        {
+          itemId: 'eot-bedroom-drawers',
+          label: 'Drawers (internal + external)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-bedroom-window-glass',
+          label: 'Windows (internal glass)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-bedroom-window-frames',
+          label: 'Window frames',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-bedroom-window-sills',
+          label: 'Window sills',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-bedroom-curtains-blinds',
+          label: 'Curtains / blinds (dusting only)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-bedroom-bed-frame',
+          label: 'Bed frame',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-bedroom-mattress-edges',
+          label: 'Mattress (vacuum edges only)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-bedroom-bedside-tables',
+          label: 'Bedside tables',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-bedroom-desks-dressers',
+          label: 'Desks / dressers',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-bedroom-shelving',
+          label: 'Shelving (open shelves)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-bedroom-mirrors',
+          label: 'Mirrors',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bedroom-floor-vacuum',
+          label: 'Floor – vacuum',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-bedroom-floor-mop',
+          label: 'Floor – mop (if hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-bedroom-carpet-edges',
+          label: 'Floor – carpet edges',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-bedroom-heater-unit',
+          label: 'Heater / heat pump unit',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bedroom-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bedroom-smoke-alarm',
+          label: 'Smoke alarm (external dusting)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bedroom-ceiling-fan',
+          label: 'Ceiling fan (if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    bathroom: {
+      standard: [
+        {
+          itemId: 'eot-bathroom-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'eot-bathroom-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-exhaust-fan',
+          label: 'Exhaust fan',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-walls',
+          label: 'Walls (spot clean marks, moisture residue)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-bathroom-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'eot-bathroom-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-bathroom-door-handle',
+          label: 'Door handle',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-bathroom-toilet-pan-internal',
+          label: 'Toilet – pan (internal)',
+          category: 'toilet'
+        },
+        {
+          itemId: 'eot-bathroom-toilet-pan-external',
+          label: 'Toilet – pan (external)',
+          category: 'toilet'
+        },
+        {
+          itemId: 'eot-bathroom-toilet-seat',
+          label: 'Toilet seat (top + underside)',
+          category: 'toilet'
+        },
+        {
+          itemId: 'eot-bathroom-toilet-cistern',
+          label: 'Toilet cistern',
+          category: 'toilet'
+        },
+        {
+          itemId: 'eot-bathroom-toilet-base',
+          label: 'Toilet base / floor seal',
+          category: 'toilet'
+        },
+        {
+          itemId: 'eot-bathroom-sink-basin',
+          label: 'Sink / basin',
+          category: 'sink'
+        },
+        {
+          itemId: 'eot-bathroom-tapware',
+          label: 'Tapware (sink taps)',
+          category: 'sink'
+        },
+        {
+          itemId: 'eot-bathroom-vanity-exterior',
+          label: 'Vanity exterior',
+          category: 'vanity'
+        },
+        {
+          itemId: 'eot-bathroom-vanity-shelving',
+          label: 'Vanity interior shelving',
+          category: 'vanity'
+        },
+        {
+          itemId: 'eot-bathroom-drawers',
+          label: 'Drawers (internal + external)',
+          category: 'vanity'
+        },
+        {
+          itemId: 'eot-bathroom-mirror',
+          label: 'Mirror',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-shower-glass',
+          label: 'Shower glass / screen',
+          category: 'shower'
+        },
+        {
+          itemId: 'eot-bathroom-shower-frame',
+          label: 'Shower frame / seals',
+          category: 'shower'
+        },
+        {
+          itemId: 'eot-bathroom-shower-walls',
+          label: 'Shower walls',
+          category: 'shower'
+        },
+        {
+          itemId: 'eot-bathroom-shower-floor',
+          label: 'Shower floor / tray',
+          category: 'shower'
+        },
+        {
+          itemId: 'eot-bathroom-shower-drain',
+          label: 'Shower drain',
+          category: 'shower'
+        },
+        {
+          itemId: 'eot-bathroom-bathtub',
+          label: 'Bathtub (if present)',
+          category: 'bath'
+        },
+        {
+          itemId: 'eot-bathroom-bathtub-tapware',
+          label: 'Bathtub tapware',
+          category: 'bath'
+        },
+        {
+          itemId: 'eot-bathroom-tile-grout-walls',
+          label: 'Tile grout (walls)',
+          category: 'tiles'
+        },
+        {
+          itemId: 'eot-bathroom-tile-grout-floors',
+          label: 'Tile grout (floors)',
+          category: 'tiles'
+        },
+        {
+          itemId: 'eot-bathroom-heated-towel-rail',
+          label: 'Heated towel rail (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-towel-hooks',
+          label: 'Towel hooks / rails',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-window-glass',
+          label: 'Window glass (internal, if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-bathroom-window-frame',
+          label: 'Window frame / sill (if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-bathroom-floor-vacuum',
+          label: 'Floor – vacuum (if applicable)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-bathroom-floor-mop',
+          label: 'Floor – mop (hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-bathroom-floor-drain',
+          label: 'Floor drain (if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-bathroom-soap-dispensers',
+          label: 'Soap dispensers',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-sanitary-bin',
+          label: 'Sanitary bin (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-bathroom-hand-dryer',
+          label: 'Hand dryer / paper towel unit (commercial, if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    laundry: {
+      standard: [
+        {
+          itemId: 'eot-laundry-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'eot-laundry-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-laundry-exhaust-fan',
+          label: 'Exhaust fan',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-laundry-walls',
+          label: 'Walls (spot clean marks)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-laundry-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'eot-laundry-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-laundry-door-handle',
+          label: 'Door handle',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-laundry-tub-sink',
+          label: 'Laundry tub / sink',
+          category: 'sink'
+        },
+        {
+          itemId: 'eot-laundry-tapware',
+          label: 'Tapware (laundry taps)',
+          category: 'sink'
+        },
+        {
+          itemId: 'eot-laundry-splashback',
+          label: 'Splashback / wall behind tub',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'eot-laundry-benchtop',
+          label: 'Benchtop / folding surface',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'eot-laundry-cabinet-exterior',
+          label: 'Cabinet exterior',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-laundry-cabinet-shelving',
+          label: 'Cabinet interior shelving',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-laundry-drawers',
+          label: 'Drawers (internal + external)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-laundry-open-shelving',
+          label: 'Open shelving',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-laundry-washer-exterior',
+          label: 'Washer exterior (if present)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-laundry-washer-lint-filter',
+          label: 'Washer lint filter',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-laundry-dryer-exterior',
+          label: 'Dryer exterior (if present)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-laundry-dryer-lint-trap',
+          label: 'Dryer lint trap',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-laundry-drying-racks',
+          label: 'Drying racks / clotheslines (internal)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-laundry-ironing-board',
+          label: 'Ironing board (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-laundry-storage-baskets',
+          label: 'Storage baskets / hampers',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-laundry-window-glass',
+          label: 'Window glass (internal, if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-laundry-window-frame',
+          label: 'Window frame / sill (if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-laundry-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-laundry-floor-vacuum',
+          label: 'Floor – vacuum',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-laundry-floor-mop',
+          label: 'Floor – mop (hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-laundry-floor-drain',
+          label: 'Floor drain (if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-laundry-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-laundry-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    living_area: {
+      standard: [
+        {
+          itemId: 'eot-living-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'eot-living-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-living-ceiling-fans',
+          label: 'Ceiling fans (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-living-walls',
+          label: 'Walls (spot clean marks)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-living-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'eot-living-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-living-door-handles',
+          label: 'Door handles',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-living-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-living-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-living-window-glass',
+          label: 'Windows (internal glass)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-living-window-frames',
+          label: 'Window frames',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-living-window-sills',
+          label: 'Window sills',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-living-curtains-blinds',
+          label: 'Curtains / blinds (dusting only)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-living-built-in-shelving',
+          label: 'Built-in shelving',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-living-freestanding-shelving',
+          label: 'Freestanding shelving',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-living-tv-unit',
+          label: 'TV unit / media cabinet',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-living-cabinets-sideboards',
+          label: 'Cabinets / sideboards',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-living-tables',
+          label: 'Tables / coffee tables',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-living-chairs',
+          label: 'Chairs / seating (external wipe)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-living-fireplace-surround',
+          label: 'Fireplace surround (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-living-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-living-heater-unit',
+          label: 'Heater / heat pump unit',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-living-stair-treads',
+          label: 'Stair treads (if present)',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-living-stair-risers',
+          label: 'Stair risers',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-living-stair-edges',
+          label: 'Stair edges / nosing',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-living-bannisters-handrails',
+          label: 'Bannisters / handrails',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-living-staircase-underside',
+          label: 'Staircase underside (dusting)',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-living-stair-lift-rail',
+          label: 'Stair lift rail (if present)',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-living-stair-lift-chair',
+          label: 'Stair lift chair (if present)',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-living-floor-vacuum',
+          label: 'Floor – vacuum (carpet)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-living-floor-mop',
+          label: 'Floor – mop (hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-living-floor-edges',
+          label: 'Floor edges / corners',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-living-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    entryway: {
+      standard: [
+        {
+          itemId: 'eot-entryway-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'eot-entryway-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-entryway-walls',
+          label: 'Walls (spot clean marks)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-entryway-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'eot-entryway-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-entryway-door-handles',
+          label: 'Door handles',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-entryway-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-entryway-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-entryway-shoe-storage',
+          label: 'Built-in shoe storage / cubbies (if present)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-entryway-coat-hooks',
+          label: 'Coat hooks / coat rack (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-entryway-console-table',
+          label: 'Console table / side table (if present)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-entryway-mirror',
+          label: 'Mirror (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-entryway-window-glass',
+          label: 'Windows (internal glass, if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-entryway-window-frames',
+          label: 'Window frames / sills (if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-entryway-stair-treads',
+          label: 'Stair treads (if present)',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-entryway-stair-risers',
+          label: 'Stair risers (if present)',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-entryway-bannisters',
+          label: 'Bannisters / handrails (if present)',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-entryway-stair-underside',
+          label: 'Stair underside (dusting, if present)',
+          category: 'stairs'
+        },
+        {
+          itemId: 'eot-entryway-heater-unit',
+          label: 'Heater / heat pump unit (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-entryway-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-entryway-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-entryway-floor-vacuum',
+          label: 'Floor – vacuum (carpet)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-entryway-floor-mop',
+          label: 'Floor – mop (hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-entryway-floor-edges',
+          label: 'Floor edges / corners',
+          category: 'floors'
+        }
+      ]
+    },
+    basement: {
+      standard: [
+        {
+          itemId: 'eot-basement-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'eot-basement-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-exposed-beams',
+          label: 'Exposed beams / pipes (dusting, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-walls',
+          label: 'Walls (spot clean marks / moisture residue)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-basement-skirting-boards',
+          label: 'Skirting boards (if present)',
+          category: 'trim'
+        },
+        {
+          itemId: 'eot-basement-doors',
+          label: 'Doors (front + back, if present)',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-basement-door-handles',
+          label: 'Door handles',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-basement-window-glass',
+          label: 'Windows (internal glass, if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-basement-window-frames',
+          label: 'Window frames / sills (if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-basement-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-dehumidifier',
+          label: 'Dehumidifier unit exterior (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-hvac-unit',
+          label: 'Heater / HVAC unit exterior (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-shelving',
+          label: 'Shelving (open shelves)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-basement-storage-racks',
+          label: 'Storage racks',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-basement-cabinets-exterior',
+          label: 'Cabinets exterior (if present)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-basement-cabinets-shelving',
+          label: 'Cabinets interior shelving (if present)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-basement-workbench',
+          label: 'Workbench / utility bench (if present)',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'eot-basement-electrical-panel',
+          label: 'Electrical panel exterior (utility rooms, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-water-heater',
+          label: 'Water heater / boiler exterior (utility rooms, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-pipes-valves',
+          label: 'Pipes / valves accessible surfaces (dusting only, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-concrete-sweep',
+          label: 'Concrete floor – sweep',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-basement-concrete-mop',
+          label: 'Concrete floor – mop (if applicable)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-basement-floor-vacuum',
+          label: 'Floor – vacuum (carpet, if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-basement-floor-mop',
+          label: 'Floor – mop (hard surface, if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-basement-floor-drain',
+          label: 'Floor drain (if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-basement-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-mirrors',
+          label: 'Mirrors (gym / theater, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-basement-equipment-exterior',
+          label: 'Equipment exterior wipe (gym/theater/laundry station, if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    utility_special: {
+      standard: [
+        {
+          itemId: 'eot-utility-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'eot-utility-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-walls',
+          label: 'Walls (spot clean marks)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-utility-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'eot-utility-doors',
+          label: 'Doors (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-utility-door-handles',
+          label: 'Door handles',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-utility-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-shelving',
+          label: 'Shelving (open shelves)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-utility-cabinets-exterior',
+          label: 'Cabinets exterior (if present)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-utility-cabinets-shelving',
+          label: 'Cabinets interior shelving (if present)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-utility-storage-bins',
+          label: 'Storage bins / hampers (if present)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-utility-sauna-benches',
+          label: 'Sauna benches (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-sauna-walls',
+          label: 'Sauna walls / interior wood surfaces (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-sauna-heater',
+          label: 'Sauna heater exterior (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-steam-benches',
+          label: 'Steam room benches (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-steam-walls',
+          label: 'Steam room walls (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-steam-floor',
+          label: 'Steam room floor (if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-utility-garage-sweep',
+          label: 'Garage floor – sweep (if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-utility-garage-spot-mop',
+          label: 'Garage floor – spot mop (optional, if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-utility-garage-shelves',
+          label: 'Garage shelves / racks (if present)',
+          category: 'storage'
+        },
+        {
+          itemId: 'eot-utility-garage-door-track',
+          label: 'Garage door track accessible surfaces (dusting, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-utility-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    home_office: {
+      standard: [
+        {
+          itemId: 'eot-office-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'eot-office-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-office-walls',
+          label: 'Walls (spot clean marks)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-office-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'eot-office-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-office-door-handle',
+          label: 'Door handle',
+          category: 'doors'
+        },
+        {
+          itemId: 'eot-office-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-office-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-office-desk-surface',
+          label: 'Desk surface (dry wipe)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-office-desk-drawers',
+          label: 'Desk drawers (external + internal, if applicable)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-office-filing-cabinet',
+          label: 'Filing cabinet exterior (if present)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-office-shelving',
+          label: 'Shelving / bookcases',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-office-monitor-screens',
+          label: 'Monitor screens (dry cloth only, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-office-keyboard-mouse',
+          label: 'Keyboard / mouse surfaces (dry wipe only, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-office-printers-devices',
+          label: 'Printers / devices exterior (dry wipe only, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-office-chair',
+          label: 'Chair (external wipe)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'eot-office-window-glass',
+          label: 'Windows (internal glass, if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-office-window-frames',
+          label: 'Window frames / sills (if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-office-curtains-blinds',
+          label: 'Curtains / blinds (dusting only)',
+          category: 'windows'
+        },
+        {
+          itemId: 'eot-office-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-office-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-office-floor-vacuum',
+          label: 'Floor – vacuum (carpet)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-office-floor-mop',
+          label: 'Floor – mop (hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-office-floor-edges',
+          label: 'Floor edges / corners',
+          category: 'floors'
+        }
+      ]
+    },
+    outdoor: {
+      standard: [
+        {
+          itemId: 'eot-outdoor-furniture',
+          label: 'Outdoor furniture (wipe down, if present)',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-railings',
+          label: 'Railings / balustrades',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-deck-sweep',
+          label: 'Deck boards / surface – sweep',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-deck-mop',
+          label: 'Deck boards / surface – mop (if applicable)',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-patio-sweep',
+          label: 'Patio surface – sweep',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-patio-mop',
+          label: 'Patio surface – mop (if applicable)',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-steps-sweep',
+          label: 'Outdoor steps – sweep',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-steps-edges',
+          label: 'Outdoor steps – edges/corners',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-pool-sweep',
+          label: 'Pool surround – sweep',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-pool-spot-wash',
+          label: 'Pool surround – spot wash',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-shed-floor',
+          label: 'Outdoor storage shed floor – sweep',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-shed-shelves',
+          label: 'Outdoor storage shed shelves (wipe, if present)',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-external-doors',
+          label: 'External doors (accessible surfaces, if present)',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-external-door-handles',
+          label: 'External door handles',
+          category: 'outdoor'
+        },
+        {
+          itemId: 'eot-outdoor-cobweb-sweep',
+          label: 'Cobweb sweep (corners/eaves within reach, if applicable)',
+          category: 'outdoor'
+        }
+      ]
+    },
+    property_wide: {
+      standard: [
+        {
+          itemId: 'eot-property-wide-vacuum',
+          label: 'Property-wide floors vacuum (carpet areas)',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'eot-property-wide-mop',
+          label: 'Property-wide floors mop (hard surface areas)',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'eot-property-wide-floor-edges',
+          label: 'Property-wide floors edges/corners pass',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'eot-property-wide-windows',
+          label: 'Property-wide internal windows (if included in service scope)',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'eot-property-wide-window-frames',
+          label: 'Property-wide internal window frames/sills (if included)',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'eot-property-wide-spot-marks',
+          label: 'Property-wide spot marks (walls/doors) sweep pass',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'eot-property-wide-walkthrough',
+          label: 'Final walkthrough / quality check',
+          category: 'property_wide'
+        },
+        {
+          itemId: 'eot-property-wide-waste',
+          label: 'Waste removal / bin liners (if included)',
+          category: 'property_wide'
+        }
+      ]
+    },
+    kitchen: {
+      standard: [
+        {
+          itemId: 'eot-kitchen-benchtops',
+          label: 'Benchtops (laminate / stainless steel)',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'eot-kitchen-bench-edges',
+          label: 'Bench edges & joins',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'eot-kitchen-splashback',
+          label: 'Splashback (tiles or metal backing)',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'eot-kitchen-bench-corners',
+          label: 'Bench corners & wall junctions',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'eot-kitchen-sink-bowls',
+          label: 'Sink bowls (single / double)',
+          category: 'sink'
+        },
+        {
+          itemId: 'eot-kitchen-sink-drains',
+          label: 'Sink drains & strainers',
+          category: 'sink'
+        },
+        {
+          itemId: 'eot-kitchen-taps',
+          label: 'Taps / mixer',
+          category: 'sink'
+        },
+        {
+          itemId: 'eot-kitchen-tap-bases',
+          label: 'Tap bases & splash zone',
+          category: 'sink'
+        },
+        {
+          itemId: 'eot-kitchen-under-sink-cupboard',
+          label: 'Under-sink cupboard (external)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-pipe-visible',
+          label: 'Pipe visible areas (if accessible)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-lower-cupboards',
+          label: 'Lower cupboards (doors)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-upper-cupboards',
+          label: 'Upper cupboards (doors)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-drawer-fronts',
+          label: 'Drawer fronts',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-drawer-handles',
+          label: 'Drawer handles',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-cupboard-handles',
+          label: 'Cupboard handles',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-kickboards',
+          label: 'Kickboards / toe-kicks',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-cupboard-sides',
+          label: 'External cupboard sides',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-cupboard-tops',
+          label: 'Cupboard tops (where exposed)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'eot-kitchen-oven-exterior',
+          label: 'Oven exterior',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-oven-door-outside',
+          label: 'Oven door (outside)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-oven-handle',
+          label: 'Oven handle',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-oven-knobs',
+          label: 'Oven control knobs',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-cooktop',
+          label: 'Cooktop / hotplates',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-cooktop-elements',
+          label: 'Cooktop rings / elements',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-drip-trays',
+          label: 'Cooktop drip trays (if applicable)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-stove-splashback',
+          label: 'Stove splashback panel (metal / tile)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-rangehood-exterior',
+          label: 'Rangehood exterior',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'eot-kitchen-rangehood-underside',
+          label: 'Rangehood underside',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'eot-kitchen-rangehood-filters',
+          label: 'Grease filters (external surface)',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'eot-kitchen-rangehood-light-covers',
+          label: 'Light covers (if reachable)',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'eot-kitchen-rangehood-wall-area',
+          label: 'Surrounding wall area',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'eot-kitchen-fridge-exterior',
+          label: 'Refrigerator exterior',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-fridge-handles',
+          label: 'Fridge door handles',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-microwave-exterior',
+          label: 'Microwave exterior',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-kettle-exterior',
+          label: 'Kettle exterior',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-dishwasher-exterior',
+          label: 'Dishwasher exterior (if present)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-appliance-bases',
+          label: 'Appliance bases (where visible)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'eot-kitchen-painted-walls',
+          label: 'Painted walls (wipe-down)',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-kitchen-tiles-grout',
+          label: 'Tiles & grout',
+          category: 'walls'
+        },
+        {
+          itemId: 'eot-kitchen-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-kitchen-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-kitchen-safety-signage',
+          label: 'Safety signage (wipe only)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-kitchen-fire-extinguisher',
+          label: 'Fire extinguisher exterior',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'eot-kitchen-floor',
+          label: 'Kitchen floor (vinyl / tile)',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-kitchen-floor-edges',
+          label: 'Floor edges & corners',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-kitchen-under-bench-floor',
+          label: 'Under-bench floor areas',
+          category: 'floors'
+        },
+        {
+          itemId: 'eot-kitchen-bins',
+          label: 'Bins (external)',
+          category: 'waste'
+        },
+        {
+          itemId: 'eot-kitchen-bin-lids',
+          label: 'Bin lids',
+          category: 'waste'
+        }
+      ]
+    }
+  },
+  residential: {
+    bedroom: {
+      standard: [
+        {
+          itemId: 'res-bedroom-walls',
+          label: 'Walls (spot clean marks, scuffs)',
+          category: 'walls'
+        },
+        {
+          itemId: 'res-bedroom-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'res-bedroom-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'res-bedroom-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bedroom-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bedroom-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bedroom-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'res-bedroom-door-handle',
+          label: 'Door handle',
+          category: 'doors'
+        },
+        {
+          itemId: 'res-bedroom-wardrobe-exterior',
+          label: 'Wardrobe exterior',
+          category: 'wardrobe'
+        },
+        {
+          itemId: 'res-bedroom-wardrobe-shelving',
+          label: 'Wardrobe interior shelving',
+          category: 'wardrobe'
+        },
+        {
+          itemId: 'res-bedroom-wardrobe-hanging-rail',
+          label: 'Wardrobe hanging rail',
+          category: 'wardrobe'
+        },
+        {
+          itemId: 'res-bedroom-drawers',
+          label: 'Drawers (internal + external)',
+          category: 'storage'
+        },
+        {
+          itemId: 'res-bedroom-window-glass',
+          label: 'Windows (internal glass)',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-bedroom-window-frames',
+          label: 'Window frames',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-bedroom-window-sills',
+          label: 'Window sills',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-bedroom-curtains-blinds',
+          label: 'Curtains / blinds (dusting only)',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-bedroom-bed-frame',
+          label: 'Bed frame',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-bedroom-mattress-edges',
+          label: 'Mattress (vacuum edges only)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-bedroom-bedside-tables',
+          label: 'Bedside tables',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-bedroom-desks-dressers',
+          label: 'Desks / dressers',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-bedroom-shelving',
+          label: 'Shelving (open shelves)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-bedroom-mirrors',
+          label: 'Mirrors',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bedroom-floor-vacuum',
+          label: 'Floor – vacuum',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-bedroom-floor-mop',
+          label: 'Floor – mop (if hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-bedroom-carpet-edges',
+          label: 'Floor – carpet edges',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-bedroom-heater-unit',
+          label: 'Heater / heat pump unit',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bedroom-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bedroom-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bedroom-ceiling-fan',
+          label: 'Ceiling fan (if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    bathroom: {
+      standard: [
+        {
+          itemId: 'res-bathroom-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'res-bathroom-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bathroom-exhaust-fan',
+          label: 'Exhaust fan',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bathroom-walls',
+          label: 'Walls (spot clean marks, moisture residue)',
+          category: 'walls'
+        },
+        {
+          itemId: 'res-bathroom-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'res-bathroom-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'res-bathroom-door-handle',
+          label: 'Door handle',
+          category: 'doors'
+        },
+        {
+          itemId: 'res-bathroom-toilet-pan-internal',
+          label: 'Toilet – pan (internal)',
+          category: 'toilet'
+        },
+        {
+          itemId: 'res-bathroom-toilet-pan-external',
+          label: 'Toilet – pan (external)',
+          category: 'toilet'
+        },
+        {
+          itemId: 'res-bathroom-toilet-seat',
+          label: 'Toilet seat (top + underside)',
+          category: 'toilet'
+        },
+        {
+          itemId: 'res-bathroom-toilet-cistern',
+          label: 'Toilet cistern',
+          category: 'toilet'
+        },
+        {
+          itemId: 'res-bathroom-toilet-base',
+          label: 'Toilet base / floor seal',
+          category: 'toilet'
+        },
+        {
+          itemId: 'res-bathroom-sink-basin',
+          label: 'Sink / basin',
+          category: 'sink'
+        },
+        {
+          itemId: 'res-bathroom-tapware',
+          label: 'Tapware (sink taps)',
+          category: 'sink'
+        },
+        {
+          itemId: 'res-bathroom-vanity-exterior',
+          label: 'Vanity exterior',
+          category: 'vanity'
+        },
+        {
+          itemId: 'res-bathroom-vanity-shelving',
+          label: 'Vanity interior shelving',
+          category: 'vanity'
+        },
+        {
+          itemId: 'res-bathroom-drawers',
+          label: 'Drawers (internal + external)',
+          category: 'vanity'
+        },
+        {
+          itemId: 'res-bathroom-mirror',
+          label: 'Mirror',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bathroom-shower-glass',
+          label: 'Shower glass / screen',
+          category: 'shower'
+        },
+        {
+          itemId: 'res-bathroom-shower-frame',
+          label: 'Shower frame / seals',
+          category: 'shower'
+        },
+        {
+          itemId: 'res-bathroom-shower-walls',
+          label: 'Shower walls',
+          category: 'shower'
+        },
+        {
+          itemId: 'res-bathroom-shower-floor',
+          label: 'Shower floor / tray',
+          category: 'shower'
+        },
+        {
+          itemId: 'res-bathroom-shower-drain',
+          label: 'Shower drain',
+          category: 'shower'
+        },
+        {
+          itemId: 'res-bathroom-bathtub',
+          label: 'Bathtub (if present)',
+          category: 'bath'
+        },
+        {
+          itemId: 'res-bathroom-bathtub-tapware',
+          label: 'Bathtub tapware',
+          category: 'bath'
+        },
+        {
+          itemId: 'res-bathroom-tile-grout-walls',
+          label: 'Tile grout (walls)',
+          category: 'tiles'
+        },
+        {
+          itemId: 'res-bathroom-tile-grout-floors',
+          label: 'Tile grout (floors)',
+          category: 'tiles'
+        },
+        {
+          itemId: 'res-bathroom-towel-hooks',
+          label: 'Towel hooks / rails',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-bathroom-window-glass',
+          label: 'Window glass (internal, if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-bathroom-window-frame',
+          label: 'Window frame / sill (if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-bathroom-floor-vacuum',
+          label: 'Floor – vacuum (if applicable)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-bathroom-floor-mop',
+          label: 'Floor – mop (hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-bathroom-floor-drain',
+          label: 'Floor drain (if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-bathroom-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    kitchen: {
+      standard: [
+        {
+          itemId: 'res-kitchen-benchtops',
+          label: 'Benchtops (laminate / stainless steel)',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'res-kitchen-bench-edges',
+          label: 'Bench edges & joins',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'res-kitchen-splashback',
+          label: 'Splashback (tiles or metal backing)',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'res-kitchen-bench-corners',
+          label: 'Bench corners & wall junctions',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'res-kitchen-sink-bowls',
+          label: 'Sink bowls (single / double)',
+          category: 'sink'
+        },
+        {
+          itemId: 'res-kitchen-sink-drains',
+          label: 'Sink drains & strainers',
+          category: 'sink'
+        },
+        {
+          itemId: 'res-kitchen-taps',
+          label: 'Taps / mixer',
+          category: 'sink'
+        },
+        {
+          itemId: 'res-kitchen-tap-bases',
+          label: 'Tap bases & splash zone',
+          category: 'sink'
+        },
+        {
+          itemId: 'res-kitchen-under-sink-cupboard',
+          label: 'Under-sink cupboard (external)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-pipe-visible',
+          label: 'Pipe visible areas (if accessible)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-lower-cupboards',
+          label: 'Lower cupboards (doors)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-upper-cupboards',
+          label: 'Upper cupboards (doors)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-drawer-fronts',
+          label: 'Drawer fronts',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-drawer-handles',
+          label: 'Drawer handles',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-cupboard-handles',
+          label: 'Cupboard handles',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-kickboards',
+          label: 'Kickboards / toe-kicks',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-cupboard-sides',
+          label: 'External cupboard sides',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-cupboard-tops',
+          label: 'Cupboard tops (where exposed)',
+          category: 'cupboards'
+        },
+        {
+          itemId: 'res-kitchen-oven-exterior',
+          label: 'Oven exterior',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-oven-door-outside',
+          label: 'Oven door (outside)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-oven-handle',
+          label: 'Oven handle',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-oven-knobs',
+          label: 'Oven control knobs',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-cooktop',
+          label: 'Cooktop / hotplates',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-cooktop-elements',
+          label: 'Cooktop rings / elements',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-drip-trays',
+          label: 'Cooktop drip trays (if applicable)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-stove-splashback',
+          label: 'Stove splashback panel (metal / tile)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-rangehood-exterior',
+          label: 'Rangehood exterior',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'res-kitchen-rangehood-underside',
+          label: 'Rangehood underside',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'res-kitchen-rangehood-filters',
+          label: 'Grease filters (external surface)',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'res-kitchen-rangehood-light-covers',
+          label: 'Light covers (if reachable)',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'res-kitchen-rangehood-wall-area',
+          label: 'Surrounding wall area',
+          category: 'rangehood'
+        },
+        {
+          itemId: 'res-kitchen-fridge-exterior',
+          label: 'Refrigerator exterior',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-fridge-handles',
+          label: 'Fridge door handles',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-microwave-exterior',
+          label: 'Microwave exterior',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-kettle-exterior',
+          label: 'Kettle exterior',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-dishwasher-exterior',
+          label: 'Dishwasher exterior (if present)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-appliance-bases',
+          label: 'Appliance bases (where visible)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-kitchen-painted-walls',
+          label: 'Painted walls (wipe-down)',
+          category: 'walls'
+        },
+        {
+          itemId: 'res-kitchen-tiles-grout',
+          label: 'Tiles & grout',
+          category: 'walls'
+        },
+        {
+          itemId: 'res-kitchen-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-kitchen-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-kitchen-floor',
+          label: 'Kitchen floor (vinyl / tile)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-kitchen-floor-edges',
+          label: 'Floor edges & corners',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-kitchen-under-bench-floor',
+          label: 'Under-bench floor areas',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-kitchen-bins',
+          label: 'Bins (external)',
+          category: 'waste'
+        },
+        {
+          itemId: 'res-kitchen-bin-lids',
+          label: 'Bin lids',
+          category: 'waste'
+        }
+      ]
+    },
+    living_area: {
+      standard: [
+        {
+          itemId: 'res-living-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'res-living-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-living-ceiling-fans',
+          label: 'Ceiling fans (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-living-walls',
+          label: 'Walls (spot clean marks)',
+          category: 'walls'
+        },
+        {
+          itemId: 'res-living-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'res-living-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'res-living-door-handles',
+          label: 'Door handles',
+          category: 'doors'
+        },
+        {
+          itemId: 'res-living-light-switches',
+          label: 'Light switches',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-living-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-living-window-glass',
+          label: 'Windows (internal glass)',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-living-window-frames',
+          label: 'Window frames',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-living-window-sills',
+          label: 'Window sills',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-living-curtains-blinds',
+          label: 'Curtains / blinds (dusting only)',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-living-built-in-shelving',
+          label: 'Built-in shelving',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-living-freestanding-shelving',
+          label: 'Freestanding shelving',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-living-tv-unit',
+          label: 'TV unit / media cabinet',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-living-cabinets-sideboards',
+          label: 'Cabinets / sideboards',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-living-tables',
+          label: 'Tables / coffee tables',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-living-chairs',
+          label: 'Chairs / seating (external wipe)',
+          category: 'furniture'
+        },
+        {
+          itemId: 'res-living-fireplace-surround',
+          label: 'Fireplace surround (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-living-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-living-heater-unit',
+          label: 'Heater / heat pump unit',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-living-floor-vacuum',
+          label: 'Floor – vacuum (carpet)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-living-floor-mop',
+          label: 'Floor – mop (hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-living-floor-edges',
+          label: 'Floor edges / corners',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-living-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        }
+      ]
+    },
+    laundry: {
+      standard: [
+        {
+          itemId: 'res-laundry-ceiling-cobwebs',
+          label: 'Ceiling (cobwebs)',
+          category: 'ceiling'
+        },
+        {
+          itemId: 'res-laundry-light-fittings',
+          label: 'Light fittings',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-laundry-exhaust-fan',
+          label: 'Exhaust fan',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-laundry-walls',
+          label: 'Walls (spot clean marks)',
+          category: 'walls'
+        },
+        {
+          itemId: 'res-laundry-skirting-boards',
+          label: 'Skirting boards',
+          category: 'trim'
+        },
+        {
+          itemId: 'res-laundry-door',
+          label: 'Door (front + back)',
+          category: 'doors'
+        },
+        {
+          itemId: 'res-laundry-door-handle',
+          label: 'Door handle',
+          category: 'doors'
+        },
+        {
+          itemId: 'res-laundry-tub-sink',
+          label: 'Laundry tub / sink',
+          category: 'sink'
+        },
+        {
+          itemId: 'res-laundry-tapware',
+          label: 'Tapware (laundry taps)',
+          category: 'sink'
+        },
+        {
+          itemId: 'res-laundry-splashback',
+          label: 'Splashback / wall behind tub',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'res-laundry-benchtop',
+          label: 'Benchtop / folding surface',
+          category: 'surfaces'
+        },
+        {
+          itemId: 'res-laundry-cabinet-exterior',
+          label: 'Cabinet exterior',
+          category: 'storage'
+        },
+        {
+          itemId: 'res-laundry-cabinet-shelving',
+          label: 'Cabinet interior shelving',
+          category: 'storage'
+        },
+        {
+          itemId: 'res-laundry-drawers',
+          label: 'Drawers (internal + external)',
+          category: 'storage'
+        },
+        {
+          itemId: 'res-laundry-open-shelving',
+          label: 'Open shelving',
+          category: 'storage'
+        },
+        {
+          itemId: 'res-laundry-washer-exterior',
+          label: 'Washer exterior (if present)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-laundry-washer-lint-filter',
+          label: 'Washer lint filter',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-laundry-dryer-exterior',
+          label: 'Dryer exterior (if present)',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-laundry-dryer-lint-trap',
+          label: 'Dryer lint trap',
+          category: 'appliances'
+        },
+        {
+          itemId: 'res-laundry-drying-racks',
+          label: 'Drying racks / clotheslines (internal)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-laundry-ironing-board',
+          label: 'Ironing board (if present)',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-laundry-storage-baskets',
+          label: 'Storage baskets / hampers',
+          category: 'storage'
+        },
+        {
+          itemId: 'res-laundry-window-glass',
+          label: 'Window glass (internal, if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-laundry-window-frame',
+          label: 'Window frame / sill (if present)',
+          category: 'windows'
+        },
+        {
+          itemId: 'res-laundry-power-points',
+          label: 'Power points',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-laundry-floor-vacuum',
+          label: 'Floor – vacuum',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-laundry-floor-mop',
+          label: 'Floor – mop (hard surface)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-laundry-floor-drain',
+          label: 'Floor drain (if present)',
+          category: 'floors'
+        },
+        {
+          itemId: 'res-laundry-air-vents',
+          label: 'Air vents',
+          category: 'fixtures'
+        },
+        {
+          itemId: 'res-laundry-smoke-alarm',
+          label: 'Smoke alarm (external dusting, if present)',
+          category: 'fixtures'
+        }
+      ]
     }
   }
 };

@@ -52,6 +52,7 @@ class AysChecklistFormFactory {
     });
 
     const element = card.render();
+    card.element = element;
     container.appendChild(element);
     card.bind();
 
@@ -78,6 +79,7 @@ class AysChecklistFormFactory {
       });
 
       const element = card.render();
+      card.element = element;
       container.appendChild(element);
       card.bind();
 
@@ -119,7 +121,12 @@ class AysChecklistFormFactory {
     let totalItems = 0;
 
     this.cards.forEach(card => {
-      const items = card.element.querySelectorAll('input[type="checkbox"]');
+      const cardElement = card.domElement || card.element;
+      if (!cardElement) {
+        return;
+      }
+
+      const items = cardElement.querySelectorAll('input[type="checkbox"]');
       items.forEach(checkbox => {
         totalItems++;
         if (checkbox.checked) totalChecked++;
@@ -138,7 +145,12 @@ class AysChecklistFormFactory {
    */
   resetAll() {
     this.cards.forEach(card => {
-      const items = card.element.querySelectorAll('input[type="checkbox"]');
+      const cardElement = card.domElement || card.element;
+      if (!cardElement) {
+        return;
+      }
+
+      const items = cardElement.querySelectorAll('input[type="checkbox"]');
       items.forEach(checkbox => {
         checkbox.checked = false;
         checkbox.dispatchEvent(new Event('change', { bubbles: true }));
