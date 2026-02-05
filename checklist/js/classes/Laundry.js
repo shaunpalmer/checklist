@@ -6,7 +6,8 @@
 class Laundry extends Room {
   /**
    * Override getItems() to fetch laundry items from ITEM_DEFINITIONS
-   * Looks up: ITEM_DEFINITIONS[serviceType]['laundry'][variant]
+   * Looks up: ITEM_DEFINITIONS[serviceType]['laundry'] or ITEM_DEFINITIONS[serviceType]['laundry'][variant]
+   * Handles both flat objects (EOT) and variant-based arrays
    * @returns {Array<Object>} Laundry items for this service type and variant
    */
   getItems() {
@@ -16,6 +17,13 @@ class Laundry extends Room {
       return [];
     }
 
+    const normalizeToArray = (def) => {
+      if (!def) return [];
+      if (Array.isArray(def)) return def;
+      if (typeof def === 'object') return Object.values(def);
+      return [];
+    };
+
     // Look up service type section (eot, residential, commercial)
     const serviceData = ITEM_DEFINITIONS[this.serviceType];
     if (!serviceData) {
@@ -23,20 +31,20 @@ class Laundry extends Room {
       return [];
     }
 
-    // Look up laundry variants
+    // Look up laundry data
     const laundryData = serviceData.laundry;
     if (!laundryData) {
       console.warn(`No laundry data for service type: ${this.serviceType}`);
       return [];
     }
 
-    // Look up specific variant (e.g., 'basic', 'with_tub', 'with_washer')
-    const variantItems = laundryData[this.variant];
-    if (!variantItems || variantItems.length === 0) {
-      console.warn(`No items for laundry variant: ${this.variant} in ${this.serviceType}`);
-      return [];
+    // Try variant first (e.g., 'basic', 'with_tub', 'with_washer')
+    const variantData = laundryData[this.variant];
+    if (variantData) {
+      return normalizeToArray(variantData);
     }
 
-    return variantItems;
+    // EOT definitions are flat objects - convert to array
+    return normalizeToArray(laundryData);
   }
 }

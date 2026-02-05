@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "ESLint ITEM_DEFINITIONS",
+			"type": "shell",
+			"command": "npx eslint \"c:/xampp/htdocs/checklist/checklist/js/data/ITEM_DEFINITIONS.js\" --format stylish"
+		},
+		{
+			"label": "ESLint all JS",
+			"type": "shell",
+			"command": "npx eslint \"c:/xampp/htdocs/checklist/checklist/js/**/*.js\" --format compact"
+		},
+		{
+			"label": "Parse Check",
+			"type": "shell",
+			"command": "node parse-check.js"
+		},
+		{
+			"label": "Syntax Check",
+			"type": "shell",
+			"command": "node syntax-check.js"
+		}
+	]
+}

@@ -66,7 +66,7 @@ class AysDisclosureRoomCard {
     const progressFill = document.createElement('span');
     progressFill.className = 'room-progressbar-fill';
     progressFill.style.width = `${this.progressPercent}%`;
-    progressFill.style.background = this.progressPercent === 100 ? '#4CAF50' : '#2196F3';
+    progressFill.style.background = this.progressPercent === 100 ? 'var(--color-success)' : 'var(--color-accent)';
     progressFill.style.transition = 'width 0.3s ease';
     
     this.progressBarElement.appendChild(progressFill);
@@ -76,10 +76,23 @@ class AysDisclosureRoomCard {
     this.progressBadgeElement.className = 'progress-badge';
     this.progressBadgeElement.textContent = `${this.checkedCount}/${this.totalCount}`;
 
+    // Select All button
+    this.selectAllButton = document.createElement('button');
+    this.selectAllButton.type = 'button';
+    this.selectAllButton.className = 'select-all-btn';
+    this.selectAllButton.textContent = '☑ All';
+    this.selectAllButton.title = 'Select all items in this room';
+    this.selectAllButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // Prevent details toggle
+      this.toggleSelectAll();
+    });
+
     // Assemble summary
     summaryHeader.appendChild(roomTitle);
     summaryHeader.appendChild(this.progressBarElement);
     summaryHeader.appendChild(this.progressBadgeElement);
+    summaryHeader.appendChild(this.selectAllButton);
     summary.appendChild(summaryHeader);
 
     // Create room details container
@@ -125,6 +138,49 @@ class AysDisclosureRoomCard {
     const checkboxes = this.domElement.querySelectorAll('input[type="checkbox"]');
     const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
     this.updateProgress(checked, this.totalCount);
+    this.updateSelectAllButton();
+  }
+
+  // ===== SELECT ALL TOGGLE =====
+  toggleSelectAll() {
+    if (!this.domElement) return;
+
+    const checkboxes = this.domElement.querySelectorAll('input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+    // Toggle: if all checked, uncheck all; otherwise check all
+    const newState = !allChecked;
+
+    checkboxes.forEach(cb => {
+      if (cb.checked !== newState) {
+        cb.checked = newState;
+        // Trigger change event so other listeners (autosave, etc.) fire
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+
+    // Update progress
+    const checked = newState ? checkboxes.length : 0;
+    this.updateProgress(checked, this.totalCount);
+    this.updateSelectAllButton();
+  }
+
+  // ===== UPDATE SELECT ALL BUTTON STATE =====
+  updateSelectAllButton() {
+    if (!this.selectAllButton || !this.domElement) return;
+
+    const checkboxes = this.domElement.querySelectorAll('input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+    if (allChecked && checkboxes.length > 0) {
+      this.selectAllButton.textContent = '☐ None';
+      this.selectAllButton.title = 'Deselect all items in this room';
+      this.selectAllButton.dataset.allSelected = 'true';
+    } else {
+      this.selectAllButton.textContent = '☑ All';
+      this.selectAllButton.title = 'Select all items in this room';
+      this.selectAllButton.dataset.allSelected = 'false';
+    }
   }
 
   // ===== UPDATE PROGRESS =====
@@ -143,7 +199,7 @@ class AysDisclosureRoomCard {
       const fill = this.progressBarElement.querySelector('.room-progressbar-fill');
       if (fill) {
         fill.style.width = `${this.progressPercent}%`;
-        fill.style.background = this.progressPercent === 100 ? '#4CAF50' : '#2196F3';
+        fill.style.background = this.progressPercent === 100 ? 'var(--color-success)' : 'var(--color-accent)';
       }
     }
 

@@ -442,21 +442,21 @@ const AysRoomMetadataLookup = {
       variants: {
         open: {
           emoji: '🅿️',
-          label: 'Open Carpark',
-          description: 'Open air parking',
-          displayName: 'Open Carpark'
+          label: 'Frontage/entry sweep',
+          description: 'Sweep/blow around entrances and immediate frontage (tidy-up).',
+          displayName: 'Frontage/entry sweep'
         },
         covered: {
           emoji: '🏚️',
-          label: 'Covered Carpark',
-          description: 'Covered parking structure',
-          displayName: 'Covered Carpark'
+          label: 'Full carpark sweep (machine)',
+          description: 'Full sweep/blow of carpark areas (usually needs equipment).',
+          displayName: 'Full carpark sweep'
         },
         street: {
           emoji: '🚗',
-          label: 'Street Parking',
-          description: 'Street parking only',
-          displayName: 'Street Parking'
+          label: 'Street parking only',
+          description: 'No dedicated carpark (info only).',
+          displayName: 'Street parking only'
         }
       },
       icon: 'car',

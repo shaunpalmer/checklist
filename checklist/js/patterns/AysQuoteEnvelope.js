@@ -19,10 +19,14 @@
  */
 
 class AysQuoteEnvelope {
-  constructor() {
+  /**
+   * @param {number|string} [draftId] - The database-generated draft ID (from IndexedDB autoIncrement)
+   */
+  constructor(draftId = null) {
     // Envelope metadata
+    // IMPORTANT: ID should come from database, not random generation
     this.envelope = {
-      id: this._generateQuoteId(),
+      id: draftId ? ('Q-' + draftId) : null,  // Use database ID, not random
       type: 'quote',
       version: '1.0',
       timestamp: new Date().toISOString()
@@ -107,11 +111,13 @@ class AysQuoteEnvelope {
   }
 
   /**
-   * Generate a unique quote ID (Q-TIMESTAMP-RANDOM)
+   * @deprecated Use database-generated ID passed to constructor instead.
+   * Random ID generation is a point of failure - IDs should come from IndexedDB autoIncrement.
    * @private
    * @returns {string}
    */
   _generateQuoteId() {
+    console.warn('[AysQuoteEnvelope] _generateQuoteId is deprecated. Pass draftId to constructor.');
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();
     return `Q-${timestamp}-${random}`;

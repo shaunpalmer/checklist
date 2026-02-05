@@ -29,6 +29,19 @@ class AysListItemCheckbox {
     this.difficulty = options.difficulty || 'basic';
     this.checked = options.checked || false;
     this.name = options.name || this.room;
+    this.control = options.control;
+    this.variantKey = options.variantKey || options.optionsKey;
+    this.defaultVariant = options.defaultVariant;
+
+    // Optional pricing + quote metadata (used by checklist-script.js quote calculator)
+    this.baseCharge = options.baseCharge;
+    this.settingsKey = options.settingsKey;
+    this.serviceCode = options.serviceCode;
+    this.variantType = options.variantType;
+    this.optionsKey = options.optionsKey;
+    this.variantOptions = options.variantOptions;
+    this.itemHash = options.itemHash;
+    this.itemDetails = options.itemDetails;
 
     // Internal state
     this.domElement = null;
@@ -46,6 +59,36 @@ class AysListItemCheckbox {
     this.domElement.setAttribute('data-hours', this.hours);
     this.domElement.setAttribute('data-difficulty', this.difficulty);
 
+    if (this.baseCharge !== undefined && this.baseCharge !== null && this.baseCharge !== '') {
+      this.domElement.setAttribute('data-base-charge', this.baseCharge);
+    }
+    if (this.settingsKey) {
+      this.domElement.setAttribute('data-settings-key', this.settingsKey);
+    }
+    if (this.serviceCode) {
+      this.domElement.setAttribute('data-service-code', this.serviceCode);
+    }
+    if (this.control) {
+      this.domElement.setAttribute('data-control', this.control);
+    }
+    if (this.variantType) {
+      this.domElement.setAttribute('data-variant-type', this.variantType);
+    }
+    const optionsKey = this.optionsKey || this.variantKey;
+    if (optionsKey) {
+      this.domElement.setAttribute('data-options-key', optionsKey);
+      this.domElement.setAttribute('data-variant-key', optionsKey);
+    }
+    if (this.defaultVariant) {
+      this.domElement.setAttribute('data-default-variant', this.defaultVariant);
+    }
+    if (this.itemHash) {
+      this.domElement.setAttribute('data-item-hash', this.itemHash);
+    }
+    if (this.itemDetails) {
+      this.domElement.setAttribute('data-item-details', this.itemDetails);
+    }
+
     // Create checkbox input
     this.checkboxElement = document.createElement('input');
     this.checkboxElement.type = 'checkbox';
@@ -62,10 +105,68 @@ class AysListItemCheckbox {
     labelSpan.className = 'item-label';
     labelSpan.textContent = this.label;
 
+    // Optional variant dropdown (e.g., ovens, floor type)
+    let variantSelect = null;
+    const optionsKeyForSelect = this.optionsKey || this.variantKey;
+    const wantsSelect = this.control === 'checkbox+select' || this.variantType === 'dropdown';
+    if (wantsSelect && optionsKeyForSelect) {
+      const options = Array.isArray(this.variantOptions)
+        ? this.variantOptions
+        : (window.VARIANTS && Array.isArray(window.VARIANTS[optionsKeyForSelect])
+          ? window.VARIANTS[optionsKeyForSelect]
+          : []);
+
+      variantSelect = document.createElement('select');
+      variantSelect.className = 'variant-dropdown';
+      variantSelect.hidden = true;
+      variantSelect.disabled = true;
+      variantSelect.setAttribute('data-options-select', optionsKeyForSelect);
+
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Choose option...';
+      variantSelect.appendChild(placeholder);
+
+      options.forEach((opt) => {
+        if (!opt) return;
+        const option = document.createElement('option');
+        option.value = opt.value;
+        option.textContent = opt.label;
+        variantSelect.appendChild(option);
+      });
+    }
+
     // Append to label
     this.domElement.appendChild(this.checkboxElement);
     this.domElement.appendChild(customCheckbox);
     this.domElement.appendChild(labelSpan);
+    if (variantSelect) {
+      this.domElement.appendChild(variantSelect);
+
+      const isFloorVariant = optionsKeyForSelect === 'floor_types' || optionsKeyForSelect === 'floor_variants';
+      if (this.control === 'checkbox+select' && isFloorVariant) {
+        const applySelect = document.createElement('select');
+        applySelect.className = 'variant-apply-scope';
+        applySelect.setAttribute('aria-label', 'Apply floor type to other rooms');
+
+        const placeholderApply = document.createElement('option');
+        placeholderApply.value = '';
+        placeholderApply.textContent = 'Apply to…';
+        applySelect.appendChild(placeholderApply);
+
+        const optRoomType = document.createElement('option');
+        optRoomType.value = 'room-type';
+        optRoomType.textContent = 'Apply to all of this room type';
+        applySelect.appendChild(optRoomType);
+
+        const optAll = document.createElement('option');
+        optAll.value = 'all-rooms';
+        optAll.textContent = 'Apply to all rooms';
+        applySelect.appendChild(optAll);
+
+        this.domElement.appendChild(applySelect);
+      }
+    }
 
     return this.domElement;
   }

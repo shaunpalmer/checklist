@@ -4,6 +4,17 @@
 
 ---
 
+## Recent Updates
+
+- ✅ Factory now stores rendered disclosure elements and safely resolves them during progress/reset calculations (prevents undefined card element lookups).
+- ✅ Settings-driven structure is now the primary flow: `ITEM_DEFINITIONS` + `AysPropertyType` → `CHECKLIST_CONFIG` → `AysChecklistFormFactory` cards.
+- ✅ EOT scaffolding added (new `eot` definitions and `eot_residential` property type).
+- ✅ Commercial Toilet room prototype added and wired into script loading order.
+
+**Rolling notes & active backlog**: see [AGENT-MEMORY.md](AGENT-MEMORY.md).
+
+---
+
 ## Project Vision
 A **multi-tenant, role-based cleaning checklist system** that adapts to **four user types**:
 - **Customers** (Public Token) - View proof of service, photos, signature
@@ -19,16 +30,44 @@ See **PHP-IMPLEMENTATION.md** for complete role-based portal system design.
 ## Folder Structure (VERIFIED ✅)
 
 ```
-c:\xampp\htdocs\quotesTable\checklist\
-├── checklist-modern.html      ✅ Main interface (role-agnostic)
+c:\xampp\htdocs\checklist\checklist\
+├── checklist-modern.html                 ✅ Main interface
 ├── css/
-│   ├── checklist-variables.css ✅ CSS variables (colors, spacing, hover states)
-│   └── checklist-style.css     ✅ Styling (responsive, role-based classes ready)
+│   ├── checklist-variables.css           ✅ Design tokens
+│   └── checklist-style.css               ✅ UI styling
 ├── js/
-│   └── checklist-script.js     ✅ jQuery interactions, localStorage, animations
-├── ARCHITECTURE.md             ✅ Full blueprint for PHP integration
-└── PROGRESS.md                 📍 This file - tracking implementation
+│   ├── checklist-script.js               ✅ App init + events
+│   ├── data/
+│   │   ├── ITEM_DEFINITIONS.js           ✅ Canonical item catalog
+│   │   └── checklist-config.js           ✅ Builds CHECKLIST_CONFIG from Settings
+│   ├── generators/
+│   │   └── AysChecklistFormFactory.js    ✅ Renders disclosure cards, supports regenerate()
+│   ├── patterns/
+│   │   ├── AysPropertyType.js            ✅ Polymorphic property type registry
+│   │   └── PropertyService.js            ✅ Base class for property-wide services
+│   └── classes/                          ✅ Room prototypes (Room, CommercialRoom, etc.)
+└── docs/
+  ├── AGENT-MEMORY.md                   📍 Rolling notes + backlog
+  └── PROGRESS.md                       📍 This file
 ```
+
+---
+
+## Current Architecture (Snapshot)
+
+**Principle**: Settings decide structure; Form captures state.
+
+**Assembly line**:
+1. `ITEM_DEFINITIONS` provides the item catalog (rooms + services).
+2. `AysPropertyType.TYPES` defines which rooms/services exist for a property type.
+3. `checklist-config.js` builds a settings-derived `CHECKLIST_CONFIG`.
+4. `AysChecklistFormFactory` converts config → rendered disclosure cards.
+
+---
+
+## Legacy Notes (HTML/Data-Attributes Phase)
+
+The sections below are from the earlier data-attributes approach. They’re preserved for reference, but the current direction is **definition-driven + object-driven** (see `AGENT-MEMORY.md`).
 
 ---
 
@@ -74,7 +113,7 @@ c:\xampp\htdocs\quotesTable\checklist\
 - [ ] Create `includes/quote-calculator.php` - sum checked items
 
 ### Phase 4: Admin Features (NOT STARTED)
-- [ ] Add time picker inputs (Flatpickr time mode)
+- [ ] Add time picker inputs (`flatpickr` time mode)
 - [ ] Add quote mode toggle button
 - [ ] Add settings panel with rate inputs
 - [ ] Add quote summary calculation display
@@ -135,7 +174,7 @@ Every checklist item should eventually have these (add as needed):
 
 ## Next Immediate Steps
 
-1. **Add time picker inputs** to meta fields (Flatpickr)
+1. **Add time picker inputs** to meta fields (`flatpickr`)
 2. **Populate Deep Cleaning section** with full data attributes
 3. **Create role-based CSS file** (`role-based.css`)
 4. **Create PHP wrapper template** for WordPress integration

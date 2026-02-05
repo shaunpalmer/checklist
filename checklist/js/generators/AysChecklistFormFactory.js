@@ -14,6 +14,14 @@ class AysChecklistFormFactory {
     this.cards = [];
   }
 
+  getCards() {
+    return this.cards;
+  }
+
+  _getCardElement(card) {
+    return card?.domElement || card?.element || null;
+  }
+
   /**
    * Generate all room cards from config
    * @param {Object} config - CHECKLIST_CONFIG object
@@ -25,6 +33,10 @@ class AysChecklistFormFactory {
       console.error(`Container with id '${this.containerId}' not found`);
       return null;
     }
+
+    // Ensure generate() can be called repeatedly without duplicating cards.
+    container.innerHTML = '';
+    this.cards = [];
 
     // Process each room in config
     config.rooms.forEach(room => {
@@ -47,11 +59,14 @@ class AysChecklistFormFactory {
   _createSingleRoomCard(room, container) {
     const card = new AysDisclosureRoomCard({
       roomId: room.roomId,
-      title: `${room.emoji} ${room.title}`,
+      title: room.title,
+      emoji: room.emoji,
       items: room.items
     });
 
     const element = card.render();
+    // Ensure the factory has a stable reference even if the component internals change.
+    card.element = element;
     container.appendChild(element);
     card.bind();
 
@@ -73,11 +88,14 @@ class AysChecklistFormFactory {
     room.subRooms.forEach(subRoom => {
       const card = new AysDisclosureRoomCard({
         roomId: subRoom.subRoomId,  // Use subRoomId for unique identification
-        title: `${room.emoji} ${subRoom.title}`,  // e.g., "🛏️ Bedroom 1"
+        title: subRoom.title,  // e.g., "Bedroom 1"
+        emoji: subRoom.emoji || room.emoji,
         items: subRoom.items
       });
 
       const element = card.render();
+      // Ensure the factory has a stable reference even if the component internals change.
+      card.element = element;
       container.appendChild(element);
       card.bind();
 
@@ -119,7 +137,10 @@ class AysChecklistFormFactory {
     let totalItems = 0;
 
     this.cards.forEach(card => {
-      const items = card.element.querySelectorAll('input[type="checkbox"]');
+      const cardElement = this._getCardElement(card);
+      if (!cardElement) return;
+
+      const items = cardElement.querySelectorAll('input[type="checkbox"]');
       items.forEach(checkbox => {
         totalItems++;
         if (checkbox.checked) totalChecked++;
@@ -138,7 +159,10 @@ class AysChecklistFormFactory {
    */
   resetAll() {
     this.cards.forEach(card => {
-      const items = card.element.querySelectorAll('input[type="checkbox"]');
+      const cardElement = this._getCardElement(card);
+      if (!cardElement) return;
+
+      const items = cardElement.querySelectorAll('input[type="checkbox"]');
       items.forEach(checkbox => {
         checkbox.checked = false;
         checkbox.dispatchEvent(new Event('change', { bubbles: true }));

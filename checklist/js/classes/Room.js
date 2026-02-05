@@ -50,6 +50,213 @@ class Room {
   }
 
   /**
+   * Base room items common to most rooms (fixed features)
+   * Subclasses can override if needed.
+   * @returns {Array<Object>} Base items
+   */
+  getBaseItems() {
+    const items = [
+      {
+        itemId: 'base-door',
+        label: 'Door (wipe/clean)',
+        category: 'base_room',
+        hours: 0.08,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Wipe door surfaces (both sides where accessible).',
+        products: ['surface_cleaner', 'cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-door_frame',
+        label: 'Door frame & trim',
+        category: 'base_room',
+        hours: 0.06,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Wipe door frame and surrounding trim.',
+        products: ['surface_cleaner', 'cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-door_handle',
+        label: 'Door handle & touchpoints',
+        category: 'touchpoints',
+        hours: 0.04,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Disinfect handles, knobs, and touchplates.',
+        products: ['disinfectant', 'cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-switches',
+        label: 'Light switches',
+        category: 'touchpoints',
+        hours: 0.04,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Wipe light switches and plates.',
+        products: ['disinfectant', 'cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-power_points',
+        label: 'Power points & outlets',
+        category: 'touchpoints',
+        hours: 0.04,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Wipe outlet covers and surrounding wall area.',
+        products: ['disinfectant', 'cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-vents',
+        label: 'Vents & air returns',
+        category: 'fixtures',
+        hours: 0.06,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Dust and wipe vents/grilles where accessible.',
+        products: ['duster', 'cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-skirting',
+        label: 'Skirting boards / baseboards',
+        category: 'trim',
+        hours: 0.08,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Wipe skirting boards and trim.',
+        products: ['microfiber_cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-windows',
+        label: 'Windows & sills (internal)',
+        category: 'windows',
+        hours: 0.10,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Wipe internal window frames and sills.',
+        products: ['glass_cleaner', 'cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-builtins',
+        label: 'Built-in cupboards / shelving (external)',
+        category: 'surfaces',
+        hours: 0.08,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Wipe fixed cupboards/shelves and ledges.',
+        products: ['microfiber_cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      },
+      {
+        itemId: 'base-walls',
+        label: 'Walls (spot wipe)',
+        category: 'walls',
+        hours: 0.08,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Spot clean marks/scuffs on walls.',
+        products: ['wall_cleaner', 'cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      }
+    ];
+
+    const isEot = this.serviceType === 'eot';
+    const allowLightFittings = isEot || this.metadata?.cleanLightFittings === true;
+    const allowCeilingWork = isEot || this.metadata?.cleanCeiling === true;
+
+    if (allowLightFittings) {
+      items.push({
+        itemId: 'base-light_fittings',
+        label: 'Light fittings (reachable)',
+        category: 'fixtures',
+        hours: 0.10,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Clean reachable light fittings and covers.',
+        products: ['microfiber_cloth'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      });
+    }
+
+    if (allowCeilingWork) {
+      items.push({
+        itemId: 'base-ceiling_decobing',
+        label: 'Ceiling / cobweb removal (reachable)',
+        category: 'high',
+        hours: 0.10,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Remove cobwebs and dust from reachable ceiling areas.',
+        products: ['duster'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      });
+    }
+
+    if (this.metadata?.includeBins === true) {
+      items.push({
+        itemId: 'base-bins',
+        label: 'Bins emptied & liners replaced',
+        category: 'waste',
+        hours: 0.06,
+        difficulty: 'basic',
+        workType: 'labor',
+        skillLevel: 'basic',
+        description: 'Empty bins and replace liners if required.',
+        products: ['trash_bags'],
+        staffCount: 1,
+        room: this.roomType,
+        name: this.roomType
+      });
+    }
+
+    return items;
+  }
+
+  /**
    * Apply sub-feature modifications to base items
    * Sub-features add/modify items or change labor/material hours
    * @param {Array<Object>} baseItems - Items from getItems()
@@ -108,6 +315,8 @@ class Room {
 
     return items.map((item, index) => ({
       ...item,
+      room: item.room || this.roomType,
+      name: item.name || this.roomType,
       itemId: `room_${this.roomType}_${String(this.number).padStart(3, '0')}_${item.itemId || `item_${index}`}`,
       roomId: this.roomId, // Add room context to each item
       sequenceInRoom: index + 1 // Track order within room
@@ -120,10 +329,47 @@ class Room {
    * @returns {Array<Object>} Final items ready for display/calculation
    */
   renderItems() {
-    const baseItems = this.getItems();
-    const modifiedItems = this.applySubFeatureModifications(baseItems);
+    const baseItems = this.getBaseItems();
+    const roomItems = this.getItems();
+    const combinedItems = this._ensureFloorControlItem([].concat(baseItems || [], roomItems || []));
+    const modifiedItems = this.applySubFeatureModifications(combinedItems);
     const normalizedItems = this.normalizeItemIds(modifiedItems);
     return normalizedItems;
+  }
+
+  _ensureFloorControlItem(items) {
+    if (!Array.isArray(items)) return items;
+
+    const hasFloorControl = items.some((item) => {
+      if (!item) return false;
+      const key = item.optionsKey || item.variantKey;
+      if (item.control === 'checkbox+select' && (key === 'floor_types' || key === 'floor_variants')) return true;
+      if (item.variantType === 'dropdown' && (key === 'floor_types' || key === 'floor_variants')) return true;
+      return false;
+    });
+
+    if (hasFloorControl) return items;
+
+    const floorItem = {
+      itemId: 'floors',
+      label: 'Floors (select type)',
+      category: 'floors',
+      hours: 0,
+      difficulty: 'basic',
+      workType: 'labor',
+      skillLevel: 'basic',
+      description: 'Select the floor type for this room',
+      products: [],
+      staffCount: 1,
+      room: this.roomType,
+      name: this.roomType,
+      control: 'checkbox+select',
+      variantType: 'dropdown',
+      variantKey: 'floor_types',
+      optionsKey: 'floor_types'
+    };
+
+    return items.concat([floorItem]);
   }
 
   /**

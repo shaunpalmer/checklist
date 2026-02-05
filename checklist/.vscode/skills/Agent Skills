@@ -1,0 +1,395 @@
+# VS Code Agent Skills — Global + Project + Feature-Specific Pattern (AYS)
+
+## Goal
+
+Create a **two-layer skill system**:
+
+1. **Global / reusable skills** (portable across repos)
+2. **Project skills** (repo-local, AYS-specific)
+
+This prevents “context drift” and forces the model to respect your architecture (drafts, hydration, persistence, mode switching, etc.).
+
+---
+
+## Recommended Folder Layout
+
+### Option A (best): Git Submodule for global skills
+
+**Pros:** single source of truth, versionable, easy to update across projects.
+
+```
+repo/
+  .github/
+    skills/
+      core/                 # git submodule (global)
+      ays/                  # local (project)
+```
+
+### Option B: Copy-once “skills pack” (simple)
+
+```
+repo/
+  .github/
+    skills/
+      core/
+      ays/
+```
+
+### Option C: Monorepo-style “skills” repo + sync script
+
+* Keep global skills in one repo.
+* Use a small script (`sync-skills.ps1` or `sync-skills.sh`) to copy into each project.
+
+---
+
+## Skill Naming Convention
+
+Keep skills atomic and triggerable:
+
+* `core.behavior.guardrails`
+* `core.repo.read-first`
+* `core.patch-discipline`
+* `core.debug.protocol`
+* `core.ui-state.contracts`
+* `ays.quotes.persistence`
+* `ays.quotes.hydration`
+* `ays.room-generation`
+
+---
+
+## Skill Structure (each skill folder)
+
+Each skill lives in:
+
+```
+.github/skills/<skill-name>/
+  SKILL.md
+  examples/
+  scripts/          # optional
+  tests/            # optional
+```
+
+### SKILL.md template
+
+Use this structure for *every* skill:
+
+* **When to use** (trigger phrases)
+* **Inputs** (what files / context must be read)
+* **Hard rules** (non-negotiable constraints)
+* **Process** (step-by-step)
+* **Outputs** (what the assistant must produce)
+* **Anti-patterns** (what to avoid)
+* **Quick checklist** (fast sanity checks)
+
+---
+
+# Core Skill Pack (portable)
+
+## 1) core.repo.read-first
+
+### Purpose
+
+Stop the model “freestyling” and force it to **read the repo before proposing code**.
+
+### Hard rules
+
+* Always locate and read relevant files before recommending changes.
+* Never invent file paths, class names, selectors, hooks, or UI ids.
+* Prefer minimal diffs and do not refactor unless requested.
+
+### Process
+
+1. Identify the entry points.
+2. Identify state ownership.
+3. Find the nearest single source of truth.
+4. Confirm the current behaviour with logs/guards.
+5. Patch, then re-check.
+
+---
+
+## 2) core.patch-discipline
+
+### Purpose
+
+Prevent spaghetti patches.
+
+### Hard rules
+
+* Add **one small change at a time**.
+* Add instrumentation before “big” changes.
+* Add guards (`if (!x) return;`) not assumptions.
+* Prefer deterministic state transitions.
+
+---
+
+## 3) core.debug.protocol
+
+### Purpose
+
+A repeatable debugging recipe (applies to JS, TS, PHP).
+
+### Process
+
+1. Repro steps
+2. Expected vs actual
+3. Identify source of truth
+4. Add logging at boundaries
+5. Validate event flow
+6. Validate data shape
+7. Patch
+8. Retest
+
+---
+
+## 4) core.ui-state.contracts
+
+### Purpose
+
+Force consistent UI mode switching (tabs, dropdowns, hydration).
+
+### Hard rules
+
+* UI tabs do not *define* truth, they *reflect* truth.
+* Mode changes are events that must be persisted.
+* Hydration must update both:
+
+  * internal state
+  * visible UI controls
+
+---
+
+# AYS Project Skill Pack (repo-local)
+
+## 1) ays.quotes.persistence
+
+### Problem
+
+Quote drafts are being saved, but:
+
+* no CRUD
+* cannot load/hydrate back into the working UI
+* limited visible history (e.g., only 3–4 drafts)
+* mode mismatch (commercial shows bedrooms, etc.)
+
+### Target behaviour
+
+* Up to **5 drafts/day** (and realistically more) without breaking.
+* Drafts persist across:
+
+  * phone lock
+  * app refresh
+  * short offline periods
+* Auto-cleanup:
+
+  * delete **synced** drafts after **14 days**
+  * delete **unsynced** stale drafts after **30 days** (configurable)
+
+### Hard rules
+
+* Drafts MUST be loadable into the form (full hydration).
+* “Current draft” must be explicit (single source of truth).
+* Any mode switch that would change structure must either:
+
+  * create a new draft, or
+  * migrate via a defined conversion path.
+
+---
+
+## 2) ays.quotes.hydration
+
+### Purpose
+
+Define a hydration contract.
+
+### Contract
+
+A draft load must:
+
+1. Set `activeDraftId`
+2. Set `quoteType` (end_of_tenancy | residential | commercial | custom)
+3. Load base defaults (base-room items)
+4. Generate room list according to quoteType
+5. Apply per-room selections
+6. Update UI:
+
+   * correct tab highlighted
+   * correct dropdowns updated
+   * correct labels (Office vs Bedroom)
+   * correct counters/progress
+
+### Anti-patterns
+
+* “Patch UI labels only” (cosmetic fix)
+* “Re-render without updating state” (desync)
+* “Update state without updating UI controls” (desync)
+
+---
+
+## 3) ays.room-generation
+
+### Purpose
+
+Stop the “3 item rooms” bug and restore inheritance/composition.
+
+### Rules
+
+* Every room composes:
+
+  * base_room_items + room_specific_items
+* Commercial must map categories correctly:
+
+  * `office_*` not `bedroom_*`
+* Room generation is deterministic and must be derived from:
+
+  * quoteType
+  * propertyType
+  * roomCounts
+  * system defaults
+
+---
+
+# Draft Model (recommended)
+
+## Data model (IndexedDB + localStorage hot cache)
+
+Store two layers, linked by the same `draftId`.
+
+### A) IndexedDB = source of truth
+
+* `drafts` store
+
+  * `draftId` (PK)
+  * `snapshot` (canonical)
+  * `updatedAt`
+  * `status`
+  * `schemaVersion`
+
+### B) localStorage = hot backup of ACTIVE draft only
+
+* `ays.currentDraftId`
+* `ays.hotBackup.<draftId>` (or a single `ays.hotBackup` object containing `{draftId, snapshot, updatedAt}`)
+
+**Rule:** localStorage is a *cache of the active IndexedDB record*, never an anonymous snapshot.
+
+### Read flow
+
+1. Read `currentDraftId` from localStorage
+2. Try `IndexedDB.get(currentDraftId)`
+3. If IndexedDB is slow/unavailable → fallback to `hotBackup` *for the same id*
+4. Hydrate from whichever source succeeds
+
+### Write flow
+
+1. Build snapshot
+2. Write to IndexedDB (`draftId = currentDraftId`) ← primary
+3. Write to localStorage hot backup ← fallback
+4. Both contain the same data for the same draft id
+
+### Suggested write policy
+
+* Debounce: **750–1500ms** after user input.
+* Force save on:
+
+  * beforeunload
+  * visibilitychange (hidden)
+  * pagehide
+
+---
+
+# UI Behaviour Spec (Manage Quotes)
+
+## Manage Quotes list
+
+Each draft row shows:
+
+* client name (or “Unnamed Draft”)
+* quoteType badge
+* status badge: CURRENT / DRAFT / SYNCED / FAILED
+* last updated
+
+Actions:
+
+* Load
+* Rename
+* Duplicate
+* Delete
+* Sync now
+
+Bulk actions:
+
+* delete
+* sync
+* archive
+
+## Loading rules
+
+* Loading a draft must fully hydrate.
+* If user is mid-edit on another draft:
+
+  * prompt: “Switch drafts? Unsaved changes will be saved automatically.”
+
+## Switching quoteType (structural)
+
+If switching quoteType changes room schema:
+
+* prompt:
+
+  * “Start a new draft?” (recommended default)
+  * “Convert draft” (only if mapping exists)
+
+---
+
+# Implementation Strategy (recommended order)
+
+1. **Single source of truth**
+
+* `DraftManager` owns `activeDraftId` and `quoteType`.
+
+2. **Hydration contract**
+
+* implement `loadDraft(draftId)` that updates state + UI.
+
+3. **Debounced persistence**
+
+* replace 250ms interval with a debounce + lifecycle saves.
+
+4. **Room generation mapping**
+
+* ensure commercial uses office templates.
+
+5. **CRUD + list scaling**
+
+* remove the “3–4 drafts only” limitation.
+
+---
+
+# Done Criteria
+
+A draft is considered “working” when:
+
+* It loads back into the UI with correct tabs/labels.
+* Fields (name/address/phone/email) hydrate correctly.
+* Room generation matches quoteType.
+* Default/base-room composition is present.
+* Draft list can handle >10 drafts without weirdness.
+
+---
+
+## Notes / Decisions captured from this session
+
+* Need **both** global skills and AYS-specific skills.
+* Draft persistence is correct direction — but *storage without CRUD/hydration is a trap*.
+* Deleting synced drafts after **14 days** feels right.
+* Unsynced drafts > **30 days** are dead leads and can be removed (configurable).
+* Mode switching must not silently mutate structure.
+
+---
+
+## Next step
+
+Create the first two SKILL.md files:
+
+1. `core.repo.read-first`
+2. `ays.quotes.hydration`
+
+Then we wire them into `.github/skills/` and test Copilot behaviour on a real “load draft → hydrate UI” bugfix.

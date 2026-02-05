@@ -8,4 +8,13 @@ Thumbs.db
 node_modules/
 .env
 *.swp
+
+# Dev utility scripts (local only)
+syntax-check.js
+parse-check.js
+find-error.js
+eslint-check.js
+lint-script.js
+check-structure.js
+package-lock.json
 *.swo

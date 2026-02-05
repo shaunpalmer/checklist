@@ -148,9 +148,9 @@ const SETTINGS_DEFAULTS = {
   // Applies to: ONLY commercial property_type
   // Available: Only if property_type has carparks
   // ============================================================
-  carpark_open_price: 0,                // Set: Open carpark per space (often $0 = included)
-  carpark_covered_price: 0,             // Set: Covered carpark per space (e.g., $10)
-  carpark_street_price: 0,              // Set: Street parking (usually $0 = can't charge)
+  carpark_open_price: 40,               // Set: Frontage/entry sweep per 100m² block
+  carpark_covered_price: 180,           // Set: Full carpark sweep per 500m² block (equipment)
+  carpark_street_price: 0,              // Set: Street parking only (info-only; typically $0)
   
   // ============================================================
   // LUNCHROOM / KITCHEN PRICING
@@ -190,15 +190,6 @@ const SETTINGS_DEFAULTS = {
   trade_workbench_price: 0,             // Set: Per workbench (e.g., $40)
   trade_machinery_area_price: 0,        // Set: Per machinery area (e.g., $75)
   trade_tool_storage_price: 0,          // Set: Tool storage area (e.g., $30)
-};
-  
-  // Building height surcharges (equipment/complexity)
-  window_ground_floor_surcharge: 0,     // Set: Ground floor extra (typically $0)
-  window_two_storey_surcharge: 0,       // Set: 2-storey equipment surcharge (e.g., $100)
-  
-  // Extra staff for large jobs
-  window_extra_staff_rate: 0,           // Set: Extra staff hourly rate (e.g., $50/hr)
-  window_extra_staff_threshold: 6,      // Set: Hours before extra staff needed (e.g., 6 hrs)
   
   // ============================================================
   // RUBBISH HANDLING PRICING
@@ -231,9 +222,9 @@ const SETTINGS_DEFAULTS = {
   // CARPARK PRICING
   // Admin: Carpark cleaning often minimal or bundled
   // ============================================================
-  carpark_open_price: 0,                // Set: Open carpark per space (often $0 = included)
-  carpark_covered_price: 0,             // Set: Covered carpark per space (e.g., $10)
-  carpark_street_price: 0,              // Set: Street parking (usually $0 = can't charge)
+  carpark_open_price: 40,               // Set: Frontage/entry sweep per 100m² block
+  carpark_covered_price: 180,           // Set: Full carpark sweep per 500m² block (equipment)
+  carpark_street_price: 0,              // Set: Street parking only (info-only; typically $0)
   
   // ============================================================
   // LUNCHROOM / KITCHEN PRICING

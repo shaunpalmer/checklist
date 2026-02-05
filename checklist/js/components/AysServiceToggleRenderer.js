@@ -31,6 +31,39 @@ const AysServiceToggleRenderer = (function() {
   const CONTAINER_ID = 'service-toggles-container';
   const DEPENDENCY_TIMEOUT_MS = 5000; // Wait up to 5 seconds for definitions
 
+  const SERVICE_META = {
+    windows: {
+      label: 'Window Cleaning',
+      description: 'Optional window cleaning for this property.',
+      settingKey: 'include_windows_cleaning'
+    },
+    carpet: {
+      label: 'Carpet Cleaning',
+      description: 'Optional carpet cleaning for this property.',
+      settingKey: 'include_carpet_cleaning'
+    },
+    gardening: {
+      label: 'Gardening',
+      description: 'Optional gardening and lawn maintenance services.',
+      settingKey: 'include_gardening_services'
+    }
+  };
+
+  function isDependencyReady(dependencyName) {
+    switch (dependencyName) {
+      case 'PROPERTY_CONFIG':
+        return typeof PROPERTY_CONFIG !== 'undefined';
+      case 'AysPropertyType':
+        return typeof AysPropertyType !== 'undefined';
+      case 'ITEM_DEFINITIONS':
+        return typeof ITEM_DEFINITIONS !== 'undefined';
+      case 'SETTINGS_DEFAULTS':
+        return typeof SETTINGS_DEFAULTS !== 'undefined';
+      default:
+        return Boolean(window[dependencyName]);
+    }
+  }
+
   /**
    * Wait for a dependency to exist on window
    * @param {string} dependencyName - e.g., 'ITEM_DEFINITIONS', 'AysPropertyType'
@@ -40,7 +73,7 @@ const AysServiceToggleRenderer = (function() {
   async function waitForDependency(dependencyName, timeoutMs = DEPENDENCY_TIMEOUT_MS) {
     const startTime = Date.now();
     
-    while (!window[dependencyName]) {
+    while (!isDependencyReady(dependencyName)) {
       const elapsed = Date.now() - startTime;
       if (elapsed > timeoutMs) {
         throw new Error(
@@ -61,17 +94,24 @@ const AysServiceToggleRenderer = (function() {
   function showLoadingState() {
     const container = document.getElementById(CONTAINER_ID);
     if (container) {
-      container.innerHTML = `
-        <div style="
-          padding: var(--space-md);
-          text-align: center;
-          color: var(--color-secondary);
-          font-size: var(--font-size-sm);
-        ">
-          <div style="margin-bottom: 8px;">⏳ Loading service options...</div>
-          <div style="font-size: 12px; opacity: 0.7;">This may take a moment on slower connections</div>
-        </div>
-      `;
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = 'var(--space-md)';
+      wrapper.style.textAlign = 'center';
+      wrapper.style.color = 'var(--color-secondary)';
+      wrapper.style.fontSize = 'var(--font-size-sm)';
+
+      const title = document.createElement('div');
+      title.style.marginBottom = '8px';
+      title.textContent = '⏳ Loading service options...';
+
+      const subtitle = document.createElement('div');
+      subtitle.style.fontSize = '12px';
+      subtitle.style.opacity = '0.7';
+      subtitle.textContent = 'This may take a moment on slower connections';
+
+      wrapper.appendChild(title);
+      wrapper.appendChild(subtitle);
+      container.replaceChildren(wrapper);
     }
   }
 
@@ -95,15 +135,14 @@ const AysServiceToggleRenderer = (function() {
       console.log('[AysServiceToggleRenderer] Waiting for dependencies...');
       await Promise.all([
         waitForDependency('PROPERTY_CONFIG'),
-        waitForDependency('AysPropertyType'),
-        waitForDependency('ITEM_DEFINITIONS')
+        waitForDependency('AysPropertyType')
       ]);
 
       console.log('[AysServiceToggleRenderer] All dependencies ready, rendering toggles');
 
       // Check property type is set
       if (!PROPERTY_CONFIG.property_type) {
-        container.innerHTML = '<p style="color: red;">Error: Property type not configured</p>';
+        container.replaceChildren(buildMessage('Error: Property type not configured', 'red'));
         return;
       }
 
@@ -111,24 +150,26 @@ const AysServiceToggleRenderer = (function() {
       const availableServices = AysPropertyType.getAvailableServices(propertyType);
 
       if (!availableServices || availableServices.length === 0) {
-        container.innerHTML = '<p style="color: var(--color-secondary);">No optional services available for this property type.</p>';
+        container.replaceChildren(buildMessage('No optional services available for this property type.', 'var(--color-secondary)'));
         return;
       }
 
       // Clear container
-      container.innerHTML = '';
+      container.replaceChildren();
 
       // Render toggles for each available service
-      const togglesHTML = availableServices.map(serviceId => 
-        buildToggleHTML(serviceId)
-      ).filter(html => html !== null).join('');
+      const toggles = availableServices
+        .map(serviceId => buildToggleElement(serviceId))
+        .filter(toggle => toggle !== null);
 
-      if (!togglesHTML) {
-        container.innerHTML = '<p style="color: var(--color-secondary);">Unable to render service toggles.</p>';
+      if (toggles.length === 0) {
+        container.replaceChildren(buildMessage('Unable to render service toggles.', 'var(--color-secondary)'));
         return;
       }
 
-      container.innerHTML = togglesHTML;
+      const fragment = document.createDocumentFragment();
+      toggles.forEach(toggle => fragment.appendChild(toggle));
+      container.appendChild(fragment);
 
       // Attach event listeners
       attachToggleListeners();
@@ -138,91 +179,121 @@ const AysServiceToggleRenderer = (function() {
       console.error('[AysServiceToggleRenderer] Render error:', error);
       const container = document.getElementById(CONTAINER_ID);
       if (container) {
-        container.innerHTML = `
-          <div style="
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 4px;
-            padding: var(--space-md);
-            color: #856404;
-          ">
-            <strong>⚠️ Service toggles unavailable:</strong>
-            <div style="font-size: 12px; margin-top: 4px;">
-              ${error.message}
-            </div>
-          </div>
-        `;
+        container.replaceChildren(buildErrorNotice(error));
       }
     }
   }
 
   /**
-   * Build HTML for a single service toggle
+   * Build DOM for a single service toggle
    * ASSUMES ITEM_DEFINITIONS is already loaded (render() waits for it)
    * @param {string} serviceId - e.g., 'windows', 'carpet', 'gardening'
-   * @returns {string|null} HTML string or null if service not found
+   * @returns {HTMLElement|null} Toggle element or null if service not found
    */
-  function buildToggleHTML(serviceId) {
-    // Defensive check (should always pass after render() waits for dependencies)
-    if (!window.ITEM_DEFINITIONS) {
-      console.error('[AysServiceToggleRenderer] ITEM_DEFINITIONS not available in buildToggleHTML');
-      return null;
-    }
-
-    const itemDef = window.ITEM_DEFINITIONS[serviceId];
-    if (!itemDef) {
-      console.warn(`[AysServiceToggleRenderer] Service "${serviceId}" not found in ITEM_DEFINITIONS`);
-      return null;
-    }
+  function buildToggleElement(serviceId) {
+    const meta = SERVICE_META[serviceId];
+    const settingKey = meta?.settingKey || `include_${serviceId}`;
 
     const toggleId = `toggle-service-${serviceId}`;
-    const settingKey = itemDef.priceSetting || `include_${serviceId}`;
 
     // Get current state from settings
     const settings = getSettings();
-    const isChecked = settings && settings[settingKey];
+    const defaults = (typeof SETTINGS_DEFAULTS !== 'undefined' && SETTINGS_DEFAULTS) ? SETTINGS_DEFAULTS : {};
+    const isChecked = (settings && (settings[settingKey] ?? defaults[settingKey])) ?? false;
 
-    return `
-      <div class="service-toggle-item" data-service="${serviceId}" style="
-        display: flex;
-        align-items: center;
-        padding: var(--space-md);
-        border: 1px solid var(--color-border);
-        border-radius: 4px;
-        margin-bottom: var(--space-sm);
-        background: ${isChecked ? 'var(--color-light)' : 'transparent'};
-        transition: background-color 0.2s;
-      ">
-        <label style="
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          cursor: pointer;
-          flex: 1;
-          margin: 0;
-        ">
-          <input 
-            type="checkbox" 
-            id="${toggleId}"
-            class="service-toggle-input"
-            data-service="${serviceId}"
-            data-setting-key="${settingKey}"
-            ${isChecked ? 'checked' : ''}
-            style="width: 20px; height: 20px; cursor: pointer;"
-          />
-          <div>
-            <strong style="color: var(--color-secondary); font-size: var(--font-size-base);">
-              ${itemDef.label || serviceId}
-            </strong>
-            ${itemDef.description ? `
-              <div style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-top: 4px;">
-                ${itemDef.description}
-              </div>
-            ` : ''}
-          </div>
-        </label>
-      </div>
-    `;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'service-toggle-item';
+    wrapper.dataset.service = serviceId;
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.padding = 'var(--space-md)';
+    wrapper.style.border = '1px solid var(--color-border)';
+    wrapper.style.borderRadius = '4px';
+    wrapper.style.marginBottom = 'var(--space-sm)';
+    wrapper.style.background = isChecked ? 'var(--color-light)' : 'transparent';
+    wrapper.style.transition = 'background-color 0.2s';
+
+    const label = document.createElement('label');
+    label.style.display = 'flex';
+    label.style.alignItems = 'center';
+    label.style.gap = '12px';
+    label.style.cursor = 'pointer';
+    label.style.flex = '1';
+    label.style.margin = '0';
+
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = toggleId;
+    input.className = 'service-toggle-input';
+    input.dataset.service = serviceId;
+    input.dataset.settingKey = settingKey;
+    input.checked = Boolean(isChecked);
+    input.style.width = '20px';
+    input.style.height = '20px';
+    input.style.cursor = 'pointer';
+
+    const textWrapper = document.createElement('div');
+
+    const title = document.createElement('strong');
+    title.style.color = 'var(--color-secondary)';
+    title.style.fontSize = 'var(--font-size-base)';
+    title.textContent = meta?.label || serviceId;
+    textWrapper.appendChild(title);
+
+    if (meta?.description) {
+      const description = document.createElement('div');
+      description.style.color = 'var(--color-secondary)';
+      description.style.fontSize = 'var(--font-size-sm)';
+      description.style.marginTop = '4px';
+      description.textContent = meta.description;
+      textWrapper.appendChild(description);
+    }
+
+    label.appendChild(input);
+    label.appendChild(textWrapper);
+    wrapper.appendChild(label);
+
+    return wrapper;
+  }
+
+  /**
+   * Build a simple message element for the container
+   * @param {string} message
+   * @param {string} color
+   * @returns {HTMLElement}
+   */
+  function buildMessage(message, color) {
+    const text = document.createElement('p');
+    text.style.color = color;
+    text.textContent = message;
+    return text;
+  }
+
+  /**
+   * Build error notice element
+   * @param {Error} error
+   * @returns {HTMLElement}
+   */
+  function buildErrorNotice(error) {
+    const wrapper = document.createElement('div');
+    wrapper.style.background = '#fff3cd';
+    wrapper.style.border = '1px solid #ffc107';
+    wrapper.style.borderRadius = '4px';
+    wrapper.style.padding = 'var(--space-md)';
+    wrapper.style.color = '#856404';
+
+    const title = document.createElement('strong');
+    title.textContent = '⚠️ Service toggles unavailable:';
+
+    const message = document.createElement('div');
+    message.style.fontSize = '12px';
+    message.style.marginTop = '4px';
+    message.textContent = error.message;
+
+    wrapper.appendChild(title);
+    wrapper.appendChild(message);
+
+    return wrapper;
   }
 
   /**

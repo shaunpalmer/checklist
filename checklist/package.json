@@ -1,0 +1,12 @@
+{
+  "name": "checklist",
+  "version": "1.0.0",
+  "description": "Checklist application",
+  "main": "index.html",
+  "scripts": {
+    "lint": "eslint js/**/*.js --format=compact"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.2"
+  }
+}

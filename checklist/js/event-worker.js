@@ -306,6 +306,13 @@ self.onmessage = async (e) => {
       return;
     }
 
+    if (msg.op === 'status') {
+      // Return count of pending (undelivered) events
+      const pending = await countPendingEvents();
+      self.postMessage({ op: 'status', ok: true, pending });
+      return;
+    }
+
     if (msg.op === 'ping') {
       self.postMessage({ op: 'pong', ok: true, ts: nowIso() });
       return;
@@ -316,3 +323,25 @@ self.onmessage = async (e) => {
     self.postMessage({ op: 'error', ok: false, message: String(err?.message || err) });
   }
 };
+
+/**
+ * Count events that haven't been delivered yet
+ */
+async function countPendingEvents() {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_EVENTS, 'readonly');
+    const store = tx.objectStore(STORE_EVENTS);
+    const index = store.index('by_delivered');
+    // Count events where delivered_at is null (IDBKeyRange.only works for exact match)
+    const req = index.count(IDBKeyRange.only(null));
+    req.onsuccess = () => {
+      db.close();
+      resolve(req.result || 0);
+    };
+    req.onerror = () => {
+      db.close();
+      resolve(0);
+    };
+  });
+}
