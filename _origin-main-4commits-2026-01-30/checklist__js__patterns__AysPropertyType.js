@@ -12,9 +12,9 @@
  * 
  * Usage:
  *   const propertyType = AysPropertyType.getType('residential_3bed');
- *   propertyType.rooms → ['Bedroom', 'Bedroom', 'Bedroom', 'Bathroom', 'Bathroom', 'Kitchen', ...]
- *   propertyType.availableServices → ['windows', 'carpet', 'gardening']
- *   propertyType.config → { numBedrooms: 3, numBathrooms: 2, ... }
+ *   propertyType.rooms ΓåÆ ['Bedroom', 'Bedroom', 'Bedroom', 'Bathroom', 'Bathroom', 'Kitchen', ...]
+ *   propertyType.availableServices ΓåÆ ['windows', 'carpet', 'gardening']
+ *   propertyType.config ΓåÆ { numBedrooms: 3, numBathrooms: 2, ... }
  */
 
 class AysPropertyType {
@@ -45,46 +45,6 @@ class AysPropertyType {
         numBathrooms: 2,     // Default
         maxBathrooms: 6,
         minBathrooms: 1
-      }
-    },
-
-    'residential_1bed': {
-      name: 'residential_1bed',
-      family: 'residential',
-      label: 'Residential - 1 Bedroom (Preset)',
-      description: 'Compact 1-bedroom residential property',
-      rooms: [
-        { type: 'Bedroom', count: 1 },
-        { type: 'Bathroom', count: 1 },
-        { type: 'Kitchen', count: 1 },
-        { type: 'LivingArea', count: 1 },
-        { type: 'Laundry', count: 1 }
-      ],
-      availableServices: ['windows', 'carpet', 'gardening'],
-      config: {
-        numBedrooms: 1,
-        numBathrooms: 1,
-        numKitchens: 1
-      }
-    },
-
-    'residential_2bed': {
-      name: 'residential_2bed',
-      family: 'residential',
-      label: 'Residential - 2 Bedroom (Preset)',
-      description: 'Common 2-bedroom residential property',
-      rooms: [
-        { type: 'Bedroom', count: 2 },
-        { type: 'Bathroom', count: 1 },
-        { type: 'Kitchen', count: 1 },
-        { type: 'LivingArea', count: 1 },
-        { type: 'Laundry', count: 1 }
-      ],
-      availableServices: ['windows', 'carpet', 'gardening'],
-      config: {
-        numBedrooms: 2,
-        numBathrooms: 1,
-        numKitchens: 1
       }
     },
 
@@ -135,7 +95,7 @@ class AysPropertyType {
       description: 'Large 6-bedroom residential home',
       rooms: [
         { type: 'Bedroom', count: 6 },
-        { type: 'Bathroom', count: 3 },
+        { type: 'Bathroom', count: 4 },
         { type: 'Kitchen', count: 1 },
         { type: 'LivingArea', count: 1 },
         { type: 'Laundry', count: 1 }
@@ -143,42 +103,8 @@ class AysPropertyType {
       availableServices: ['windows', 'carpet', 'gardening'],
       config: {
         numBedrooms: 6,
-        numBathrooms: 3,
+        numBathrooms: 4,
         numKitchens: 1
-      }
-    },
-
-    // ============================================================
-    // END OF TENANCY (EOT) - Residential
-    // ============================================================
-    'eot_residential': {
-      name: 'eot_residential',
-      family: 'eot',
-      label: 'End of Tenancy - Residential',
-      description: 'End of tenancy residential clean with EOT-intensive item set',
-      rooms: [
-        { type: 'Bedroom', count: null },
-        { type: 'Bathroom', count: null },
-        { type: 'Kitchen', count: 1 },
-        { type: 'LivingArea', count: 1 },
-        { type: 'Laundry', count: 1 },
-
-        // EOT-specific / special spaces
-        { type: 'Entryway', count: 1 },
-        { type: 'Basement', count: 1 },
-        { type: 'UtilitySpecial', count: 1 },
-        { type: 'HomeOffice', count: 1 },
-        { type: 'Outdoor', count: 1 },
-        { type: 'Garage', count: 1 }
-      ],
-      availableServices: ['windows', 'carpet'],
-      config: {
-        numBedrooms: 3,
-        maxBedrooms: 10,
-        minBedrooms: 1,
-        numBathrooms: 2,
-        maxBathrooms: 6,
-        minBathrooms: 1
       }
     },
     
@@ -272,6 +198,33 @@ class AysPropertyType {
         numLoadingDocks: null,    // 1, 2, 3 docks
         numAdminOffices: null     // 2-5 admin offices
       }
+    },
+
+    // ============================================================
+    // END OF TENANCY RESIDENTIAL TYPE
+    // ============================================================
+    'eot_residential': {
+      name: 'eot_residential',
+      family: 'eot',
+      label: 'End of Tenancy - Residential',
+      description: 'End of tenancy clean for residential properties',
+      rooms: [
+        { type: 'Bedroom', count: null },
+        { type: 'Bathroom', count: null },
+        { type: 'Kitchen', count: 1 },
+        { type: 'LivingArea', count: 1 },
+        { type: 'Laundry', count: 1 },
+        { type: 'Entryway', count: 1 }
+      ],
+      availableServices: ['windows', 'carpet'],
+      config: {
+        numBedrooms: 2,
+        maxBedrooms: 10,
+        minBedrooms: 1,
+        numBathrooms: 1,
+        maxBathrooms: 6,
+        minBathrooms: 1
+      }
     }
   };
 
@@ -322,10 +275,10 @@ class AysPropertyType {
    * 
    * Example:
    *   AysPropertyType.getAvailableServices('residential_3bed')
-   *   → ['windows', 'carpet', 'gardening']
+   *   ΓåÆ ['windows', 'carpet', 'gardening']
    *   
    *   AysPropertyType.getAvailableServices('commercial_gym')
-   *   → ['windows']  (no carpet, no gardening)
+   *   ΓåÆ ['windows']  (no carpet, no gardening)
    */
   static getAvailableServices(typeName) {
     const type = this.getType(typeName);

@@ -22,40 +22,45 @@
  */
 
 // ============================================================
-// ITEM TEMPLATES - @deprecated
-// ============================================================
-// 
-// ⚠️ DEPRECATION NOTICE (Phase 3 - OOP Migration)
-// 
-// These templates are LEGACY fallbacks. The canonical source of items is now:
-//   ITEM_DEFINITIONS.js → Room Classes → RoomRegistry → UI
-// 
-// Templates will be removed in a future version. If you see console warnings
-// about template usage, migrate to ITEM_DEFINITIONS.js instead.
-// 
-// See: docs/MIGRATION-PLAN-OOP-ARCHITECTURE.md
+// ITEM TEMPLATES - Reusable across property types
 // ============================================================
 
-/**
- * @deprecated Use ITEM_DEFINITIONS.eot.bedroom or ITEM_DEFINITIONS.residential.bedroom instead
- */
 const BEDROOM_ITEMS_TEMPLATE = [
   { 
-    itemId: 'bed{N}-floors',
-    label: 'Floors (select type)',
-    category: 'floors',
-    hours: 0.2,
+    itemId: 'bed{N}-beds', 
+    label: 'Beds Made', 
+    category: 'beds', 
+    hours: 0.2, 
     difficulty: 'basic',
     workType: 'labor',
     skillLevel: 'basic',
-    description: 'Select floor type and clean accordingly',
-    products: ['vacuum_cleaner', 'mop'],
-    staffCount: 1,
-    control: 'checkbox+select',
-    variantType: 'dropdown',
-    variantKey: 'floor_types',
-    optionsKey: 'floor_types',
-    defaultVariant: 'carpet'
+    description: 'Change linens, make bed, organize pillows',
+    products: [],
+    staffCount: 1
+  },
+  { 
+    itemId: 'bed{N}-carpet', 
+    label: 'Carpet Vacuum', 
+    category: 'floors', 
+    hours: 0.2, 
+    difficulty: 'basic',
+    workType: 'labor',
+    skillLevel: 'basic',
+    description: 'Vacuum carpet thoroughly',
+    products: ['vacuum_cleaner'],
+    staffCount: 1
+  },
+  { 
+    itemId: 'bed{N}-wood', 
+    label: 'Wood Floors Cleaned', 
+    category: 'floors', 
+    hours: 0.2, 
+    difficulty: 'basic',
+    workType: 'labor',
+    skillLevel: 'basic',
+    description: 'Sweep and mop wood floors',
+    products: ['wood_cleaner', 'mop'],
+    staffCount: 1
   },
   { 
     itemId: 'bed{N}-baseboards', 
@@ -83,14 +88,6 @@ const BEDROOM_ITEMS_TEMPLATE = [
   }
 ];
 
-/**
- * @deprecated Use ITEM_DEFINITIONS.eot.bedroom instead
- */
-const EOT_BEDROOM_ITEMS_TEMPLATE = BEDROOM_ITEMS_TEMPLATE.filter((item) => item.category !== 'beds');
-
-/**
- * @deprecated Use ITEM_DEFINITIONS.eot.bathroom or ITEM_DEFINITIONS.residential.bathroom instead
- */
 const BATHROOM_ITEMS_TEMPLATE = [
   { itemId: 'bath{N}-sink', label: 'Sinks and Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean and polish sinks and faucets', products: ['bathroom_cleaner', 'cloth'], staffCount: 1 },
   { itemId: 'bath{N}-tub', label: 'Tub/Shower', category: 'shower', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Scrub and clean tub or shower stall', products: ['bathroom_cleaner', 'scrub_brush'], staffCount: 1 },
@@ -104,18 +101,12 @@ const BATHROOM_ITEMS_TEMPLATE = [
   { itemId: 'bath{N}-trash', label: 'Remove Trash Bags', category: 'trash', hours: 0.05, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Remove and replace trash bags', products: ['trash_bags'], staffCount: 1 }
 ];
 
-/**
- * @deprecated Use ITEM_DEFINITIONS.commercial.shower instead
- */
 const SHOWER_ITEMS_TEMPLATE = [
   { itemId: 'shower{N}-stalls', label: 'Shower Stalls', category: 'shower', hours: 0.5, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Scrub and clean shower stalls', products: ['bathroom_cleaner', 'scrub_brush'], staffCount: 1 },
   { itemId: 'shower{N}-mirrors', label: 'Mirrors cleaned', category: 'glass', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean mirrors and glass partitions', products: ['glass_cleaner', 'cloth'], staffCount: 1 },
   { itemId: 'shower{N}-hooks', label: 'Hooks & Rails', category: 'fixtures', hours: 0.1, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe hooks, rails, and fixtures', products: ['microfiber_cloth'], staffCount: 1 }
 ];
 
-/**
- * @deprecated Use ITEM_DEFINITIONS.commercial.offices instead
- */
 const OFFICE_ITEMS_TEMPLATE = [
   { itemId: 'office{N}-desks', label: 'Desks Wiped', category: 'surfaces', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe down desks and work surfaces', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
   { itemId: 'office{N}-chairs', label: 'Chairs Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe office chairs and seating', products: ['microfiber_cloth'], staffCount: 1 },
@@ -128,105 +119,27 @@ const OFFICE_ITEMS_TEMPLATE = [
 // STATIC ROOM DEFINITIONS (same across all property types)
 // ============================================================
 
-/**
- * @deprecated Use ITEM_DEFINITIONS.eot.kitchen or buildKitchenItemsFromClass() instead
- */
-const KITCHEN_SHARED_ITEMS_TEMPLATE = [
-  // 1) Benches & Surfaces
-  { key: 'benchtops', label: 'Benchtops (laminate / stainless steel)', category: 'benches', hours: 0.10, difficulty: 'basic' },
-  { key: 'bench_edges_joins', label: 'Bench edges & joins', category: 'benches', hours: 0.05, difficulty: 'basic' },
-  { key: 'splashback', label: 'Splashback (tiles / metal backing)', category: 'benches', hours: 0.10, difficulty: 'basic' },
-  { key: 'bench_corners_junctions', label: 'Bench corners & wall junctions', category: 'benches', hours: 0.05, difficulty: 'basic' },
-
-  // 2) Sinks & Plumbing
-  { key: 'sink_bowls', label: 'Sink bowls (single / double)', category: 'sinks', hours: 0.10, difficulty: 'basic' },
-  { key: 'sink_drains_strainers', label: 'Sink drains & strainers', category: 'sinks', hours: 0.05, difficulty: 'basic' },
-  { key: 'taps_mixer', label: 'Taps / mixer', category: 'sinks', hours: 0.05, difficulty: 'basic' },
-  { key: 'tap_bases_splash_zone', label: 'Tap bases & splash zone', category: 'sinks', hours: 0.05, difficulty: 'basic' },
-  { key: 'under_sink_cupboard_external', label: 'Under-sink cupboard (external)', category: 'sinks', hours: 0.05, difficulty: 'basic' },
-  { key: 'pipe_visible_areas', label: 'Pipe visible areas (if accessible)', category: 'sinks', hours: 0.05, difficulty: 'basic' },
-
-  // 3) Cupboards & Storage
-  { key: 'lower_cupboards_doors', label: 'Lower cupboards (doors)', category: 'cupboards', hours: 0.10, difficulty: 'basic' },
-  { key: 'upper_cupboards_doors', label: 'Upper cupboards (doors – if present)', category: 'cupboards', hours: 0.10, difficulty: 'basic' },
-  { key: 'drawer_fronts', label: 'Drawer fronts', category: 'cupboards', hours: 0.05, difficulty: 'basic' },
-  { key: 'drawer_handles', label: 'Drawer handles', category: 'cupboards', hours: 0.05, difficulty: 'basic' },
-  { key: 'cupboard_handles', label: 'Cupboard handles', category: 'cupboards', hours: 0.05, difficulty: 'basic' },
-  { key: 'kickboards_toe_kicks', label: 'Kickboards / toe-kicks', category: 'cupboards', hours: 0.05, difficulty: 'basic' },
-  { key: 'external_cupboard_sides', label: 'External cupboard sides', category: 'cupboards', hours: 0.05, difficulty: 'basic' },
-  { key: 'cupboard_tops_exposed', label: 'Cupboard tops (where exposed)', category: 'cupboards', hours: 0.05, difficulty: 'basic' },
-
-  // 4) Cooking Appliances (external)
-  { key: 'oven_exterior', label: 'Oven exterior', category: 'cooking', hours: 0.10, difficulty: 'basic' },
-  { key: 'oven_door_outside', label: 'Oven door (outside)', category: 'cooking', hours: 0.05, difficulty: 'basic' },
-  { key: 'oven_handle', label: 'Oven handle', category: 'cooking', hours: 0.05, difficulty: 'basic' },
-  { key: 'oven_control_knobs', label: 'Oven control knobs', category: 'cooking', hours: 0.05, difficulty: 'basic' },
-  { key: 'cooktop_hotplates', label: 'Cooktop / hotplates', category: 'cooking', hours: 0.15, difficulty: 'basic' },
-  { key: 'cooktop_elements', label: 'Cooktop rings / elements', category: 'cooking', hours: 0.10, difficulty: 'basic' },
-  { key: 'cooktop_drip_trays', label: 'Cooktop drip trays (if applicable)', category: 'cooking', hours: 0.05, difficulty: 'basic' },
-  { key: 'stove_splashback_panel', label: 'Stove splashback panel (metal / tile)', category: 'cooking', hours: 0.10, difficulty: 'basic' },
-  { key: 'oven_interior_extra', label: 'Oven interior (optional / extra)', category: 'cooking', hours: 0.75, difficulty: 'deep' },
-
-  // 5) Rangehood / Extraction
-  { key: 'rangehood_exterior', label: 'Rangehood exterior', category: 'rangehood', hours: 0.05, difficulty: 'basic' },
-  { key: 'rangehood_underside', label: 'Rangehood underside', category: 'rangehood', hours: 0.10, difficulty: 'basic' },
-  { key: 'grease_filters_surface', label: 'Grease filters (external surface)', category: 'rangehood', hours: 0.10, difficulty: 'basic' },
-  { key: 'rangehood_light_covers', label: 'Light covers (if reachable)', category: 'rangehood', hours: 0.05, difficulty: 'basic' },
-  { key: 'surrounding_wall_area', label: 'Surrounding wall area', category: 'rangehood', hours: 0.05, difficulty: 'basic' },
-
-  // 6) Whiteware / Appliances (external)
-  { key: 'fridge_exterior', label: 'Refrigerator exterior', category: 'appliances', hours: 0.10, difficulty: 'basic' },
-  { key: 'fridge_handles', label: 'Fridge door handles', category: 'appliances', hours: 0.05, difficulty: 'basic' },
-  { key: 'microwave_exterior', label: 'Microwave exterior', category: 'appliances', hours: 0.05, difficulty: 'basic' },
-  { key: 'kettle_exterior', label: 'Kettle exterior', category: 'appliances', hours: 0.05, difficulty: 'basic' },
-  { key: 'dishwasher_exterior', label: 'Dishwasher exterior (if present)', category: 'appliances', hours: 0.05, difficulty: 'basic' },
-  { key: 'appliance_bases_visible', label: 'Appliance bases (where visible)', category: 'appliances', hours: 0.05, difficulty: 'basic' },
-  { key: 'fridge_interior_extra', label: 'Fridge interior (optional / extra)', category: 'appliances', hours: 0.50, difficulty: 'deep' },
-  { key: 'dishwasher_interior_extra', label: 'Dishwasher interior (optional / extra)', category: 'appliances', hours: 0.30, difficulty: 'deep' },
-
-  // 7) Walls, Fixtures & Fittings
-  { key: 'painted_walls', label: 'Painted walls (wipe-down)', category: 'walls', hours: 0.10, difficulty: 'basic' },
-  { key: 'tiles_grout', label: 'Tiles & grout', category: 'walls', hours: 0.15, difficulty: 'basic' },
-  { key: 'power_points', label: 'Power points', category: 'fixtures', hours: 0.05, difficulty: 'basic' },
-  { key: 'light_switches', label: 'Light switches', category: 'fixtures', hours: 0.05, difficulty: 'basic' },
-  { key: 'safety_signage', label: 'Safety signage (wipe only)', category: 'safety', hours: 0.05, difficulty: 'basic' },
-  { key: 'fire_extinguisher', label: 'Fire extinguisher exterior', category: 'safety', hours: 0.05, difficulty: 'basic' },
-
-  // 8) Floors & Waste
-  { key: 'floor_clean', label: 'Kitchen floor (vinyl / tile)', category: 'floors', hours: 0.20, difficulty: 'basic' },
-  { key: 'floor_edges_corners', label: 'Floor edges & corners', category: 'floors', hours: 0.10, difficulty: 'basic' },
-  { key: 'under_bench_floor', label: 'Under-bench floor areas', category: 'floors', hours: 0.10, difficulty: 'basic' },
-  { key: 'bins_external', label: 'Bins (external)', category: 'waste', hours: 0.05, difficulty: 'basic' },
-  { key: 'bin_lids', label: 'Bin lids', category: 'waste', hours: 0.05, difficulty: 'basic' }
-];
-
-function buildKitchenSharedItems(prefix) {
-  return KITCHEN_SHARED_ITEMS_TEMPLATE.map((t) => ({
-    itemId: `${prefix}-${t.key}`,
-    label: t.label,
-    room: prefix,
-    name: prefix,
-    category: t.category,
-    hours: t.hours,
-    difficulty: t.difficulty || 'basic',
-    workType: 'labor',
-    skillLevel: t.difficulty || 'basic',
-    staffCount: 1,
-    description: '',
-    products: []
-  }));
-}
-
 const KITCHEN_ROOM = {
   roomId: 'kitchen',
-  emoji: '🍳',
+  emoji: '≡ƒì│',
   title: 'Kitchen',
-  items: buildKitchenSharedItems('kitchen')
+  items: [
+    { itemId: 'kitchen-sinks', label: 'Sinks and Faucets', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Clean and polish sinks and faucets', products: ['kitchen_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-microwave-out', label: 'Microwave (outside)', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe exterior of microwave', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-countertops', label: 'Countertops', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe and sanitize counter surfaces', products: ['kitchen_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-floors', label: 'Floors Mopped', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Mop kitchen floors', products: ['floor_cleaner', 'mop'], staffCount: 1 },
+    { itemId: 'kitchen-baseboards', label: 'Baseboards wiped', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe kitchen baseboards', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'kitchen-garbage', label: 'Garbage bags removed', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Remove and replace garbage bags', products: ['trash_bags'], staffCount: 1 },
+    { itemId: 'kitchen-stovetop', label: 'Stovetop wiped', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Clean and wipe stovetop surface', products: ['kitchen_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-fridge-out', label: 'Refrig. (outside)', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe exterior of refrigerator', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-drawers', label: 'Drawers/Pantry (empty & wipe) - $50', category: 'drawer', hours: 1, baseCharge: 50, serviceCode: 'KDRAW', difficulty: 'basic', workType: 'labor', skillLevel: 'intermediate', description: 'Empty and wipe drawers and pantry shelves', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'kitchen-lights', label: 'Light switches', category: 'basic', hours: 0.5, workType: 'labor', skillLevel: 'basic', description: 'Wipe light switches and handles', products: ['disinfectant', 'cloth'], staffCount: 1 }
+  ]
 };
 
 const LIVING_AREA_ROOM = {
   roomId: 'living-room',
-  emoji: '🛋️',
+  emoji: '≡ƒ¢ï∩╕Å',
   title: 'Living Room',
   items: [
     { itemId: 'living-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Vacuum carpet thoroughly', products: ['vacuum_cleaner'], staffCount: 1 },
@@ -241,7 +154,7 @@ const LIVING_AREA_ROOM = {
 
 const ENTRYWAY_ROOM = {
   roomId: 'entryway',
-  emoji: '🚪',
+  emoji: '≡ƒÜ¬',
   title: 'Entryway',
   items: [
     { itemId: 'entryway-carpet', label: 'Carpet Vacuum', category: 'floors', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Vacuum entryway carpet', products: ['vacuum_cleaner'], staffCount: 1 },
@@ -254,7 +167,7 @@ const ENTRYWAY_ROOM = {
 
 const LAUNDRY_ROOM = {
   roomId: 'laundry',
-  emoji: '🧺',
+  emoji: '≡ƒº║',
   title: 'Laundry Room',
   items: [
     { itemId: 'laundry-sink', label: 'Sink Tub (stainless steel)', category: 'fixtures', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean stainless steel sink/tub', products: ['stainless_cleaner', 'cloth'], staffCount: 1 },
@@ -270,14 +183,20 @@ const LAUNDRY_ROOM = {
 
 const LUNCHROOM_ROOM = {
   roomId: 'lunchroom',
-  emoji: '🍴',
+  emoji: '≡ƒì┤',
   title: 'Lunchroom',
-  items: buildKitchenSharedItems('lunchroom')
+  items: [
+    { itemId: 'lunchroom-tables', label: 'Tables Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe and sanitize lunch tables', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'lunchroom-chairs', label: 'Chairs Wiped', category: 'surfaces', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe chairs', products: ['microfiber_cloth'], staffCount: 1 },
+    { itemId: 'lunchroom-fridge', label: 'Refrigerator (outside)', category: 'appliances', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe refrigerator exterior', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'lunchroom-sink', label: 'Sink/Faucets', category: 'fixtures', hours: 0.2, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Clean sink and faucets', products: ['bathroom_cleaner', 'cloth'], staffCount: 1 },
+    { itemId: 'lunchroom-floors', label: 'Floors Cleaned', category: 'floors', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Mop lunchroom floors', products: ['floor_cleaner', 'mop'], staffCount: 1 }
+  ]
 };
 
 const CIRCULATION_ROOM = {
   roomId: 'circulation',
-  emoji: '🚶',
+  emoji: '≡ƒÜ╢',
   title: 'Circulation (Hallways/Entry)',
   items: [
     { itemId: 'circ-carpets', label: 'Carpets Vacuumed', category: 'floors', hours: 0.5, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Vacuum all carpets in hallways', products: ['vacuum_cleaner'], staffCount: 1 },
@@ -290,7 +209,7 @@ const CIRCULATION_ROOM = {
 
 const RECEPTION_ROOM = {
   roomId: 'reception',
-  emoji: '📞',
+  emoji: '≡ƒô₧',
   title: 'Reception/Front Desk',
   items: [
     { itemId: 'reception-desk', label: 'Reception Desk Wiped', category: 'surfaces', hours: 0.3, difficulty: 'basic', workType: 'labor', skillLevel: 'basic', description: 'Wipe and sanitize reception desk', products: ['surface_cleaner', 'cloth'], staffCount: 1 },
@@ -303,13 +222,7 @@ const RECEPTION_ROOM = {
 // HELPER FUNCTIONS - Generate N instances of templated rooms
 // ============================================================
 
-/**
- * @deprecated Use buildRoomInstances() with Room classes instead
- * This template-based approach does not support service-type-aware items.
- * See: MIGRATION-PLAN-OOP-ARCHITECTURE.md
- */
 function generateRoomInstances(template, count, roomType) {
-  console.warn(`[DEPRECATED] generateRoomInstances() called for ${roomType}. Use buildRoomInstances() instead.`);
   const rooms = [];
   for (let i = 1; i <= count; i++) {
     const items = template.map(item => ({
@@ -326,11 +239,11 @@ function generateRoomInstances(template, count, roomType) {
     }[roomType] || `${roomType} ${i}`;
 
     const emoji = {
-      'Bedroom': '🛏️',
-      'Bathroom': '🛁',
-      'Shower': '🚿',
-      'Office': '💼'
-    }[roomType] || '📋';
+      'Bedroom': '≡ƒ¢Å∩╕Å',
+      'Bathroom': '≡ƒ¢ü',
+      'Shower': '≡ƒÜ┐',
+      'Office': '≡ƒÆ╝'
+    }[roomType] || '≡ƒôï';
 
     rooms.push({
       subRoomId: `${roomType.toLowerCase()}${i}`,
@@ -343,7 +256,7 @@ function generateRoomInstances(template, count, roomType) {
 }
 
 // ============================================================
-// ROOM CLASS-BASED GENERATION (Commercial + future migration)
+// ROOM CLASS-BASED GENERATION
 // ============================================================
 
 const ROOM_TYPE_KEYS = {
@@ -365,45 +278,51 @@ const ROOM_TYPE_KEYS = {
   SalesFloor: 'sales_floor',
   Stockroom: 'stockroom',
   LockerRoom: 'locker_room',
-  Shower: 'shower',
   LoadingDock: 'loading_dock',
   Warehouse: 'warehouse',
   Carpark: 'carpark',
   Staircase: 'staircase',
   Utility: 'utility',
-  TradeWorkshop: 'trade',
-  Toilet: 'toilets',
-  Garage: 'garage'
+  TradeWorkshop: 'trade'
 };
 
 const ROOM_EMOJI = {
-  Bedroom: '🛏️',
-  Bathroom: '🛁',
-  Kitchen: '🍳',
-  LivingArea: '🛋️',
-  Laundry: '🧺',
-  Entryway: '🚪',
-  Basement: '🧱',
-  UtilitySpecial: '⚙️',
-  HomeOffice: '🧑‍💻',
-  Outdoor: '🌿',
-  Garage: '🚗',
-  Office: '💼',
-  Reception: '📞',
-  Boardroom: '📊',
-  Lunchroom: '🍽️',
-  Circulation: '🚶',
-  SalesFloor: '🛍️',
-  Stockroom: '📦',
-  LockerRoom: '🧼',
-  LoadingDock: '🚚',
-  Warehouse: '📦',
-  Carpark: '🅿️',
-  Staircase: '🪜',
-  Utility: '⚙️',
-  TradeWorkshop: '🔧',
-  Shower: '🚿',
-  Toilet: '🚽'
+  Bedroom: '≡ƒ¢Å∩╕Å',
+  Bathroom: '≡ƒ¢ü',
+  Kitchen: '≡ƒì│',
+  LivingArea: '≡ƒ¢ï∩╕Å',
+  Laundry: '≡ƒº║',
+  Entryway: '≡ƒÜ¬',
+  Basement: '≡ƒº▒',
+  UtilitySpecial: 'ΓÜÖ∩╕Å',
+  HomeOffice: '≡ƒºæΓÇì≡ƒÆ╗',
+  Outdoor: '≡ƒî┐',
+  Office: '≡ƒÆ╝',
+  Reception: '≡ƒô₧',
+  Boardroom: '≡ƒôè',
+  Lunchroom: '≡ƒì╜∩╕Å',
+  Circulation: '≡ƒÜ╢',
+  SalesFloor: '≡ƒ¢ì∩╕Å',
+  Stockroom: '≡ƒôª',
+  LockerRoom: '≡ƒº╝',
+  LoadingDock: '≡ƒÜÜ',
+  Warehouse: '≡ƒôª',
+  Carpark: '≡ƒà┐∩╕Å',
+  Staircase: '≡ƒ¬£',
+  Utility: 'ΓÜÖ∩╕Å',
+  TradeWorkshop: '≡ƒöº',
+  Shower: '≡ƒÜ┐',
+  Toilet: '≡ƒÜ╜'
+};
+
+const ROOM_TEMPLATES = {
+  Bedroom: typeof BEDROOM_ITEMS_TEMPLATE !== 'undefined' ? BEDROOM_ITEMS_TEMPLATE : [],
+  Bathroom: typeof BATHROOM_ITEMS_TEMPLATE !== 'undefined' ? BATHROOM_ITEMS_TEMPLATE : [],
+  Kitchen: typeof KITCHEN_ROOM !== 'undefined' ? KITCHEN_ROOM.items : [],
+  LivingArea: typeof LIVING_AREA_ROOM !== 'undefined' ? LIVING_AREA_ROOM.items : [],
+  Laundry: typeof LAUNDRY_ROOM !== 'undefined' ? LAUNDRY_ROOM.items : [],
+  Shower: typeof SHOWER_ITEMS_TEMPLATE !== 'undefined' ? SHOWER_ITEMS_TEMPLATE : [],
+  Office: typeof OFFICE_ITEMS_TEMPLATE !== 'undefined' ? OFFICE_ITEMS_TEMPLATE : []
 };
 
 function resolveServiceType(propertyType) {
@@ -415,223 +334,53 @@ function resolveServiceType(propertyType) {
   return 'residential';
 }
 
-function normalizeItemsToArray(itemsDef) {
-  if (!itemsDef) return [];
-  if (Array.isArray(itemsDef)) return itemsDef;
-  if (typeof itemsDef === 'object') return Object.values(itemsDef);
-  return [];
-}
+function createRoomItems(roomType, number, serviceType) {
+  if (typeof AysRoomRegistry === 'undefined') return null;
+  const RoomClass = AysRoomRegistry.get(roomType);
+  if (!RoomClass) return null;
 
-function getItemsFromDefinitions(serviceType, roomKey) {
-  if (typeof ITEM_DEFINITIONS === 'undefined') return [];
-  const serviceDefs = ITEM_DEFINITIONS[serviceType] || ITEM_DEFINITIONS.commercial || ITEM_DEFINITIONS.residential;
-  if (!serviceDefs) return [];
-
-  // Special-case: carpark has legacy alias keys kept for compatibility.
-  // Prefer the explicit sweep keys to avoid duplicate items in the UI.
-  if (roomKey === 'carpark' && serviceDefs.carpark && typeof serviceDefs.carpark === 'object') {
-    const defs = serviceDefs.carpark;
-    const preferred = [];
-
-    if (defs.frontage_sweep_100m2 || defs.full_sweep_500m2) {
-      if (defs.frontage_sweep_100m2) preferred.push(defs.frontage_sweep_100m2);
-      if (defs.full_sweep_500m2) preferred.push(defs.full_sweep_500m2);
-      if (defs.street_parking) preferred.push(defs.street_parking);
-      return preferred;
-    }
-
-    // Fallback: older key set
-    if (defs.open_carpark) preferred.push(defs.open_carpark);
-    if (defs.covered_carpark) preferred.push(defs.covered_carpark);
-    if (defs.street_parking) preferred.push(defs.street_parking);
-    return preferred;
-  }
-
-  return normalizeItemsToArray(serviceDefs[roomKey]);
-}
-
-function createRoomItemsFromClass(roomClassName, serviceType, number) {
-  const registry = (typeof AysRoomRegistry !== 'undefined')
-    ? AysRoomRegistry
-    : (typeof window !== 'undefined' ? window.AysRoomRegistry : undefined);
-
-  if (!registry || typeof registry.get !== 'function') {
-    console.warn('[ChecklistConfig] Room registry unavailable', { roomClassName });
-    return null;
-  }
-
-  let RoomClass = registry.get(roomClassName);
-  if (!RoomClass && typeof window !== 'undefined') {
-    RoomClass = window[roomClassName];
-  }
-  if (!RoomClass) {
-    const roomKey = ROOM_TYPE_KEYS[roomClassName] || String(roomClassName || '').toLowerCase();
-    const availableKeys = typeof registry.list === 'function' ? registry.list() : [];
-    console.warn('[ChecklistConfig] Missing room class', { roomClassName, roomKey, availableKeys });
-    return null;
-  }
-
-  const roomKey = ROOM_TYPE_KEYS[roomClassName] || String(roomClassName || '').toLowerCase();
-
-  try {
-    const room = new RoomClass({
-      roomId: `${roomKey}_${number}`,
-      roomType: roomKey,
-      serviceType,
-      variant: 'standard',
-      number
-    });
-    return room.renderItems();
-  } catch (err) {
-    console.warn(`[ChecklistConfig] Failed to build ${roomClassName} items from class:`, err);
-    return null;
-  }
-}
-
-function prefixItemIds(items, prefix) {
-  return (items || []).map((item, index) => {
-    const normalizedHours = item && (item.hours ?? item.baseHours);
-    const normalizedDifficulty = item && (item.difficulty ?? item.skillLevel);
-
-    // Normalize pricing fields so UI + quote calculation can read data attributes consistently.
-    // ITEM_DEFINITIONS uses: price + priceSetting
-    // Checklist UI expects: baseCharge + settingsKey (rendered as data-base-charge + data-settings-key)
-    const normalizedBaseCharge = item && (item.baseCharge ?? item.price);
-    const normalizedSettingsKey = item && (item.settingsKey ?? item.priceSetting);
-
-    return {
-      ...item,
-      room: item.room || prefix,
-      name: item.name || prefix,
-      hours: normalizedHours ?? 0,
-      difficulty: normalizedDifficulty || 'basic',
-      baseCharge: normalizedBaseCharge,
-      settingsKey: normalizedSettingsKey,
-      itemId: `${prefix}-${item.itemId || `item_${index}`}`
-    };
+  const roomKey = ROOM_TYPE_KEYS[roomType] || roomType.toLowerCase();
+  const room = new RoomClass({
+    roomId: `${roomKey}_${number}`,
+    roomType: roomKey,
+    serviceType,
+    variant: 'standard',
+    number
   });
+  return room.renderItems();
 }
 
-function normalizeRoomTypeKey(roomId) {
-  if (!roomId) return '';
-  return String(roomId)
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/_+/g, '-')
-    .replace(/-\d+$/, '')
-    .replace(/\d+$/, '');
-}
+function buildRoomInstances(roomType, count, serviceType) {
+  const itemsFromClass = createRoomItems(roomType, 1, serviceType);
+  if (!itemsFromClass) {
+    return generateRoomInstances(ROOM_TEMPLATES[roomType] || [], count, roomType);
+  }
 
-function getFloorDefaultForRoom(roomKey, defaults) {
-  if (!defaults || !roomKey) return null;
-  const key = normalizeRoomTypeKey(roomKey);
-  if (defaults[key]) return defaults[key];
-
-  const alias = {
-    'living-room': 'living_area',
-    'living-room-area': 'living_area',
-    'living-area': 'living_area',
-    'toilets': 'toilet',
-    'restrooms': 'toilet',
-    'hallway': 'circulation',
-    'hallways': 'circulation',
-    'entryway': 'circulation'
-  };
-
-  const aliasKey = alias[key];
-  if (aliasKey && defaults[aliasKey]) return defaults[aliasKey];
-
-  const underscored = key.replace(/-/g, '_');
-  if (defaults[underscored]) return defaults[underscored];
-
-  return null;
-}
-
-function applyFloorDefaultsToItems(items, roomKey, defaults) {
-  if (!Array.isArray(items) || !defaults) return items;
-  const defaultVariant = getFloorDefaultForRoom(roomKey, defaults);
-  if (!defaultVariant) return items;
-
-  return items.map((item) => {
-    if (!item) return item;
-    const optionsKey = item.optionsKey || item.variantKey;
-    const isFloorItem = optionsKey === 'floor_types' || optionsKey === 'floor_variants';
-    if (!isFloorItem) return item;
-    return {
-      ...item,
-      control: item.control || 'checkbox+select',
-      variantKey: item.variantKey || optionsKey,
-      optionsKey: optionsKey,
-      defaultVariant: item.defaultVariant || defaultVariant
-    };
-  });
-}
-
-function ensureFloorControlItem(items) {
-  if (!Array.isArray(items)) return items;
-  const hasControl = items.some((item) => {
-    if (!item) return false;
-    const key = item.optionsKey || item.variantKey;
-    if (item.control === 'checkbox+select' && (key === 'floor_types' || key === 'floor_variants')) return true;
-    if (item.variantType === 'dropdown' && (key === 'floor_types' || key === 'floor_variants')) return true;
-    return false;
-  });
-
-  if (hasControl) return items;
-
-  return items.concat([
-    {
-      itemId: 'floors',
-      label: 'Floors (select type)',
-      category: 'floors',
-      hours: 0,
-      difficulty: 'basic',
-      workType: 'labor',
-      skillLevel: 'basic',
-      description: 'Select the floor type for this room',
-      products: [],
-      staffCount: 1,
-      control: 'checkbox+select',
-      variantType: 'dropdown',
-      variantKey: 'floor_types',
-      optionsKey: 'floor_types'
-    }
-  ]);
-}
-
-function buildSingleRoom(roomClassName, serviceType, title) {
-  const roomKey = ROOM_TYPE_KEYS[roomClassName] || String(roomClassName || '').toLowerCase();
-  const emoji = ROOM_EMOJI[roomClassName] || '📋';
-  const itemsFromClass = createRoomItemsFromClass(roomClassName, serviceType, 1);
-  const items = itemsFromClass || ensureFloorControlItem(getItemsFromDefinitions(serviceType, roomKey));
-
-  return {
-    roomId: roomKey.replace(/_/g, '-'),
-    emoji,
-    title: title || roomClassName,
-    items: itemsFromClass ? itemsFromClass : prefixItemIds(items, roomKey)
-  };
-}
-
-function buildRoomInstances(roomClassName, count, serviceType) {
-  const roomKey = ROOM_TYPE_KEYS[roomClassName] || String(roomClassName || '').toLowerCase();
-  const emoji = ROOM_EMOJI[roomClassName] || '📋';
-  const itemsFromClass = createRoomItemsFromClass(roomClassName, serviceType, 1);
-  const baseItems = itemsFromClass ? null : ensureFloorControlItem(getItemsFromDefinitions(serviceType, roomKey));
   const rooms = [];
-
   for (let i = 1; i <= count; i++) {
+    const items = createRoomItems(roomType, i, serviceType);
     rooms.push({
-      subRoomId: `${roomKey.replace(/_/g, '-')}-${i}`,
-      title: `${roomClassName.replace(/([A-Z])/g, ' $1').trim()} ${i}`,
-      emoji,
-      items: itemsFromClass
-        ? createRoomItemsFromClass(roomClassName, serviceType, i)
-        : prefixItemIds(baseItems, `${roomKey}-${i}`)
+      subRoomId: `${roomType.toLowerCase()}${i}`,
+      title: `${roomType} ${i}`,
+      emoji: ROOM_EMOJI[roomType] || '≡ƒôï',
+      items: items
     });
   }
-
   return rooms;
+}
+
+function buildSingleRoom(roomType, serviceType, titleOverride = null) {
+  const items = createRoomItems(roomType, 1, serviceType);
+  if (!items) return null;
+
+  const roomId = roomType.toLowerCase();
+  const title = titleOverride || roomType.replace(/([A-Z])/g, ' $1').trim();
+  return {
+    roomId,
+    emoji: ROOM_EMOJI[roomType] || '≡ƒôï',
+    title,
+    items
+  };
 }
 
 // ============================================================
@@ -659,7 +408,6 @@ class AysChecklistConfigBuilder {
       numLoadingDocks: null,
       numAdminOffices: null
     };
-    this.floorDefaults = null;
   }
 
   static forPropertyType(typeName) {
@@ -676,7 +424,7 @@ class AysChecklistConfigBuilder {
         );
       }
       if (count > this.typeConfig.config.maxBedrooms) {
-        // Warn but don't prevent — let user proceed if they want
+        // Warn but don't prevent ΓÇö let user proceed if they want
         this.warnings = this.warnings || [];
         this.warnings.push({
           type: 'commercial_threshold',
@@ -704,14 +452,7 @@ class AysChecklistConfigBuilder {
     return this;
   }
 
-  withFloorDefaults(defaults) {
-    if (defaults && typeof defaults === 'object') {
-      this.floorDefaults = { ...defaults };
-    }
-    return this;
-  }
-
-  // Multi-story office building (5 floors × 6 offices per floor)
+  // Multi-story office building (5 floors ├ù 6 offices per floor)
   withMultiStoryOffice(numFloors, officesPerFloor) {
     this.params.numFloors = numFloors;
     this.params.numOfficesPerFloor = officesPerFloor;
@@ -767,45 +508,37 @@ class AysChecklistConfigBuilder {
 
     const rooms = [];
     const serviceType = resolveServiceType(this.propertyType);
-
-    // Service-wide items that should appear once (not duplicated per room)
-    const propertyWideItems = getItemsFromDefinitions(serviceType, 'all_rooms');
-    if (propertyWideItems.length > 0) {
-      rooms.push({
-        roomId: 'all-rooms',
-        emoji: '🏠',
-        title: 'All Rooms (Property-wide)',
-        items: prefixItemIds(propertyWideItems, 'all_rooms')
-      });
-    }
+    this.serviceType = serviceType;
     
     // Add rooms based on property type configuration
-    // NOTE: Uses buildRoomInstances() which instantiates Room classes for proper base_room composition
     for (const roomSpec of this.typeConfig.rooms) {
       if (roomSpec.type === 'Bedroom' && roomSpec.count === null) {
         rooms.push({
           roomId: 'bedrooms',
-          emoji: '🛏️',
+          emoji: '≡ƒ¢Å∩╕Å',
           title: `Bedrooms (1-${this.params.numBedrooms})`,
           subRooms: buildRoomInstances('Bedroom', this.params.numBedrooms, serviceType)
         });
       } else if (roomSpec.type === 'Bathroom' && roomSpec.count === null) {
         rooms.push({
           roomId: 'bathrooms',
-          emoji: '🛁',
+          emoji: '≡ƒ¢ü',
           title: `Bathrooms (1-${this.params.numBathrooms})`,
           subRooms: buildRoomInstances('Bathroom', this.params.numBathrooms, serviceType)
         });
       } else if (roomSpec.type === 'Kitchen') {
-        rooms.push(KITCHEN_ROOM);
+        const room = buildSingleRoom('Kitchen', serviceType, 'Kitchen');
+        rooms.push(room || KITCHEN_ROOM);
       } else if (roomSpec.type === 'LivingArea') {
-        rooms.push(LIVING_AREA_ROOM);
+        const room = buildSingleRoom('LivingArea', serviceType, 'Living Room');
+        rooms.push(room || LIVING_AREA_ROOM);
       } else if (roomSpec.type === 'Laundry') {
-        rooms.push(LAUNDRY_ROOM);
+        const room = buildSingleRoom('Laundry', serviceType, 'Laundry Room');
+        rooms.push(room || LAUNDRY_ROOM);
       } else if (roomSpec.type === 'Shower') {
         rooms.push({
           roomId: 'showers',
-          emoji: '🚿',
+          emoji: '≡ƒÜ┐',
           title: `Showers (1-${this.params.numShowers})`,
           subRooms: buildRoomInstances('Shower', this.params.numShowers, serviceType)
         });
@@ -814,57 +547,86 @@ class AysChecklistConfigBuilder {
         if (this.params.numFloors) {
           rooms.push({
             roomId: 'offices',
-            emoji: '💼',
-            title: `Offices (${this.params.numFloors} floors × ${this.params.numOfficesPerFloor} offices = ${this.params.numOffices} total)`,
+            emoji: '≡ƒÆ╝',
+            title: `Offices (${this.params.numFloors} floors ├ù ${this.params.numOfficesPerFloor} offices = ${this.params.numOffices} total)`,
             subRooms: this._generateMultiStoryOffices()
           });
         } else {
           // Single floor
           rooms.push({
             roomId: 'offices',
-            emoji: '💼',
+            emoji: '≡ƒÆ╝',
             title: `Offices (1-${this.params.numOffices})`,
             subRooms: buildRoomInstances('Office', this.params.numOffices, serviceType)
           });
         }
       } else if (roomSpec.type === 'Reception') {
-        rooms.push(RECEPTION_ROOM);
+        const room = buildSingleRoom('Reception', serviceType, 'Reception/Front Desk');
+        rooms.push(room || RECEPTION_ROOM);
       } else if (roomSpec.type === 'Lunchroom') {
-        rooms.push(LUNCHROOM_ROOM);
+        const room = buildSingleRoom('Lunchroom', serviceType, 'Lunchroom');
+        rooms.push(room || LUNCHROOM_ROOM);
       } else if (roomSpec.type === 'Circulation') {
-        rooms.push(CIRCULATION_ROOM);
+        const room = buildSingleRoom('Circulation', serviceType, 'Circulation (Hallways/Entry)');
+        rooms.push(room || CIRCULATION_ROOM);
       } else if (roomSpec.type === 'SalesFloor') {
         const room = buildSingleRoom('SalesFloor', serviceType, 'Sales Floor');
-        rooms.push(room);
+        rooms.push(room || {
+          roomId: 'sales-floor',
+          emoji: '≡ƒ¢ì∩╕Å',
+          title: 'Sales Floor',
+          items: []
+        });
       } else if (roomSpec.type === 'Stockroom') {
         const room = buildSingleRoom('Stockroom', serviceType, 'Stockroom');
-        rooms.push(room);
+        rooms.push(room || {
+          roomId: 'stockroom',
+          emoji: '≡ƒôª',
+          title: 'Stockroom',
+          items: []
+        });
       } else if (roomSpec.type === 'LockerRoom') {
         if (roomSpec.count && roomSpec.count > 1) {
           rooms.push({
             roomId: 'locker-rooms',
-            emoji: ROOM_EMOJI.LockerRoom,
+            emoji: '≡ƒº╝',
             title: `Locker Rooms (1-${roomSpec.count})`,
             subRooms: buildRoomInstances('LockerRoom', roomSpec.count, serviceType)
           });
         } else {
           const room = buildSingleRoom('LockerRoom', serviceType, 'Locker Room');
-          rooms.push(room);
+          rooms.push(room || {
+            roomId: 'locker-room',
+            emoji: '≡ƒº╝',
+            title: 'Locker Room',
+            items: []
+          });
         }
       } else if (roomSpec.type === 'LoadingDock') {
         rooms.push({
           roomId: 'loading-docks',
-          emoji: '🚚',
+          emoji: '≡ƒÜÜ',
           title: `Loading Docks (1-${this.params.numLoadingDocks})`,
           subRooms: buildRoomInstances('LoadingDock', this.params.numLoadingDocks, serviceType)
         });
       } else if (roomSpec.type === 'Toilet') {
-        const room = buildSingleRoom('Toilet', serviceType, 'Restrooms');
-        rooms.push(room);
-      } else if (roomSpec.type === 'Warehouse') {
         rooms.push({
+          roomId: 'toilets',
+          emoji: '≡ƒÜ╜',
+          title: 'Restrooms',
+          items: [
+            { itemId: 'toilet-stalls', label: 'Stalls Cleaned', category: 'fixtures', hours: 0.5, difficulty: 'basic' },
+            { itemId: 'toilet-sinks', label: 'Sinks & Faucets', category: 'fixtures', hours: 0.3, difficulty: 'basic' },
+            { itemId: 'toilet-mirrors', label: 'Mirrors Cleaned', category: 'glass', hours: 0.2, difficulty: 'basic' },
+            { itemId: 'toilet-floors', label: 'Floors Mopped', category: 'floors', hours: 0.3, difficulty: 'basic' },
+            { itemId: 'toilet-trash', label: 'Trash Removed', category: 'trash', hours: 0.1, difficulty: 'basic' }
+          ]
+        });
+      } else if (roomSpec.type === 'Warehouse') {
+        const room = buildSingleRoom('Warehouse', serviceType, 'Warehouse Floor');
+        rooms.push(room || {
           roomId: 'warehouse',
-          emoji: '📦',
+          emoji: '≡ƒôª',
           title: 'Warehouse Floor',
           items: [
             { itemId: 'warehouse-floors', label: 'Concrete Floors Swept', category: 'floors', hours: 1, difficulty: 'basic' },
@@ -872,107 +634,17 @@ class AysChecklistConfigBuilder {
             { itemId: 'warehouse-trash', label: 'Trash Removed', category: 'trash', hours: 0.5, difficulty: 'basic' }
           ]
         });
-      } else if (roomSpec.type === 'Entryway') {
-        const room = buildSingleRoom('Entryway', serviceType, 'Entryway / Hallway');
-        rooms.push(room);
-      } else if (roomSpec.type === 'Basement') {
-        const room = buildSingleRoom('Basement', serviceType, 'Basement');
-        rooms.push(room);
-      } else if (roomSpec.type === 'UtilitySpecial') {
-        const room = buildSingleRoom('UtilitySpecial', serviceType, 'Utility & Special Rooms');
-        rooms.push(room);
-      } else if (roomSpec.type === 'HomeOffice') {
-        const room = buildSingleRoom('HomeOffice', serviceType, 'Home Office');
-        rooms.push(room);
-      } else if (roomSpec.type === 'Outdoor') {
-        const room = buildSingleRoom('Outdoor', serviceType, 'Outdoor');
-        rooms.push(room);
       }
     }
 
-    rooms.forEach((room) => {
-      if (Array.isArray(room.items)) {
-        room.items = ensureFloorControlItem(room.items);
-      }
-      if (Array.isArray(room.subRooms)) {
-        room.subRooms.forEach((sub) => {
-          if (Array.isArray(sub.items)) {
-            sub.items = ensureFloorControlItem(sub.items);
-          }
-        });
-      }
-    });
-
-    if (this.floorDefaults) {
-      rooms.forEach((room) => {
-        if (Array.isArray(room.items)) {
-          room.items = applyFloorDefaultsToItems(room.items, room.roomId || room.title, this.floorDefaults);
-        }
-        if (Array.isArray(room.subRooms)) {
-          room.subRooms.forEach((sub) => {
-            if (Array.isArray(sub.items)) {
-              sub.items = applyFloorDefaultsToItems(sub.items, sub.subRoomId || sub.title, this.floorDefaults);
-            }
-          });
-        }
+    const propertyWideItems = ITEM_DEFINITIONS?.[serviceType]?.property_wide?.standard;
+    if (Array.isArray(propertyWideItems) && propertyWideItems.length > 0) {
+      rooms.unshift({
+        roomId: 'property-wide',
+        emoji: '≡ƒÅá',
+        title: 'Property-wide',
+        items: propertyWideItems
       });
-    }
-
-    // Enforce scope: move property-wide items out of rooms.
-    const propertyWideCollected = [];
-
-    const extractPropertyWideItems = (items) => {
-      if (!Array.isArray(items)) return items;
-      const keep = [];
-      items.forEach((item) => {
-        if (item && (item.scope === 'property' || item.category === 'property_wide')) {
-          propertyWideCollected.push(item);
-        } else {
-          keep.push(item);
-        }
-      });
-      return keep;
-    };
-
-    rooms.forEach((room) => {
-      if (Array.isArray(room.items)) {
-        room.items = extractPropertyWideItems(room.items);
-      }
-      if (Array.isArray(room.subRooms)) {
-        room.subRooms.forEach((sub) => {
-          if (Array.isArray(sub.items)) {
-            sub.items = extractPropertyWideItems(sub.items);
-          }
-        });
-      }
-    });
-
-    if (propertyWideCollected.length > 0) {
-      const propertyWideRoom = rooms.find((room) => room.roomId === 'all-rooms');
-      const merged = [];
-      const seen = new Set();
-
-      const pushUnique = (item) => {
-        if (!item) return;
-        const key = item.itemId || JSON.stringify(item);
-        if (seen.has(key)) return;
-        seen.add(key);
-        merged.push(item);
-      };
-
-      if (propertyWideRoom && Array.isArray(propertyWideRoom.items)) {
-        propertyWideRoom.items.forEach(pushUnique);
-        propertyWideCollected.forEach(pushUnique);
-        propertyWideRoom.items = merged;
-      } else {
-        propertyWideCollected.forEach(pushUnique);
-        rooms.unshift({
-          roomId: 'all-rooms',
-          emoji: '🏠',
-          title: 'All Rooms (Property-wide)',
-          items: merged
-        });
-      }
     }
 
     return {
@@ -991,33 +663,22 @@ class AysChecklistConfigBuilder {
   _generateMultiStoryOffices() {
     const floors = [];
     let officeCounter = 1;
-    const serviceType = resolveServiceType(this.propertyType);
 
     for (let floor = 1; floor <= this.params.numFloors; floor++) {
       const floorOffices = [];
       const startOffice = officeCounter;
 
       for (let office = 0; office < this.params.numOfficesPerFloor; office++) {
-        // Use Room class for proper base_room composition
-        const itemsFromClass = createRoomItemsFromClass('Office', serviceType, officeCounter);
-        
-        // Fallback to deprecated template if Room class fails
-        let items;
-        if (itemsFromClass) {
-          items = itemsFromClass;
-        } else {
-          console.warn('[DEPRECATED] Using OFFICE_ITEMS_TEMPLATE fallback. Migrate to ITEM_DEFINITIONS.commercial.offices');
-          items = OFFICE_ITEMS_TEMPLATE.map(item => ({
-            ...item,
-            itemId: item.itemId.replace('{N}', officeCounter),
-            label: item.label
-          }));
-        }
+        const items = createRoomItems('Office', officeCounter, this.serviceType) || OFFICE_ITEMS_TEMPLATE.map(item => ({
+          ...item,
+          itemId: item.itemId.replace('{N}', officeCounter),
+          label: item.label
+        }));
 
         floorOffices.push({
           subRoomId: `office${officeCounter}`,
           title: `Office ${officeCounter}`,
-          emoji: '💼',
+          emoji: '≡ƒÆ╝',
           items: items
         });
 
@@ -1027,15 +688,13 @@ class AysChecklistConfigBuilder {
       floors.push({
         subRoomId: `floor${floor}`,
         title: `Floor ${floor} (Offices ${startOffice}-${officeCounter - 1})`,
-        emoji: '🏢',
+        emoji: '≡ƒÅó',
         items: floorOffices  // Nested sub-rooms
       });
     }
 
     return floors;
   }
-
-}
 
 // ============================================================
 // DEFAULT CONFIG - Loaded on page init
@@ -1198,7 +857,7 @@ function updateCommercialWarningLabel() {
   let warningLabel = document.getElementById('commercial-threshold-warning');
   
   if (!CHECKLIST_CONFIG.warnings || CHECKLIST_CONFIG.warnings.length === 0) {
-    // No warnings — remove label if it exists
+    // No warnings ΓÇö remove label if it exists
     if (warningLabel) {
       warningLabel.remove();
     }
@@ -1209,7 +868,7 @@ function updateCommercialWarningLabel() {
   const commercialWarning = CHECKLIST_CONFIG.warnings.find(w => w.type === 'commercial_threshold');
   
   if (!commercialWarning) {
-    // Warning cleared — remove label
+    // Warning cleared ΓÇö remove label
     if (warningLabel) {
       warningLabel.remove();
     }
@@ -1233,7 +892,7 @@ function updateCommercialWarningLabel() {
       gap: 10px;
     `;
     warningLabel.innerHTML = `
-      <span style="font-size: 20px;">⚠️</span>
+      <span style="font-size: 20px;">ΓÜá∩╕Å</span>
       <div>
         <strong>${commercialWarning.message}</strong>
         <div style="font-size: 12px; font-weight: normal; margin-top: 4px; color: #666;">

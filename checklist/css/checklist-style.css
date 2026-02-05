@@ -255,14 +255,60 @@ body {
 
 .service-tabs {
   display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-md);
+  overscroll-behavior-x: contain;
   border-bottom: 2px solid var(--color-accent);
   background: var(--color-white);
   padding: var(--space-md);
   gap: var(--space-sm);
+  scrollbar-width: none; /* Firefox */
+  position: relative;
+}
+
+.service-tabs::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Edge fade hint (shows only when tabs overflow horizontally) */
+.service-tabs.has-overflow::before,
+.service-tabs.has-overflow::after {
+  content: '';
+  position: sticky;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.service-tabs.has-overflow::before {
+  left: 0;
+  background: linear-gradient(to right, var(--color-white), rgba(255, 255, 255, 0));
+}
+
+.service-tabs.has-overflow::after {
+  right: 0;
+  background: linear-gradient(to left, var(--color-white), rgba(255, 255, 255, 0));
+}
+
+/* When scrolled to the ends, hide the corresponding fade */
+.service-tabs.has-overflow.is-at-start::before {
+  opacity: 0;
+}
+
+.service-tabs.has-overflow.is-at-end::after {
+  opacity: 0;
 }
 
 .tab {
   cursor: pointer;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
   padding: var(--space-md) var(--space-lg);
   color: var(--color-secondary);
   font-size: var(--font-size-base);
@@ -342,6 +388,16 @@ body {
 
 .tab-label {
   font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Desktop affordance for drag-to-scroll */
+.service-tabs.is-draggable {
+  cursor: grab;
+}
+
+.service-tabs.is-draggable.is-dragging {
+  cursor: grabbing;
 }
 
 /* ============================================================================
@@ -364,21 +420,505 @@ body {
 }
 
 /* ============================================================================
-   FORM CONTROLS (Crew Info, Date)
+   FORM CONTROLS (Crew Info, Date) - Compact header bar
    ============================================================================ */
 
 .checklist-meta {
-  background: var(--color-light);
-  padding: var(--space-lg) var(--space-md);
-  border-bottom: 1px solid var(--color-border);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-lg);
+  background: var(--color-primary);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-end;
 }
 
-@media (max-width: 768px) {
+.checklist-meta .meta-field {
+  flex: 1;
+  max-width: 280px;
+}
+
+.checklist-meta .meta-field:last-child {
+  flex: 0 0 auto;
+  max-width: 160px;
+}
+
+.checklist-meta .meta-field label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 2px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.checklist-meta .meta-field input {
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: rgba(255,255,255,0.1);
+  color: var(--color-white);
+  width: 100%;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.checklist-meta .meta-field input::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+.checklist-meta .meta-field input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background: rgba(255,255,255,0.15);
+}
+
+/* Quote ID Badge in Header */
+.quote-id-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  max-width: 180px;
+}
+
+.quote-id-field label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.7);
+  font-weight: var(--font-weight-semibold);
+}
+
+.quote-id-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.15);
+  color: var(--color-white);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  min-width: 50px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.btn-new-quote-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn-new-quote-small:hover {
+  background: #1b5e20;
+  transform: scale(1.05);
+}
+
+.btn-new-quote-small:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 500px) {
   .checklist-meta {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+  
+  .checklist-meta .meta-field,
+  .checklist-meta .meta-field:last-child {
+    max-width: none;
+  }
+}
+
+/* ============================================================================
+   SERVICE TYPE SELECTOR - Global Quote Mode Indicator
+   Always visible, drives which items appear in checklist
+   ============================================================================ */
+
+.service-type-selector {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #1a237e 100%);
+  border-radius: var(--radius-lg);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.service-type-selector-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.service-type-label {
+  color: rgba(255,255,255,0.9);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.service-type-dropdown {
+  flex: 1;
+  min-width: 180px;
+  max-width: 300px;
+  padding: var(--space-sm) var(--space-md);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius-md);
+  background: #f0f0f0;
+  color: #222222;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.service-type-dropdown option {
+  color: #222222;
+  background: #f5f5f5;
+}
+
+.service-type-dropdown:hover {
+  border-color: rgba(255,255,255,0.6);
+  background: #ffffff;
+  color: #111111;
+}
+
+.service-type-dropdown:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(28, 201, 80, 0.3);
+}
+
+.service-type-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: rgba(28, 201, 80, 0.2);
+  border-radius: var(--radius-full);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.indicator-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+.indicator-text {
+  white-space: nowrap;
+}
+
+/* Service type specific colors */
+.service-type-selector[data-service="eot"] {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+}
+
+.service-type-selector[data-service="residential"] {
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+}
+
+.service-type-selector[data-service="commercial"] {
+  background: linear-gradient(135deg, #e65100 0%, #bf360c 100%);
+}
+
+.service-type-selector[data-service="custom"] {
+  background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%);
+}
+
+@media (max-width: 500px) {
+  .service-type-selector-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .service-type-dropdown {
+    max-width: none;
+  }
+  
+  .service-type-indicator {
+    justify-content: center;
+  }
+}
+
+/* ============================================================================
+   CLIENT ESSENTIALS CARD - Sleek, Space-Saving, Animated
+   Modern collapsible with smooth reveal and polished micro-interactions
+   ============================================================================ */
+
+.client-essentials-card {
+  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-light) 100%);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-md);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.client-essentials-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.client-essentials-card[open] {
+  box-shadow: 0 4px 20px rgba(46,125,50,0.12), 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Header - Compact pill style when collapsed */
+.client-essentials-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #1b5e20 100%);
+  color: var(--color-white);
+  cursor: pointer;
+  user-select: none;
+  font-weight: var(--font-weight-semibold);
+  transition: padding 0.2s ease, background 0.2s ease;
+  list-style: none; /* Firefox */
+}
+
+.client-essentials-header::-webkit-details-marker {
+  display: none;
+}
+
+/* Animated chevron icon (replaces ugly triangle) */
+.client-essentials-header::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.client-essentials-card[open] .client-essentials-header::after {
+  transform: rotate(45deg);
+}
+
+.client-essentials-title {
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.client-essentials-preview {
+  font-size: var(--font-size-sm);
+  opacity: 0.9;
+  margin-left: var(--space-sm);
+  padding: 2px 8px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 12px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.client-essentials-card[open] .client-essentials-preview {
+  opacity: 0;
+  transform: translateX(10px);
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Body - Smooth slide reveal */
+.client-essentials-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease;
+  padding: 0 var(--space-md);
+}
+
+.client-essentials-card[open] .client-essentials-body {
+  grid-template-rows: 1fr;
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+.client-essentials-body > * {
+  overflow: hidden;
+}
+
+/* Input row - flex with breathing room */
+.client-essentials-row {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.client-essentials-row .meta-field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Sleek input styling */
+.client-essentials-card .meta-field label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-secondary);
+  margin-bottom: 2px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.client-essentials-card .meta-field input {
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-white);
+  color: var(--color-primary);
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.client-essentials-card .meta-field input::placeholder {
+  color: var(--color-secondary);
+  opacity: 0.5;
+}
+
+.client-essentials-card .meta-field input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background: var(--color-white);
+  box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+}
+
+/* Nested Address Card - Subtle reveal */
+.client-address-card {
+  background: var(--color-light);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-sm);
+  overflow: hidden;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.client-address-card[open] {
+  border-color: var(--color-border);
+  background: var(--color-white);
+}
+
+.client-address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+  transition: color 0.15s ease;
+  list-style: none;
+}
+
+.client-address-header::-webkit-details-marker {
+  display: none;
+}
+
+/* Chevron icon for address - matches main card */
+.client-address-header::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.2s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.client-address-card[open] .client-address-header::after {
+  transform: rotate(45deg);
+}
+
+.client-address-card[open] .client-address-header {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.client-address-preview {
+  font-size: 11px;
+  color: var(--color-secondary);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.client-address-card[open] .client-address-preview {
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Address body - smooth reveal */
+.client-address-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.2s ease;
+}
+
+.client-address-card[open] .client-address-body {
+  grid-template-rows: 1fr;
+  padding: var(--space-xs) var(--space-sm) var(--space-sm);
+}
+
+.client-address-body > * {
+  overflow: hidden;
+}
+
+.client-address-body .client-essentials-row {
+  gap: var(--space-xs);
+}
+
+/* Address fields: Street widest, postcode narrowest */
+.client-address-body .meta-field:nth-child(1) { flex: 2.5; }  /* Street */
+.client-address-body .meta-field:nth-child(2) { flex: 1; }    /* Suburb */
+.client-address-body .meta-field:nth-child(3) { flex: 1; }    /* City */
+.client-address-body .meta-field:nth-child(4) { flex: 0.5; min-width: 60px; }  /* Postcode */
+
+/* Mobile: Stack gracefully */
+@media (max-width: 500px) {
+  .client-essentials-row {
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  
+  .client-address-body .meta-field:nth-child(1),
+  .client-address-body .meta-field:nth-child(2),
+  .client-address-body .meta-field:nth-child(3),
+  .client-address-body .meta-field:nth-child(4) {
+    flex: 1;
+  }
+  
+  .client-essentials-card .meta-field input {
+    padding: 10px 12px;
+    font-size: var(--font-size-base);
   }
 }
 
@@ -656,6 +1196,243 @@ span.flatpickr-weekday {
   box-shadow: 0 0 0 3px rgba(28, 201, 80, 0.1);
 }
 
+.checklist-item .variant-apply-scope {
+  width: 100%;
+  margin-top: var(--space-xs);
+  padding: var(--button-padding);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-light);
+  color: var(--color-secondary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+}
+
+.floor-summary-card .floor-summary-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-secondary);
+}
+
+#sync-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-light);
+  color: var(--color-secondary);
+}
+
+#sync-status[data-state="syncing"] {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.first-run-panel {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+  background: var(--color-light);
+}
+
+.first-run-panel h4 {
+  margin: 0 0 var(--space-sm);
+  color: var(--color-secondary);
+}
+
+.first-run-panel label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+.first-run-panel input {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: var(--font-size-base);
+}
+
+.first-run-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.first-run-status {
+  margin-top: 12px;
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+}
+
+
+.endpoint-banner {
+  margin: var(--space-md) 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--color-border);
+  background: var(--color-light);
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  display: none;
+}
+
+.endpoint-banner.is-visible {
+  display: block;
+}
+
+.system-intro {
+  color: var(--color-secondary);
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-sm);
+}
+
+/* ============================================================================
+   SYSTEM TAB - Base Info Panel & Sections
+   Status + configuration surface (like a router admin page)
+   Always renders deterministically, even with no services configured
+   ============================================================================ */
+
+.system-info-panel {
+  background: linear-gradient(135deg, var(--color-light) 0%, var(--color-white) 100%);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.system-info-panel h3 {
+  color: var(--color-primary);
+  margin-bottom: var(--space-md);
+  font-size: 1.25rem;
+}
+
+.system-info-panel p {
+  color: var(--color-secondary);
+  margin-bottom: var(--space-sm);
+  line-height: 1.6;
+}
+
+.system-info-panel .system-info-note {
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-white);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+}
+
+.system-section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  background: var(--color-white);
+}
+
+.system-section h4 {
+  color: var(--color-secondary);
+  margin-bottom: var(--space-md);
+  font-size: 1.1rem;
+}
+
+.system-section .section-description {
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-md);
+}
+
+.system-section .field-hint {
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  margin-top: 4px;
+}
+
+/* Sync status rows */
+.system-status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.system-status-row:last-child {
+  border-bottom: none;
+}
+
+.system-status-row .status-label {
+  font-weight: 600;
+  color: var(--color-secondary);
+  min-width: 120px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.status-badge.status-unknown {
+  background: var(--color-light);
+  color: var(--color-secondary);
+}
+
+.status-badge.status-online {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.status-offline {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.status-syncing {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* ============================================================================
+   SETTINGS TAB CONTENT VISIBILITY
+   Use CSS classes to toggle tab visibility instead of inline styles
+   ============================================================================ */
+
+/* Settings tab visibility (class-based) */
+.settings-tab-content {
+  display: none;
+}
+
+.settings-tab-content.is-active {
+  display: block;
+}
+
+/* Legacy system-callout (keep for backwards compat) */
+.system-callout {
+  margin-bottom: var(--space-md);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-light);
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.first-run-panel p {
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+}
+
 /* ============================================================================
    ACCORDION (Details/Summary)
    ============================================================================ */
@@ -719,7 +1496,7 @@ details[open] summary:hover {
 
 /* Custom arrow indicator */
 details summary::before {
-  content: '▶';
+  content: '\25B6';
   display: inline-block;
   margin-right: var(--space-md);
   transition: transform var(--transition-base);
@@ -775,6 +1552,38 @@ details[open] .progress-badge {
   background: transparent;
   color: var(--color-accent);
   border: 1px solid var(--color-accent);
+}
+
+/* Select All button for room cards */
+.select-all-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-left: var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.select-all-btn:hover {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-white);
+}
+
+.select-all-btn:active {
+  transform: scale(0.95);
+}
+
+/* When all items are selected, show subtle indication */
+.select-all-btn[data-all-selected="true"] {
+  background: var(--color-accent-light, rgba(0, 123, 255, 0.1));
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* ============================================================================
@@ -861,7 +1670,7 @@ details[open] .progress-badge {
 }
 
 .checklist-item input[type="checkbox"]:checked + .checkbox-custom::after {
-  content: '✓';
+  content: '\2713';
   color: var(--color-white);
   font-size: 14px;
   font-weight: var(--font-weight-bold);
@@ -1077,6 +1886,46 @@ details[open] .progress-badge {
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: var(--space-lg);
+}
+
+/* ============================================================================
+   QUOTE MANAGER PANEL
+   ============================================================================ */
+
+.quote-panel {
+  transition: box-shadow 0.2s ease;
+}
+
+.quote-panel:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quote-panel summary {
+  user-select: none;
+}
+
+.quote-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.quote-panel .quote-chevron {
+  transition: transform 0.2s ease;
+  font-size: 14px;
+  color: var(--color-secondary);
+}
+
+.quote-panel[open] .quote-chevron {
+  transform: rotate(90deg);
+}
+
+.quote-panel summary:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.quote-panel .quote-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
 }
 
 /* ============================================================================

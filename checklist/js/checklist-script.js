@@ -17,7 +17,8 @@
     customItems: 'checklist_custom_items_v1',
     changeLog: 'checklist_change_log',
     snapshotFallback: 'checklist_snapshot_latest',
-    clientContext: 'checklist_client_context'
+    clientContext: 'checklist_client_context',
+    currentQuoteId: 'ays_current_quote_id'
   };
 
   const CHANGE_LOG_MAX_ENTRIES = 2000;
@@ -58,25 +59,954 @@
      */
     init: function() {
       this.initAdminView();
+      this.initSettingsTabs();
+      this.registerServiceWorker();
       this.cacheDOM();
       this.applySettingsToUI();
+      this.updateEndpointBanner();
       this.initCustomItems();
       this.initRoomProgressBars();
       this.initEventWorker();
       this.initSyncStatusUI();
       this.normalizePhase1Attributes();
       this.bindEvents();
+      this.initGeneratedRoomsForTabs();
+      this.initAdminDiagnostics();
+      this.initQuickPropertyTypeSelector();
+      this.initGlobalServiceTypeSelector();
+      this.initFloorDefaultsPanel();
+      this.initEndpointFromUrl();
+      this.initFirstRunSetup();
       this.initVoiceDictationMicButtons();
       this.restoreSnapshotBestEffort();
+      this.initQuoteStorage();
+      this.initQuoteManager();
       this.restoreClientContextBestEffort();
       this.loadProgress();
       this.updateAllProgress();
+      this.updateClientSummary();
+      this.updateSystemStatus();
+      
+      // Listen for online/offline events to update System tab
+      window.addEventListener('online', () => this.updateSystemStatus());
+      window.addEventListener('offline', () => this.updateSystemStatus());
       
       // CRITICAL: Initialize service toggle renderer
       // MUST wait for ITEM_DEFINITIONS to load before rendering toggles
       // If this fails, the entire polymorphic property system cascades down
       this.initServiceToggleRenderer();
     },
+
+    /**
+     * Initialize Settings tab navigation (Property/Pricing/Production/Surcharges/Services/System)
+     */
+    initSettingsTabs: function() {
+      const settingsTabButtons = document.querySelectorAll('.settings-tab-button');
+      const settingsTabContents = document.querySelectorAll('.settings-tab-content');
+
+      if (!settingsTabButtons.length || !settingsTabContents.length) {
+        return;
+      }
+
+      const showSettingsTab = (tabName) => {
+        settingsTabContents.forEach(content => {
+          content.classList.remove('is-active');
+          content.style.display = 'none';
+        });
+
+        const activeContent = document.querySelector(`.settings-tab-content[data-tab="${tabName}"]`);
+        if (activeContent) {
+          activeContent.classList.add('is-active');
+          activeContent.style.display = 'block';
+        }
+
+        settingsTabButtons.forEach(btn => {
+          const isActive = btn.getAttribute('data-tab') === tabName;
+          btn.classList.toggle('is-active', isActive);
+          btn.style.borderBottomColor = isActive ? 'var(--color-accent)' : 'transparent';
+          if (isActive) {
+            btn.style.color = 'var(--color-secondary)';
+          }
+        });
+
+        if (tabName === 'system' && typeof Checklist !== 'undefined' && Checklist.updateSystemStatus) {
+          Checklist.updateSystemStatus();
+        }
+        
+        // Refresh quote list when Manage Quotes tab is shown
+        if (tabName === 'manage-quotes' && typeof Checklist !== 'undefined' && Checklist.renderQuoteList) {
+          Checklist.renderQuoteList();
+        }
+      };
+
+      settingsTabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const tabName = this.getAttribute('data-tab');
+          showSettingsTab(tabName);
+        });
+      });
+
+      let initialTab = null;
+      settingsTabButtons.forEach(btn => {
+        if (!initialTab && btn.classList.contains('is-active')) {
+          initialTab = btn.getAttribute('data-tab');
+        }
+      });
+
+      if (!initialTab) {
+        initialTab = settingsTabButtons[0].getAttribute('data-tab');
+      }
+
+      showSettingsTab(initialTab);
+    },
+
+    /**
+     * Update header banner when endpoint is not configured
+     */
+    updateEndpointBanner: function() {
+      const banner = document.getElementById('endpoint-banner');
+      if (!banner) return;
+      const settings = this.getSettings() || {};
+      if (settings.service_api_endpoint) {
+        banner.classList.remove('is-visible');
+        banner.textContent = '';
+        return;
+      }
+      banner.classList.add('is-visible');
+      banner.textContent = 'Not connected — set your endpoint to enable sync.';
+    },
+
+    /**
+     * Update System tab status indicators (connection, last sync, pending count)
+     * Called on init, after sync, and on online/offline events
+     */
+    updateSystemStatus: function() {
+      const connectionEl = document.getElementById('system-connection-status');
+      const lastSyncEl = document.getElementById('system-last-sync');
+      const pendingEl = document.getElementById('system-pending-count');
+      
+      // Connection status
+      if (connectionEl) {
+        const settings = this.getSettings() || {};
+        const hasEndpoint = !!settings.service_api_endpoint;
+        const isOnline = navigator.onLine;
+        
+        connectionEl.classList.remove('status-unknown', 'status-online', 'status-offline', 'status-syncing');
+        
+        if (!hasEndpoint) {
+          connectionEl.textContent = 'Not configured';
+          connectionEl.classList.add('status-unknown');
+        } else if (!isOnline) {
+          connectionEl.textContent = 'Offline';
+          connectionEl.classList.add('status-offline');
+        } else {
+          connectionEl.textContent = 'Online';
+          connectionEl.classList.add('status-online');
+        }
+      }
+      
+      // Last sync timestamp
+      if (lastSyncEl) {
+        const lastSync = localStorage.getItem('checklist_last_sync');
+        if (lastSync) {
+          try {
+            const date = new Date(lastSync);
+            lastSyncEl.textContent = date.toLocaleString();
+          } catch (e) {
+            lastSyncEl.textContent = lastSync;
+          }
+        } else {
+          lastSyncEl.textContent = 'Never';
+        }
+      }
+      
+      // Pending items count (from event worker outbox)
+      if (pendingEl) {
+        // Request count from event worker if available
+        if (this._eventWorker) {
+          // Worker will respond via message handler
+          this._eventWorker.postMessage({ op: 'status' });
+        } else {
+          pendingEl.textContent = '0';
+        }
+      }
+    },
+
+    initFirstRunSetup: function() {
+      const input = document.getElementById('first-run-endpoint');
+      const btnTest = document.getElementById('first-run-test');
+      const btnSave = document.getElementById('first-run-save');
+      const btnOffline = document.getElementById('first-run-offline');
+      const status = document.getElementById('first-run-status');
+
+      const setStatus = (text, ok) => {
+        if (!status) return;
+        status.textContent = text || '';
+        status.style.color = ok ? 'var(--color-accent)' : 'var(--color-secondary)';
+      };
+
+      const normalizeEndpoint = (value) => {
+        const trimmed = (value || '').toString().trim();
+        if (!trimmed) return '';
+        return trimmed.replace(/\/+$/, '');
+      };
+
+      const hasEndpoint = async () => {
+        const local = (this.getSettings() || {}).service_api_endpoint;
+        if (local) return local;
+        const idbValue = await this.getEndpointFromIdb();
+        return idbValue || '';
+      };
+
+      const applyEndpoint = async (endpoint) => {
+        if (!endpoint) return;
+        await this.saveEndpointToIdb(endpoint);
+        const settings = this.getSettings() || {};
+        const next = { ...settings, service_api_endpoint: endpoint };
+        localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(next));
+        $('#service-api-endpoint').val(endpoint);
+        $('#system-service-api-endpoint').val(endpoint);
+        this.updateEndpointBanner();
+        if (this._eventWorker) {
+          this._eventWorker.postMessage({ op: 'config', config: { endpoint } });
+          this.flushEventQueue();
+        }
+      };
+
+      const testEndpoint = async () => {
+        const endpoint = normalizeEndpoint(input?.value || '');
+        if (!endpoint) {
+          setStatus('Enter a valid endpoint URL.', false);
+          btnSave.disabled = true;
+          return;
+        }
+
+        setStatus('Testing connection…', true);
+        try {
+          const res = await fetch(endpoint + '/health', { method: 'GET' });
+          if (!res.ok) throw new Error('Health check failed');
+          setStatus('Connection OK.', true);
+          btnSave.disabled = false;
+        } catch (e) {
+          setStatus('Connection failed. Check the URL.', false);
+          btnSave.disabled = true;
+        }
+      };
+
+      const saveAndContinue = async () => {
+        const endpoint = normalizeEndpoint(input?.value || '');
+        if (!endpoint) return;
+        await applyEndpoint(endpoint);
+        this.setSyncStatus('queued', 'Endpoint configured. Syncing…');
+        setStatus('Endpoint saved. Syncing…', true);
+      };
+
+      const continueOffline = () => {
+        this.setSyncStatus('local', 'Saved locally (no endpoint)');
+        setStatus('Offline mode enabled.', true);
+        this.updateEndpointBanner();
+      };
+
+      btnTest?.addEventListener('click', testEndpoint);
+      btnSave?.addEventListener('click', saveAndContinue);
+      btnOffline?.addEventListener('click', continueOffline);
+
+      hasEndpoint().then((endpoint) => {
+        if (endpoint) {
+          applyEndpoint(endpoint).then(() => {
+            this.updateEndpointBanner();
+            if (input) input.value = endpoint;
+            btnSave && (btnSave.disabled = false);
+            setStatus('Endpoint loaded.', true);
+          });
+        } else {
+          this.updateEndpointBanner();
+          setStatus('Endpoint not set. Sync is disabled.', false);
+        }
+      });
+    },
+
+    initAdminDiagnostics: function() {
+      try {
+        const params = new URLSearchParams(window.location.search || '');
+        const enabled = (params.get('admin') === '1') || (params.get('debug') === '1');
+        if (!enabled) return;
+
+        if (this._adminDiag && this._adminDiag.enabled) return;
+
+        const panel = document.createElement('pre');
+        panel.id = 'ays-admin-diagnostics';
+        panel.style.position = 'fixed';
+        panel.style.right = '12px';
+        panel.style.bottom = '12px';
+        panel.style.zIndex = '99999';
+        panel.style.maxWidth = '420px';
+        panel.style.maxHeight = '45vh';
+        panel.style.overflow = 'auto';
+        panel.style.padding = '10px';
+        panel.style.margin = '0';
+        panel.style.border = '1px solid var(--color-border)';
+        panel.style.borderRadius = 'var(--radius-md)';
+        panel.style.background = 'var(--color-white)';
+        panel.style.color = 'var(--color-primary)';
+        panel.style.fontSize = '12px';
+        panel.style.lineHeight = '1.35';
+        panel.style.boxShadow = 'var(--shadow-md)';
+
+        const state = {
+          enabled: true,
+          panel,
+          lines: [],
+          log: (line) => {
+            const ts = new Date().toLocaleTimeString();
+            state.lines.push(`[${ts}] ${String(line)}`);
+            // Keep last ~200 lines
+            if (state.lines.length > 200) state.lines.splice(0, state.lines.length - 200);
+            panel.textContent = state.lines.join('\n');
+          },
+          snapshot: () => {
+            const activeService = (typeof this.getActiveServiceType === 'function') ? this.getActiveServiceType() : 'unknown';
+            const containerId = this._generatorContainerByService && this._generatorContainerByService[activeService];
+            const containerEl = containerId ? document.getElementById(containerId) : null;
+            const cfg = this._getCurrentGeneratedConfig && this._getCurrentGeneratedConfig();
+            const roomsCount = (cfg && Array.isArray(cfg.rooms)) ? cfg.rooms.length : 'n/a';
+            const hasFactory = (typeof AysChecklistFormFactory !== 'undefined');
+            const hasGenerator = !!(this._generatorsByService && this._generatorsByService[activeService]);
+            const generatedDetailsCount = containerEl ? containerEl.querySelectorAll('details').length : 'n/a';
+            const legacyId = 'legacy-rooms-' + activeService;
+            const legacyEl = document.getElementById(legacyId);
+            const legacyVisible = legacyEl ? (legacyEl.style.display !== 'none') : 'n/a';
+
+            state.log('--- STATUS ---');
+            state.log(`activeService=${activeService}`);
+            state.log(`containerId=${containerId || 'n/a'} containerFound=${!!containerEl}`);
+            state.log(`generatedDetailsCount=${generatedDetailsCount}`);
+            state.log(`AysChecklistFormFactoryLoaded=${hasFactory}`);
+            state.log(`generatorInstanceForService=${hasGenerator}`);
+            state.log(`configRooms=${roomsCount}`);
+            state.log(`legacyEl(${legacyId})=${!!legacyEl} legacyVisible=${legacyVisible}`);
+          }
+        };
+
+        this._adminDiag = state;
+        document.body.appendChild(panel);
+        state.log('Admin diagnostics enabled');
+
+        window.addEventListener('error', (e) => {
+          const msg = e && e.message ? e.message : 'Unknown error';
+          state.log(`ERROR: ${msg}`);
+        });
+
+        window.addEventListener('unhandledrejection', (e) => {
+          const reason = (e && e.reason) ? e.reason : 'Unknown rejection';
+          const msg = (reason && reason.message) ? reason.message : String(reason);
+          state.log(`UNHANDLED: ${msg}`);
+        });
+
+        // Snapshot a few times during initial load.
+        setTimeout(() => state.snapshot(), 50);
+        setTimeout(() => state.snapshot(), 500);
+        setTimeout(() => state.snapshot(), 2000);
+      } catch (_) {
+        // Never break the app for diagnostics.
+      }
+    },
+
+    initGeneratedRoomsForTabs: function() {
+      // Keep generator instances per service tab so we can render into different containers.
+      // IMPORTANT: We keep Settings as the source-of-truth, and just swap the active generator.
+      this._generatorContainerByService = {
+        'end-of-tenancy': 'rooms-container',
+        'residential': 'rooms-container-residential',
+        'commercial': 'rooms-container-commercial'
+      };
+
+      this._floorSummaryContainerByService = {
+        'end-of-tenancy': 'floor-summary-container',
+        'residential': 'floor-summary-container-residential',
+        'commercial': 'floor-summary-container-commercial'
+      };
+
+      this._generatorsByService = this._generatorsByService || {};
+
+      Object.entries(this._generatorContainerByService).forEach(([service, containerId]) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        if (this._generatorsByService[service]) return;
+        if (typeof AysChecklistFormFactory === 'undefined') return;
+        this._generatorsByService[service] = new AysChecklistFormFactory(containerId);
+      });
+
+      // Ensure the currently active tab has the correct generator selected.
+      this.setActiveChecklistGenerator(this.getActiveServiceType());
+    },
+
+    _escapeHtml: function(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    },
+
+    _waitFor: function(checkFn, options) {
+      const opts = options || {};
+      const timeoutMs = typeof opts.timeoutMs === 'number' ? opts.timeoutMs : 5000;
+      const intervalMs = typeof opts.intervalMs === 'number' ? opts.intervalMs : 50;
+
+      return new Promise((resolve, reject) => {
+        const started = Date.now();
+
+        const tick = () => {
+          let value = null;
+          try {
+            value = checkFn();
+          } catch (e) {
+            reject(e);
+            return;
+          }
+
+          if (value) {
+            resolve(value);
+            return;
+          }
+
+          if (Date.now() - started >= timeoutMs) {
+            reject(new Error('Timed out waiting for prerequisites'));
+            return;
+          }
+
+          setTimeout(tick, intervalMs);
+        };
+
+        tick();
+      });
+    },
+
+    _getCurrentGeneratedConfig: function() {
+      if (typeof PROPERTY_CONFIG !== 'undefined' && typeof PROPERTY_CONFIG.getConfig === 'function') {
+        return PROPERTY_CONFIG.getConfig();
+      }
+      if (typeof CHECKLIST_CONFIG !== 'undefined') {
+        return CHECKLIST_CONFIG;
+      }
+      return null;
+    },
+
+    buildChecklistConfigFor: function(serviceType, propertyTypeKey) {
+      if (typeof AysChecklistConfigBuilder === 'undefined' || typeof PROPERTY_CONFIG === 'undefined') {
+        return this._getCurrentGeneratedConfig();
+      }
+
+      const baseType = propertyTypeKey || PROPERTY_CONFIG.property_type || 'residential';
+      let targetType = baseType;
+
+      if (serviceType === 'commercial') {
+        targetType = baseType.startsWith('commercial') ? baseType : 'commercial_office';
+      } else if (serviceType === 'end-of-tenancy') {
+        targetType = baseType.startsWith('eot') ? baseType : 'eot_residential';
+      } else if (serviceType === 'residential') {
+        targetType = baseType.startsWith('residential') ? baseType : 'residential';
+      }
+
+      try {
+        const builder = AysChecklistConfigBuilder.forPropertyType(targetType);
+
+        if (PROPERTY_CONFIG.numBedrooms) builder.withBedroomCount(PROPERTY_CONFIG.numBedrooms);
+        if (PROPERTY_CONFIG.numBathrooms) builder.withBathroomCount(PROPERTY_CONFIG.numBathrooms);
+
+        if (PROPERTY_CONFIG.numFloors && PROPERTY_CONFIG.numOfficesPerFloor) {
+          builder.withMultiStoryOffice(PROPERTY_CONFIG.numFloors, PROPERTY_CONFIG.numOfficesPerFloor);
+        } else if (PROPERTY_CONFIG.numOffices) {
+          builder.withOfficeCount(PROPERTY_CONFIG.numOffices);
+        }
+
+        if (PROPERTY_CONFIG.numShowers) builder.withShowerCount(PROPERTY_CONFIG.numShowers);
+        if (PROPERTY_CONFIG.numLoadingDocks) builder.withLoadingDockCount(PROPERTY_CONFIG.numLoadingDocks);
+        if (PROPERTY_CONFIG.numAdminOffices) builder.withAdminOfficeCount(PROPERTY_CONFIG.numAdminOffices);
+
+        const rawDefaults = this.getFloorDefaultsFromStorage();
+        const normalizedDefaults = this.normalizeFloorDefaults(rawDefaults);
+        if (normalizedDefaults && typeof builder.withFloorDefaults === 'function') {
+          builder.withFloorDefaults(normalizedDefaults);
+        }
+
+        return builder.build();
+      } catch (err) {
+        console.warn('[Checklist] Per-tab config build failed, falling back to global config:', err);
+        return this._getCurrentGeneratedConfig();
+      }
+    },
+
+    getFloorDefaultsFromStorage: function() {
+      try {
+        return JSON.parse(localStorage.getItem('checklist_floor_defaults') || 'null');
+      } catch (_) {
+        return null;
+      }
+    },
+
+    normalizeFloorDefaults: function(rawDefaults) {
+      if (!rawDefaults || typeof rawDefaults !== 'object') return null;
+
+      const map = {};
+      const assign = (keys, value) => {
+        if (!value) return;
+        keys.forEach((key) => {
+          map[key] = value;
+        });
+      };
+
+      assign(['bedroom'], rawDefaults.bedroom);
+      assign(['bathroom', 'toilet', 'toilets', 'shower'], rawDefaults.bathroom);
+      assign(['living_area', 'living-room', 'living'], rawDefaults.living);
+      assign(['kitchen', 'lunchroom'], rawDefaults.kitchen);
+      assign(['circulation', 'entryway', 'hallway'], rawDefaults.hallway);
+      assign(['warehouse'], rawDefaults.warehouse);
+      assign(['office', 'reception', 'boardroom', 'sales-floor', 'stockroom'], rawDefaults.office);
+
+      return Object.keys(map).length ? map : null;
+    },
+
+    _waitForGeneratedConfigWithRooms: function() {
+      return this._waitFor(() => {
+        const cfg = this._getCurrentGeneratedConfig();
+        return (cfg && Array.isArray(cfg.rooms)) ? cfg : null;
+      }, { timeoutMs: 8000, intervalMs: 50 });
+    },
+
+    _renderGeneratedRoomsForService: function(serviceType, containerId, containerEl, configOverride) {
+      this._pendingGeneratedRenderToken = (this._pendingGeneratedRenderToken || 0) + 1;
+      const token = this._pendingGeneratedRenderToken;
+
+      const ensureFactoryLoaded = () => (typeof AysChecklistFormFactory !== 'undefined') ? true : null;
+
+      return this._waitFor(ensureFactoryLoaded, { timeoutMs: 8000, intervalMs: 50 })
+        .then(() => {
+          if (configOverride && Array.isArray(configOverride.rooms)) return configOverride;
+          return this._waitForGeneratedConfigWithRooms();
+        })
+        .then((config) => {
+          // Ignore stale renders if the user switched tabs quickly.
+          if (token !== this._pendingGeneratedRenderToken) return null;
+
+          this._generatorsByService = this._generatorsByService || {};
+          if (!this._generatorsByService[serviceType]) {
+            this._generatorsByService[serviceType] = new AysChecklistFormFactory(containerId);
+          }
+
+          const generator = this._generatorsByService[serviceType];
+          window.checklistGenerator = generator;
+
+          // Regenerate into the correct container.
+          generator.regenerate(config);
+
+          if (typeof this.initRoomProgressBars === 'function') {
+            this.initRoomProgressBars();
+          }
+          if (typeof this.updateFloorSummary === 'function') {
+            this.updateFloorSummary();
+          }
+
+          // Option A (safer): only hide legacy hardcoded rooms after generated rooms are present.
+          // We also strip IDs inside the legacy container to prevent duplicate IDs interfering with
+          // selectors/labels, while still keeping the markup available as a fallback.
+          const hasGeneratedRooms = !!(
+            containerEl &&
+            containerEl.querySelector &&
+            // Generated cards include a progress bar element; legacy markup does not.
+            containerEl.querySelector('.room-progressbar, .room-progressbar-fill')
+          );
+
+          if (hasGeneratedRooms) {
+            const legacyEl = document.getElementById('legacy-rooms-' + serviceType);
+            if (legacyEl) {
+              // Avoid repeated work on re-renders.
+              if (legacyEl.dataset.aysLegacyDisabled !== '1') {
+                legacyEl.dataset.aysLegacyDisabled = '1';
+
+                // Remove IDs under legacy to avoid duplicates with generated content.
+                legacyEl.querySelectorAll('[id]').forEach((el) => {
+                  el.removeAttribute('id');
+                });
+              }
+
+              legacyEl.style.display = 'none';
+            }
+          }
+
+          return true;
+        })
+        .catch((err) => {
+          if (token !== this._pendingGeneratedRenderToken) return null;
+          const msg = (err && err.message) ? err.message : String(err);
+          if (containerEl) {
+            containerEl.innerHTML = `<p><strong>Generated rooms error:</strong> ${this._escapeHtml(msg)}</p>`;
+          }
+          return null;
+        });
+    },
+
+    setActiveChecklistGenerator: function(serviceType) {
+      const containerId = this._generatorContainerByService && this._generatorContainerByService[serviceType];
+      if (!containerId) return;
+
+      const containerEl = document.getElementById(containerId);
+      if (!containerEl) return;
+
+      // Show deterministic status while waiting for prerequisites in large pages.
+      containerEl.innerHTML = '<p>Loading generated rooms…</p>';
+
+      // Promise-based render (no try/catch). Errors are surfaced in the container.
+      const propertyType = (typeof PROPERTY_CONFIG !== 'undefined' && PROPERTY_CONFIG.property_type)
+        ? PROPERTY_CONFIG.property_type
+        : null;
+      const config = this.buildChecklistConfigFor(serviceType, propertyType);
+      this._renderGeneratedRoomsForService(serviceType, containerId, containerEl, config);
+    },
+
+    initQuickPropertyTypeSelector: function() {
+      const quickSelect = document.getElementById('property-type-quick');
+      const settingsSelect = document.getElementById('setting-property-type');
+      if (!quickSelect || !settingsSelect) return;
+      if (quickSelect.dataset.aysQuickPropertyTypeInit === '1') return;
+      quickSelect.dataset.aysQuickPropertyTypeInit = '1';
+
+      const syncOptionsFromSettings = () => {
+        try {
+          // Clone options from Settings so we never drift
+          quickSelect.innerHTML = '';
+          Array.from(settingsSelect.options).forEach((opt) => {
+            const copy = document.createElement('option');
+            copy.value = opt.value;
+            copy.textContent = opt.textContent;
+            quickSelect.appendChild(copy);
+          });
+        } catch (_) {
+          // ignore
+        }
+      };
+
+      const syncValueFromSettings = () => {
+        if (!settingsSelect.value) return;
+        quickSelect.value = settingsSelect.value;
+      };
+
+      syncOptionsFromSettings();
+      syncValueFromSettings();
+
+      // When user changes the quick selector, update Settings and trigger existing wiring
+      quickSelect.addEventListener('change', () => {
+        settingsSelect.value = quickSelect.value;
+        settingsSelect.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+
+      // When Settings changes (restore, user edits settings tab), reflect it in quick selector
+      settingsSelect.addEventListener('change', () => {
+        syncOptionsFromSettings();
+        syncValueFromSettings();
+      });
+
+      // In case Settings is hydrated after Checklist.init, resync shortly after load
+      setTimeout(() => {
+        syncOptionsFromSettings();
+        syncValueFromSettings();
+      }, 0);
+    },
+
+    /**
+     * Initialize Global Service Type Selector
+     * Controls which items appear in checklist forms across all tabs.
+     * Syncs with tab selection and updates indicator.
+     */
+    initGlobalServiceTypeSelector: function() {
+      const selector = document.getElementById('global-service-type');
+      const container = document.querySelector('.service-type-selector');
+      const indicator = document.getElementById('service-type-indicator');
+      const indicatorText = indicator?.querySelector('.indicator-text');
+      
+      if (!selector) {
+        console.warn('[Checklist] Global service type selector not found');
+        return;
+      }
+      
+      // Prevent double-init
+      if (selector.dataset.aysGlobalServiceInit === '1') return;
+      selector.dataset.aysGlobalServiceInit = '1';
+      
+      const SERVICE_LABELS = {
+        'eot': 'EOT Mode',
+        'residential': 'Residential Mode',
+        'commercial': 'Commercial Mode',
+        'custom': 'Custom Mode'
+      };
+      
+      const TAB_TO_SERVICE = {
+        'end-of-tenancy': 'eot',
+        'residential': 'residential',
+        'commercial': 'commercial',
+        'custom': 'custom',
+        'quotes': null, // Don't change on quotes tab
+        'settings': null // Don't change on settings tab
+      };
+      
+      const SERVICE_TO_TAB = {
+        'eot': 'end-of-tenancy',
+        'residential': 'residential',
+        'commercial': 'commercial',
+        'custom': 'custom'
+      };
+      
+      const updateIndicator = (serviceType) => {
+        if (container) {
+          container.dataset.service = serviceType;
+        }
+        if (indicatorText) {
+          indicatorText.textContent = SERVICE_LABELS[serviceType] || 'Unknown';
+        }
+      };
+      
+      const switchToTab = (tabDataService) => {
+        // Find and click the corresponding tab
+        const tab = document.querySelector(`.tab[data-service="${tabDataService}"]`);
+        if (tab && !tab.classList.contains('is-tab-selected')) {
+          tab.click();
+        }
+      };
+      
+      // When user changes the dropdown
+      const self = this;
+      selector.addEventListener('change', () => {
+        const serviceType = selector.value;
+        updateIndicator(serviceType);
+        
+        // Switch to the corresponding tab
+        const tabDataService = SERVICE_TO_TAB[serviceType];
+        if (tabDataService) {
+          switchToTab(tabDataService);
+        }
+        
+        // PHASE 2: Trigger form rebuild using existing factory pattern
+        // Maps: eot → end-of-tenancy, residential → residential, etc.
+        if (typeof window.checklistGenerator !== 'undefined') {
+          const propertyType = (typeof PROPERTY_CONFIG !== 'undefined') 
+            ? PROPERTY_CONFIG.property_type 
+            : null;
+          const newConfig = self.buildChecklistConfigFor(tabDataService, propertyType);
+          
+          if (newConfig && newConfig.rooms) {
+            window.checklistGenerator.regenerate(newConfig);
+            console.log(`[Checklist] Form rebuilt for ${serviceType} with ${newConfig.rooms.length} rooms`);
+            
+            // Re-init room progress bars after regeneration
+            if (typeof self.initRoomProgressBars === 'function') {
+              self.initRoomProgressBars();
+            }
+          }
+        }
+        
+        // Save to snapshot (existing flow)
+        this.saveSnapshot();
+        
+        console.log('[Checklist] Service type changed to:', serviceType);
+      });
+      
+      // Sync when tabs are clicked (for EOT/Residential/Commercial/Custom)
+      document.querySelectorAll('.tab[data-service]').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const tabService = tab.dataset.service;
+          const mappedService = TAB_TO_SERVICE[tabService];
+          
+          // Only sync if it's a content tab (not quotes/settings)
+          if (mappedService && selector.value !== mappedService) {
+            selector.value = mappedService;
+            updateIndicator(mappedService);
+          }
+        });
+      });
+      
+      // Initialize indicator on load
+      updateIndicator(selector.value);
+      
+      // Restore from active tab on load
+      const activeTab = document.querySelector('.tab.is-tab-selected');
+      if (activeTab) {
+        const tabService = activeTab.dataset.service;
+        const mappedService = TAB_TO_SERVICE[tabService];
+        if (mappedService) {
+          selector.value = mappedService;
+          updateIndicator(mappedService);
+        }
+      }
+    },
+
+    getFloorVariantOptions: function() {
+      if (window.VARIANTS && Array.isArray(window.VARIANTS.floor_types)) {
+        return window.VARIANTS.floor_types;
+      }
+      if (window.VARIANTS && Array.isArray(window.VARIANTS.floor_variants)) {
+        return window.VARIANTS.floor_variants;
+      }
+      return [
+        { value: 'carpet', label: 'Carpet' },
+        { value: 'lino', label: 'Lino/Vinyl' },
+        { value: 'tile', label: 'Tile' },
+        { value: 'wood', label: 'Wood' },
+        { value: 'concrete', label: 'Concrete/Sealed' },
+        { value: 'other', label: 'Other' }
+      ];
+    },
+
+    initFloorDefaultsPanel: function() {
+      const panel = document.getElementById('floor-defaults-panel');
+      if (!panel) return;
+      if (panel.dataset.aysFloorDefaultsInit === '1') return;
+      panel.dataset.aysFloorDefaultsInit = '1';
+
+      const selects = panel.querySelectorAll('select[data-floor-default]');
+      if (!selects.length) return;
+
+      const options = this.getFloorVariantOptions();
+      selects.forEach((select) => {
+        if (select.options && select.options.length > 1) return;
+        select.innerHTML = '<option value="">Select default…</option>';
+        options.forEach((opt) => {
+          if (!opt) return;
+          const option = document.createElement('option');
+          option.value = opt.value;
+          option.textContent = opt.label;
+          select.appendChild(option);
+        });
+      });
+
+      const stored = this.getFloorDefaultsFromStorage() || {};
+      selects.forEach((select) => {
+        const key = select.dataset.floorDefault;
+        if (key && stored[key]) {
+          select.value = stored[key];
+        }
+      });
+
+      const applyDefaults = () => {
+        const next = {};
+        selects.forEach((select) => {
+          const key = select.dataset.floorDefault;
+          const value = (select.value || '').toString();
+          if (key && value) next[key] = value;
+        });
+
+        try {
+          localStorage.setItem('checklist_floor_defaults', JSON.stringify(next));
+        } catch (e) {
+          console.warn('[Checklist] Failed to save floor defaults:', e);
+        }
+
+        if (typeof window.checklistGenerator !== 'undefined') {
+          const activeService = this.getActiveServiceType();
+          const propertyType = (typeof PROPERTY_CONFIG !== 'undefined') ? PROPERTY_CONFIG.property_type : null;
+          const newConfig = this.buildChecklistConfigFor(activeService, propertyType);
+          window.checklistGenerator.regenerate(newConfig);
+        }
+      };
+
+      const applyBtn = document.getElementById('btn-apply-floor-defaults');
+      if (applyBtn) {
+        applyBtn.addEventListener('click', applyDefaults);
+      }
+
+      panel.addEventListener('change', applyDefaults);
+    },
+
+    initEndpointFromUrl: function() {
+      try {
+        const params = new URLSearchParams(window.location.search || '');
+        const endpoint = (params.get('endpoint') || '').toString().trim();
+        if (!endpoint) return;
+
+        const settings = this.getSettings() || {};
+        if (settings.service_api_endpoint === endpoint) return;
+
+        const next = { ...settings, service_api_endpoint: endpoint };
+        localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(next));
+
+        const $input = $('#service-api-endpoint');
+        if ($input.length) $input.val(endpoint);
+        const $systemInput = $('#system-service-api-endpoint');
+        if ($systemInput.length) $systemInput.val(endpoint);
+
+        if (this._eventWorker) {
+          this._eventWorker.postMessage({
+            op: 'config',
+            config: { endpoint }
+          });
+          this.flushEventQueue();
+        }
+
+        this.setSyncStatus('queued', 'Endpoint configured. Syncing…');
+      } catch (e) {
+        console.warn('[Checklist] Failed to apply endpoint from URL:', e);
+      }
+    },
+
+    getEndpointFromIdb: function() {
+      return new Promise((resolve) => {
+        if (!('indexedDB' in window)) return resolve(null);
+
+        const req = indexedDB.open('checklist_app_config', 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains('config')) {
+            db.createObjectStore('config', { keyPath: 'key' });
+          }
+        };
+        req.onsuccess = () => {
+          const db = req.result;
+          const tx = db.transaction('config', 'readonly');
+          const store = tx.objectStore('config');
+          const getReq = store.get('endpoint');
+          getReq.onsuccess = () => {
+            resolve(getReq.result?.value || null);
+            db.close();
+          };
+          getReq.onerror = () => {
+            resolve(null);
+            db.close();
+          };
+        };
+        req.onerror = () => resolve(null);
+      });
+    },
+
+    saveEndpointToIdb: function(endpoint) {
+      return new Promise((resolve) => {
+        if (!('indexedDB' in window)) return resolve(false);
+
+        const req = indexedDB.open('checklist_app_config', 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains('config')) {
+            db.createObjectStore('config', { keyPath: 'key' });
+          }
+        };
+        req.onsuccess = () => {
+          const db = req.result;
+          const tx = db.transaction('config', 'readwrite');
+          const store = tx.objectStore('config');
+          store.put({ key: 'endpoint', value: endpoint });
+          tx.oncomplete = () => {
+            db.close();
+            resolve(true);
+          };
+          tx.onerror = () => {
+            db.close();
+            resolve(false);
+          };
+        };
+        req.onerror = () => resolve(false);
+      });
+    },
+
 
     /**
      * Initialize service toggle renderer for current property type
@@ -112,12 +1042,11 @@
       console.log(`[Checklist] Property type changed to: ${newPropertyType}`, params);
 
       // Regenerate checklist with new property type config
-      if (typeof window.checklistGenerator !== 'undefined' && 
-          typeof PROPERTY_CONFIG.getConfig === 'function') {
-        
-        const newConfig = PROPERTY_CONFIG.getConfig();
+      if (typeof window.checklistGenerator !== 'undefined') {
+        const activeService = this.getActiveServiceType();
+        const newConfig = this.buildChecklistConfigFor(activeService, newPropertyType);
         window.checklistGenerator.regenerate(newConfig);
-        
+
         console.log(`[Checklist] Checklist regenerated with ${newConfig.rooms.length} rooms`);
         
         // SAVE property config to localStorage so next load remembers this choice
@@ -1040,6 +1969,9 @@
       applyIfPresent('#setting-discount-percent', 'discount_percent');
       applyIfPresent('#setting-discount-fixed', 'discount_fixed');
 
+      applyIfPresent('#setting-carpark-open-price', 'carpark_open_price');
+      applyIfPresent('#setting-carpark-covered-price', 'carpark_covered_price');
+
       applyIfPresent('#surcharge-single-oven', 'surcharge_single_oven');
       applyIfPresent('#surcharge-double-oven', 'surcharge_double_oven');
       applyIfPresent('#surcharge-windows', 'surcharge_windows');
@@ -1047,6 +1979,7 @@
       applyIfPresent('#surcharge-drawers', 'surcharge_drawers');
       applyIfPresent('#surcharge-garage', 'surcharge_garage');
       applyIfPresent('#service-api-endpoint', 'service_api_endpoint');
+      applyIfPresent('#system-service-api-endpoint', 'service_api_endpoint');
     },
 
     applyTheme: function(theme) {
@@ -1168,8 +2101,23 @@
             this.applySnapshot(msg.record.snapshot);
           }
 
+          // Handle status response for System tab pending count
+          if (msg.op === 'status') {
+            const pendingEl = document.getElementById('system-pending-count');
+            if (pendingEl && typeof msg.pending === 'number') {
+              pendingEl.textContent = String(msg.pending);
+            }
+          }
+
           if (msg.op === 'flush') {
             this._lastFlushResult = msg;
+            
+            // Update last sync timestamp on successful sync
+            if (msg.ok && typeof msg.delivered === 'number' && msg.delivered > 0) {
+              localStorage.setItem('checklist_last_sync', new Date().toISOString());
+              this.updateSystemStatus();
+            }
+            
             if (msg.ok) {
               if (typeof msg.delivered === 'number' && msg.delivered > 0) {
                 this.setSyncStatus('synced', `Synced (${msg.delivered})`);
@@ -1191,11 +2139,11 @@
           }
         };
 
-        const settings = this.getSettings();
+        const settings = this.getSettings() || {};
         this._eventWorker.postMessage({
           op: 'config',
           config: {
-            endpoint: settings?.service_api_endpoint || null
+            endpoint: settings.service_api_endpoint || null
           }
         });
 
@@ -1204,6 +2152,12 @@
 
         window.addEventListener('online', () => {
           this.flushEventQueue();
+        });
+
+        window.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            this.flushEventQueue();
+          }
         });
 
         window.addEventListener('offline', () => {
@@ -1314,11 +2268,14 @@
       if (!$dropdown.length) return;
 
       if (checked) {
-        $dropdown.show();
+        $dropdown.prop('hidden', false);
+        $dropdown.prop('disabled', false);
+        $dropdown.removeAttr('style');
 
         // Oven: default to Single so it prices correctly without extra taps.
         const variantType = ($item.data('variantType') || '').toString();
         const optionsKey = ($item.data('optionsKey') || '').toString();
+        const defaultVariant = ($item.data('defaultVariant') || '').toString();
         if (variantType === 'dropdown' && optionsKey === 'oven_variants') {
           const current = ($dropdown.val() || '').toString();
           if (!current) {
@@ -1328,10 +2285,133 @@
               $dropdown.val('single').trigger('change');
             }
           }
+        } else {
+          const current = ($dropdown.val() || '').toString();
+          if (!current) {
+            if (defaultVariant && $dropdown.find(`option[value="${defaultVariant}"]`).length) {
+              $dropdown.val(defaultVariant).trigger('change');
+            } else {
+              const firstOption = $dropdown.find('option').not('[value=""]').first();
+              if (firstOption.length) {
+                $dropdown.val(firstOption.val()).trigger('change');
+              }
+            }
+          }
         }
       } else {
-        $dropdown.hide();
+        $dropdown.prop('hidden', true);
+        $dropdown.prop('disabled', true);
+        this.updateFloorActionLabel($item, '', false);
       }
+    },
+
+    isFloorControlItem: function($item) {
+      if (!$item || !$item.length) return false;
+      const optionsKey = ($item.data('optionsKey') || $item.data('variantKey') || '').toString();
+      if (optionsKey === 'floor_types' || optionsKey === 'floor_variants') return true;
+      const label = ($item.find('.item-label').text() || '').toLowerCase();
+      return label.indexOf('floor') !== -1;
+    },
+
+    getFloorActionForVariant: function(variant) {
+      const key = (variant || '').toString().toLowerCase();
+      if (!key) return null;
+      if (key === 'carpet') return 'Vacuum';
+      if (key === 'concrete') return 'Sweep + Mop';
+      if (['lino', 'vinyl', 'tile', 'wood', 'other'].includes(key)) return 'Mop';
+      return null;
+    },
+
+    updateFloorActionLabel: function($item, selectedVariant, checked) {
+      if (!this.isFloorControlItem($item)) return;
+
+      const $label = $item.find('.item-label');
+      if (!$label.length) return;
+
+      let baseLabel = ($item.attr('data-base-label') || '').toString();
+      if (!baseLabel) {
+        baseLabel = ($label.text() || '').toString();
+        $item.attr('data-base-label', baseLabel);
+      }
+
+      const cleanBase = baseLabel.replace(/\s*\(.*\)\s*$/, '').trim();
+      if (!checked) {
+        $label.text(baseLabel);
+        $item.removeAttr('data-floor-action');
+        return;
+      }
+
+      const action = this.getFloorActionForVariant(selectedVariant);
+      if (!action) {
+        $label.text(baseLabel);
+        $item.removeAttr('data-floor-action');
+        return;
+      }
+
+      $label.text(`${cleanBase} (${action})`);
+      $item.attr('data-floor-action', action);
+    },
+
+    updateFloorSummary: function() {
+      const serviceType = this.getActiveServiceType();
+      const containerId = this._floorSummaryContainerByService && this._floorSummaryContainerByService[serviceType];
+      if (!containerId) return;
+
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const $scope = $('.service-tab-content.is-active');
+      if (!$scope.length) return;
+
+      const counts = {};
+      const labelMap = {};
+      const options = this.getFloorVariantOptions();
+      options.forEach((opt) => {
+        if (opt && opt.value) labelMap[opt.value] = opt.label || opt.value;
+      });
+
+      $scope.find('.checklist-item').each((_, el) => {
+        const $item = $(el);
+        const optionsKey = ($item.data('optionsKey') || $item.data('variantKey') || '').toString();
+        if (optionsKey !== 'floor_types' && optionsKey !== 'floor_variants') return;
+
+        const checked = $item.find('input[type="checkbox"]').is(':checked');
+        if (!checked) return;
+
+        let selected = ($item.attr('data-selected-variant') || '').toString();
+        if (!selected) selected = ($item.find('.variant-dropdown').val() || '').toString();
+        if (!selected) selected = ($item.data('defaultVariant') || '').toString();
+        if (!selected) return;
+
+        counts[selected] = (counts[selected] || 0) + 1;
+      });
+
+      const entries = Object.entries(counts);
+      if (!entries.length) {
+        container.innerHTML = '';
+        return;
+      }
+
+      const lines = entries
+        .sort((a, b) => b[1] - a[1])
+        .map(([key, count]) => `<li><strong>${this._escapeHtml(labelMap[key] || key)}</strong>: ${count}</li>`)
+        .join('');
+
+      container.innerHTML = `
+        <div class="room-section floor-summary-card">
+          <details open>
+            <summary>
+              <div class="summary-header">
+                <span class="room-title">🧾 Floors Summary</span>
+                <span class="progress-badge">${entries.length} types</span>
+              </div>
+            </summary>
+            <div class="room-details">
+              <ul class="floor-summary-list">${lines}</ul>
+            </div>
+          </details>
+        </div>
+      `;
     },
 
     ensureQuoteStatusUI: function() {
@@ -1513,6 +2593,12 @@
 
     flushEventQueue: function() {
       if (!this._eventWorker) return;
+      if (navigator.onLine === true) {
+        const st = this.getSettings() || {};
+        if (st.service_api_endpoint) {
+          this.setSyncStatus('syncing', 'Syncing…');
+        }
+      }
       this._eventWorker.postMessage({ op: 'flush', online: navigator.onLine === true });
     },
 
@@ -1550,12 +2636,16 @@
       };
 
       return {
-        schema: 1,
+        schema: 2,
         updated_at: new Date().toISOString(),
         serviceType: this.getActiveServiceType(),
+        globalServiceType: ($('#global-service-type').val() || '').toString().trim() || 'eot',
+        propertyConfig: this._getCurrentPropertyConfig(),
         crew: this.$crewInput.val(),
         date: this.$dateInput.val(),
         client,
+        quoteServiceType: ($('#quote-service-type').val() || '').toString().trim() || null,
+        bookingDate: ($('#quote-booking-date').val() || '').toString().trim() || null,
         progress,
         variantSelections,
         customItemsSnapshot: this.getCustomItemsSnapshot()
@@ -1563,17 +2653,73 @@
     },
 
     saveSnapshot: function() {
+      const self = this;
       const snapshot = this.buildSnapshot();
+      let currentQuoteId = this.getCurrentQuoteId();
 
-      // Always keep a small local fallback (for quick restore if worker isn't ready)
+      // If no quote exists yet, create one first (handles race with initQuoteStorage)
+      if (!currentQuoteId && typeof QuoteStorage !== 'undefined' && QuoteStorage.isReady()) {
+        console.log('[Checklist] saveSnapshot: No current quote, creating one first');
+        this.createQuoteFromCurrentState().then(function(saved) {
+          // Now save with the new ID
+          self._saveSnapshotWithId(saved.id, snapshot);
+        }).catch(function(err) {
+          console.warn('[Checklist] Failed to create quote for snapshot:', err);
+          // Still save to localStorage as fallback
+          self._saveSnapshotToLocalStorage(null, snapshot);
+        });
+        return;
+      }
+
+      this._saveSnapshotWithId(currentQuoteId, snapshot);
+    },
+
+    /**
+     * Internal: Save snapshot to localStorage only
+     * @private
+     */
+    _saveSnapshotToLocalStorage: function(draftId, snapshot) {
       try {
-        localStorage.setItem(STORAGE_KEYS.snapshotFallback, JSON.stringify(snapshot));
+        localStorage.setItem(STORAGE_KEYS.snapshotFallback, JSON.stringify({
+          draftId: draftId,
+          snapshot: snapshot
+        }));
       } catch (e) {
         console.warn('Snapshot fallback write failed:', e);
       }
+    },
 
+    /**
+     * Internal: Save snapshot to all storage locations with given ID
+     * @private
+     */
+    _saveSnapshotWithId: function(currentQuoteId, snapshot) {
+      // Always keep a small local fallback (for quick restore if worker isn't ready)
+      // CRITICAL: Wrap with draftId so we can verify on restore that it matches
+      this._saveSnapshotToLocalStorage(currentQuoteId, snapshot);
+
+      // 1. Hot backup to worker (fire-and-forget, non-blocking)
       if (this._eventWorker) {
         this._eventWorker.postMessage({ op: 'save_snapshot', snapshot });
+      }
+
+      // 2. Persist to current quote in QuoteStorage (async, parallel)
+      // DEFENSIVE: Only write if QuoteStorage is fully initialized
+      if (currentQuoteId && typeof QuoteStorage !== 'undefined') {
+        if (QuoteStorage.isReady()) {
+          QuoteStorage.updateSnapshot(currentQuoteId, snapshot).catch(function(err) {
+            // Non-fatal: log but don't interrupt. Worker backup is the safety net.
+            console.warn('[Checklist] QuoteStorage save failed:', err.message || err);
+          });
+        } else {
+          // Attempt reconnect - init() is idempotent and returns cached promise
+          QuoteStorage.init().then(function() {
+            return QuoteStorage.updateSnapshot(currentQuoteId, snapshot);
+          }).catch(function(err) {
+            // Still non-fatal - we have localStorage + worker backups
+            console.warn('[Checklist] QuoteStorage reconnect/save failed:', err.message || err);
+          });
+        }
       }
     },
 
@@ -1587,21 +2733,48 @@
     applySnapshot: function(snapshot) {
       if (!snapshot || typeof snapshot !== 'object') return;
 
-      // Switch tab first so DOM cache aligns
+      // 1. Switch tab using normal method (handles UI + generator setup)
       if (snapshot.serviceType) {
         this.switchServiceTab(snapshot.serviceType);
       }
 
+      // 2. REBUILD ROOMS with snapshot's property config
+      // This ensures DOM has the exact room structure that was saved.
+      // switchServiceTab may have built rooms with CURRENT settings, but we need
+      // to rebuild with the SAVED settings from the snapshot.
+      if (snapshot.propertyConfig || snapshot.serviceType) {
+        this._rebuildRoomsForSnapshot(snapshot);
+      }
+
+      // 3. Re-cache DOM after rebuild (selectors may have changed)
+      this.cacheDOM();
+
       if (typeof snapshot.crew === 'string') this.$crewInput.val(snapshot.crew);
       if (typeof snapshot.date === 'string') this.$dateInput.val(snapshot.date);
 
+      // 4. Apply checkbox states with logging to identify missing elements
+      let restoredCount = 0;
+      let missingCount = 0;
       if (snapshot.progress && typeof snapshot.progress === 'object') {
         for (const id in snapshot.progress) {
           const $checkbox = $('#' + id);
           if ($checkbox.length) {
             $checkbox.prop('checked', !!snapshot.progress[id]);
+            if (snapshot.progress[id]) restoredCount++;
+          } else {
+            missingCount++;
+            // Only log first 5 missing to avoid console spam
+            if (missingCount <= 5) {
+              console.warn('[applySnapshot] Checkbox not found:', id);
+            }
           }
         }
+      }
+
+      if (missingCount > 0) {
+        console.warn('[applySnapshot] ' + missingCount + ' checkboxes not found, ' + restoredCount + ' restored');
+      } else if (restoredCount > 0) {
+        console.log('[applySnapshot] Successfully restored ' + restoredCount + ' checkbox states');
       }
 
       if (snapshot.variantSelections && typeof snapshot.variantSelections === 'object') {
@@ -1681,10 +2854,184 @@
         if (addr.region) $('#quote-region').val(addr.region);
         if (addr.postcode) $('#quote-postcode').val(addr.postcode);
         if (addr.country) $('#quote-country').val(addr.country);
+        
+        // Update preview text in client card header
+        this.updateClientSummary();
+      }
+
+      // Restore quote service type and booking date
+      if (snapshot.quoteServiceType) {
+        $('#quote-service-type').val(snapshot.quoteServiceType);
+      }
+      if (snapshot.bookingDate) {
+        $('#quote-booking-date').val(snapshot.bookingDate);
+      }
+      
+      // Restore global service type selector
+      if (snapshot.globalServiceType) {
+        const globalSelector = document.getElementById('global-service-type');
+        const container = document.querySelector('.service-type-selector');
+        const indicatorText = document.querySelector('#service-type-indicator .indicator-text');
+        
+        if (globalSelector) {
+          globalSelector.value = snapshot.globalServiceType;
+          
+          // Update indicator
+          if (container) {
+            container.dataset.service = snapshot.globalServiceType;
+          }
+          if (indicatorText) {
+            const labels = {
+              'eot': 'EOT Mode',
+              'residential': 'Residential Mode',
+              'commercial': 'Commercial Mode',
+              'custom': 'Custom Mode'
+            };
+            indicatorText.textContent = labels[snapshot.globalServiceType] || 'Unknown';
+          }
+        }
       }
 
       this.scheduleSaveProgress();
       this.updateAllProgress();
+    },
+
+    /**
+     * Rebuild room DOM to match a snapshot's property configuration.
+     * Called during hydration to ensure checkboxes exist before we try to check them.
+     * @param {Object} snapshot - The snapshot being applied
+     * @private
+     */
+    _rebuildRoomsForSnapshot: function(snapshot) {
+      const serviceType = snapshot.serviceType || this.getActiveServiceType();
+      
+      // Get property config from snapshot, or fall back to current global config
+      const propertyConfig = snapshot.propertyConfig || this._getCurrentPropertyConfig();
+      
+      // Build config using the builder
+      try {
+        const config = this._buildConfigForHydration(serviceType, propertyConfig);
+        if (!config || !Array.isArray(config.rooms)) {
+          console.warn('[_rebuildRoomsForSnapshot] Invalid config generated');
+          return;
+        }
+
+        // CRITICAL: Increment the render token to cancel any pending async rebuild.
+        // Without this, switchServiceTab()'s async rebuild would complete AFTER our
+        // sync rebuild and overwrite the correct rooms. See: _renderGeneratedRoomsForService()
+        this._pendingGeneratedRenderToken = (this._pendingGeneratedRenderToken || 0) + 1;
+
+        // Get or create factory for this service type
+        this._generatorsByService = this._generatorsByService || {};
+        const containerId = 'generated-rooms-' + serviceType;
+        if (!this._generatorsByService[serviceType]) {
+          this._generatorsByService[serviceType] = new AysChecklistFormFactory(containerId);
+        }
+
+        const generator = this._generatorsByService[serviceType];
+        generator.regenerate(config);
+
+        // Re-init progress bars after rebuild
+        if (typeof this.initRoomProgressBars === 'function') {
+          this.initRoomProgressBars();
+        }
+        
+        // Recalculate totals after rebuild
+        if (typeof this.updateAllProgress === 'function') {
+          this.updateAllProgress();
+        }
+        if (typeof this.updateFloorSummary === 'function') {
+          this.updateFloorSummary();
+        }
+
+        console.log('[_rebuildRoomsForSnapshot] Rebuilt ' + config.rooms.length + ' rooms for:', serviceType);
+      } catch (err) {
+        console.error('[_rebuildRoomsForSnapshot] Failed to rebuild:', err);
+      }
+    },
+
+    /**
+     * Get current property configuration from PROPERTY_CONFIG global or defaults.
+     * @returns {Object} Property configuration object
+     * @private
+     */
+    _getCurrentPropertyConfig: function() {
+      // Use global PROPERTY_CONFIG if available
+      if (typeof PROPERTY_CONFIG !== 'undefined') {
+        return {
+          property_type: PROPERTY_CONFIG.property_type || 'residential',
+          numBedrooms: PROPERTY_CONFIG.numBedrooms || 3,
+          numBathrooms: PROPERTY_CONFIG.numBathrooms || 2,
+          numFloors: PROPERTY_CONFIG.numFloors || null,
+          numOfficesPerFloor: PROPERTY_CONFIG.numOfficesPerFloor || null,
+          numOffices: PROPERTY_CONFIG.numOffices || null,
+          numShowers: PROPERTY_CONFIG.numShowers || null,
+          numLoadingDocks: PROPERTY_CONFIG.numLoadingDocks || null,
+          numAdminOffices: PROPERTY_CONFIG.numAdminOffices || null
+        };
+      }
+      
+      // Fallback defaults
+      return {
+        property_type: 'residential',
+        numBedrooms: 3,
+        numBathrooms: 2
+      };
+    },
+
+    /**
+     * Build a CHECKLIST_CONFIG for hydration purposes.
+     * @param {string} serviceType - The service type (end-of-tenancy, residential, commercial)
+     * @param {Object} propertyConfig - Property configuration from snapshot
+     * @returns {Object|null} Config object or null on failure
+     * @private
+     */
+    _buildConfigForHydration: function(serviceType, propertyConfig) {
+      if (typeof AysChecklistConfigBuilder === 'undefined') {
+        console.warn('[_buildConfigForHydration] AysChecklistConfigBuilder not loaded');
+        return null;
+      }
+
+      // Determine the correct property type based on service and stored config
+      const baseType = propertyConfig.property_type || 'residential';
+      let targetType = baseType;
+
+      if (serviceType === 'commercial') {
+        targetType = baseType.startsWith('commercial') ? baseType : 'commercial_office';
+      } else if (serviceType === 'end-of-tenancy') {
+        targetType = baseType.startsWith('eot') ? baseType : 'eot_residential';
+      } else if (serviceType === 'residential') {
+        targetType = baseType.startsWith('residential') ? baseType : 'residential';
+      }
+
+      try {
+        const builder = AysChecklistConfigBuilder.forPropertyType(targetType);
+
+        if (propertyConfig.numBedrooms) builder.withBedroomCount(propertyConfig.numBedrooms);
+        if (propertyConfig.numBathrooms) builder.withBathroomCount(propertyConfig.numBathrooms);
+
+        if (propertyConfig.numFloors && propertyConfig.numOfficesPerFloor) {
+          builder.withMultiStoryOffice(propertyConfig.numFloors, propertyConfig.numOfficesPerFloor);
+        } else if (propertyConfig.numOffices) {
+          builder.withOfficeCount(propertyConfig.numOffices);
+        }
+
+        if (propertyConfig.numShowers) builder.withShowerCount(propertyConfig.numShowers);
+        if (propertyConfig.numLoadingDocks) builder.withLoadingDockCount(propertyConfig.numLoadingDocks);
+        if (propertyConfig.numAdminOffices) builder.withAdminOfficeCount(propertyConfig.numAdminOffices);
+
+        // Get floor defaults from storage if available
+        const rawDefaults = this.getFloorDefaultsFromStorage();
+        const normalizedDefaults = this.normalizeFloorDefaults(rawDefaults);
+        if (normalizedDefaults && typeof builder.withFloorDefaults === 'function') {
+          builder.withFloorDefaults(normalizedDefaults);
+        }
+
+        return builder.build();
+      } catch (err) {
+        console.error('[_buildConfigForHydration] Build failed:', err);
+        return null;
+      }
     },
 
     restoreClientContextBestEffort: function() {
@@ -1713,8 +3060,542 @@
           if (addr.postcode) $('#quote-postcode').val(addr.postcode);
           if (addr.country) $('#quote-country').val(addr.country);
         }
+        
+        // Update preview text after restoring
+        this.updateClientSummary();
       } catch (e) {
         console.warn('Client context restore failed:', e);
+      }
+    },
+
+    // ======== QUOTE MANAGEMENT HELPERS ========
+
+    /**
+     * Get the current working quote ID.
+     * @returns {string|null}
+     */
+    getCurrentQuoteId: function() {
+      return localStorage.getItem(STORAGE_KEYS.currentQuoteId) || null;
+    },
+
+    /**
+     * Set the current working quote ID.
+     * @param {string|null} id
+     */
+    setCurrentQuoteId: function(id) {
+      if (id) {
+        localStorage.setItem(STORAGE_KEYS.currentQuoteId, id);
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.currentQuoteId);
+      }
+      // Update header display
+      this.updateQuoteIdDisplay(id);
+    },
+
+    /**
+     * Update the Quote ID badge in the header.
+     * @param {string|null} id - The quote ID or null
+     */
+    updateQuoteIdDisplay: function(id) {
+      var badge = document.getElementById('current-quote-id');
+      if (badge) {
+        badge.textContent = id ? '#' + id : '---';
+        badge.title = id ? 'Quote ID: ' + id : 'No active quote';
+      }
+    },
+
+    /**
+     * Start a new quote: save current if needed, clear form, create new quote.
+     * @returns {Promise<Object>} The new quote
+     */
+    startNewQuote: function() {
+      var self = this;
+      
+      // DEFENSIVE: Check both existence AND ready state
+      if (typeof QuoteStorage === 'undefined' || !QuoteStorage.isReady()) {
+        return Promise.reject(new Error('QuoteStorage not ready'));
+      }
+
+      // Save current state first
+      var currentId = this.getCurrentQuoteId();
+      var savePromise = currentId 
+        ? QuoteStorage.updateSnapshot(currentId, this.buildSnapshot())
+        : Promise.resolve();
+
+      return savePromise
+        .catch(function(err) {
+          console.warn('[Checklist] Failed to save current quote before new:', err);
+        })
+        .then(function() {
+          // Clear form to defaults
+          self.clearForm();
+          
+          // Create new quote from empty state
+          var snapshot = self.buildSnapshot();
+          var quote = QuoteStorage.createQuote(snapshot);
+          
+          return QuoteStorage.save(quote).then(function(saved) {
+            self.setCurrentQuoteId(saved.id);
+            console.log('[Checklist] Started new quote:', saved.id);
+            return saved;
+          });
+        });
+    },
+
+    /**
+     * Load a quote by ID into the form.
+     * @param {string} quoteId
+     * @returns {Promise<Object>} The loaded quote
+     */
+    loadQuote: function(quoteId) {
+      var self = this;
+      
+      // DEFENSIVE: Check both existence AND ready state
+      if (typeof QuoteStorage === 'undefined' || !QuoteStorage.isReady()) {
+        return Promise.reject(new Error('QuoteStorage not ready'));
+      }
+
+      // Save current state first
+      var currentId = this.getCurrentQuoteId();
+      var savePromise = (currentId && currentId !== quoteId)
+        ? QuoteStorage.updateSnapshot(currentId, this.buildSnapshot())
+        : Promise.resolve();
+
+      return savePromise
+        .catch(function(err) {
+          console.warn('[Checklist] Failed to save current quote before load:', err);
+        })
+        .then(function() {
+          return QuoteStorage.get(quoteId);
+        })
+        .then(function(quote) {
+          if (!quote) {
+            throw new Error('Quote not found: ' + quoteId);
+          }
+          
+          // Apply the snapshot to restore form state
+          if (quote.snapshot) {
+            self.applySnapshot(quote.snapshot);
+          }
+          
+          self.setCurrentQuoteId(quote.id);
+          
+          // CRITICAL: Update localStorage fallback with loaded quote's snapshot
+          // This ensures localStorage and currentQuoteId stay in sync after load
+          try {
+            localStorage.setItem(STORAGE_KEYS.snapshotFallback, JSON.stringify({
+              draftId: quote.id,
+              snapshot: quote.snapshot
+            }));
+          } catch (e) {
+            console.warn('[Checklist] Failed to update localStorage after load:', e);
+          }
+          
+          console.log('[Checklist] Loaded quote:', quote.id, quote.displayName);
+          return quote;
+        });
+    },
+
+    /**
+     * Clear the form to start fresh.
+     */
+    clearForm: function() {
+      // Clear checkboxes
+      this.$wrapper.find('.checklist-item input[type="checkbox"]').prop('checked', false);
+      
+      // Clear client fields
+      $('#quote-client-id').val('');
+      $('#quote-population-id').val('');
+      $('#quote-client-name').val('');
+      $('#quote-client-email').val('');
+      $('#quote-client-phone').val('');
+      $('#quote-address-line1').val('');
+      $('#quote-address-line2').val('');
+      $('#quote-suburb').val('');
+      $('#quote-city').val('');
+      $('#quote-region').val('');
+      $('#quote-postcode').val('');
+      $('#quote-country').val('');
+      
+      // Clear variant selections
+      localStorage.removeItem(STORAGE_KEYS.variantSelections);
+      this.$wrapper.find('.variant-dropdown').val('');
+      
+      // Reset date to today
+      this.$dateInput.val(new Date().toISOString().split('T')[0]);
+      
+      // Clear crew
+      this.$crewInput.val('');
+      
+      // Clear client context
+      localStorage.removeItem(STORAGE_KEYS.clientContext);
+    },
+
+    // ======== QUOTE MANAGER UI ========
+
+    /**
+     * Initialize the Manage Quotes panel in Settings.
+     * Binds events and renders initial list.
+     */
+    initQuoteManager: function() {
+      var self = this;
+      var container = document.getElementById('quote-list-container');
+      
+      if (!container) {
+        console.log('[Checklist] Quote list container not found, skipping QuoteManager init');
+        return;
+      }
+
+      // Update header quote ID display
+      this.updateQuoteIdDisplay(this.getCurrentQuoteId());
+
+      // Render initial list
+      this.renderQuoteList();
+
+      // Bind New Quote button
+      $('#btn-new-quote').on('click', function() {
+        self.startNewQuote()
+          .then(function() {
+            self.renderQuoteList();
+            // Switch to main tab to work on the new quote
+            self.announce('New quote started');
+          })
+          .catch(function(err) {
+            console.error('[Checklist] Failed to start new quote:', err);
+            alert('Failed to start new quote. Please try again.');
+          });
+      });
+
+      // Bind header New Quote button (+)
+      $('#btn-new-quote-header').on('click', function() {
+        self.startNewQuote()
+          .then(function() {
+            self.renderQuoteList();
+            self.announce('New quote started');
+          })
+          .catch(function(err) {
+            console.error('[Checklist] Failed to start new quote:', err);
+            alert('Failed to start new quote. Please try again.');
+          });
+      });
+
+      // Bind Sync All button
+      $('#btn-sync-all-quotes').on('click', function() {
+        self.flushEventQueue();
+        self.announce('Syncing all quotes...');
+      });
+
+      // Bind bulk action apply
+      $('#btn-apply-bulk-action').on('click', function() {
+        self.applyBulkQuoteAction();
+      });
+
+      // Bind select all checkbox
+      $('#quote-select-all').on('change', function() {
+        var checked = $(this).prop('checked');
+        $('#quote-list-container input[type="checkbox"]').prop('checked', checked);
+      });
+
+      // Delegate click on quote panel summary (load quote)
+      $(container).on('click', '.quote-panel-load-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var quoteId = $(this).closest('.quote-panel').attr('data-quote-id');
+        if (quoteId) {
+          self.loadQuote(quoteId)
+            .then(function() {
+              self.renderQuoteList();
+              // Switch to the service tab to work on the quote
+              var serviceTab = document.querySelector('.service-tabs .tab.is-active');
+              if (serviceTab) {
+                serviceTab.click();
+              }
+              self.announce('Quote loaded');
+            })
+            .catch(function(err) {
+              console.error('[Checklist] Failed to load quote:', err);
+              alert('Failed to load quote. Please try again.');
+            });
+        }
+      });
+
+      // Delegate click on delete button
+      $(container).on('click', '.quote-panel-delete-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var quoteId = $(this).closest('.quote-panel').attr('data-quote-id');
+        if (quoteId && confirm('Delete this quote? This cannot be undone.')) {
+          self.deleteQuote(quoteId);
+        }
+      });
+
+      console.log('[Checklist] QuoteManager initialized');
+    },
+
+    /**
+     * Render the quote list from IndexedDB.
+     * Waits for QuoteStorage to be ready if needed.
+     */
+    renderQuoteList: function() {
+      var self = this;
+      var container = document.getElementById('quote-list-container');
+      
+      if (!container) {
+        console.warn('[Checklist] Quote list container not found');
+        return;
+      }
+      
+      // Check if QuoteStorage exists
+      if (typeof QuoteStorage === 'undefined') {
+        container.innerHTML = '<p style="color: var(--color-secondary); padding: var(--space-md); text-align: center;">Quote storage not available.</p>';
+        return;
+      }
+
+      // If not ready yet, wait for it
+      if (!QuoteStorage.isReady()) {
+        container.innerHTML = '<p style="color: var(--color-secondary); padding: var(--space-md); text-align: center;">Loading quotes...</p>';
+        
+        // Wait for QuoteStorage to be ready, then render
+        QuoteStorage.whenReady()
+          .then(function() {
+            self.renderQuoteList();  // Recursive call now that it's ready
+          })
+          .catch(function(err) {
+            console.error('[Checklist] QuoteStorage failed to init:', err);
+            container.innerHTML = '<p style="color: #ef4444; padding: var(--space-md); text-align: center;">Failed to load quote storage.</p>';
+          });
+        return;
+      }
+
+      QuoteStorage.getAll({ sortBy: 'updatedAt', sortOrder: 'desc' })
+        .then(function(quotes) {
+          if (!quotes || quotes.length === 0) {
+            container.innerHTML = '<p style="color: var(--color-secondary); padding: var(--space-md); text-align: center; font-style: italic;">No quotes yet. Click "➕ New Quote" to get started.</p>';
+            return;
+          }
+
+          var currentId = self.getCurrentQuoteId();
+          var html = quotes.map(function(quote) {
+            return self.buildQuotePanelHTML(quote, quote.id === currentId);
+          }).join('');
+          
+          container.innerHTML = html;
+        })
+        .catch(function(err) {
+          console.error('[Checklist] Failed to load quotes:', err);
+          container.innerHTML = '<p style="color: #ef4444; padding: var(--space-md); text-align: center;">Failed to load quotes. Please refresh the page.</p>';
+        });
+    },
+
+    /**
+     * Build HTML for a single quote panel.
+     * @param {Object} quote - Quote object from QuoteStorage
+     * @param {boolean} isCurrent - Whether this is the currently active quote
+     * @returns {string} HTML string
+     */
+    buildQuotePanelHTML: function(quote, isCurrent) {
+      var statusColors = {
+        draft: '#f59e0b',
+        synced: '#22c55e',
+        syncing: '#3b82f6',
+        error: '#ef4444'
+      };
+      
+      var serviceLabels = {
+        'end-of-tenancy': 'EOT',
+        'residential': 'Res',
+        'commercial': 'Comm'
+      };
+
+      var status = quote.status || 'draft';
+      var statusColor = statusColors[status] || statusColors.draft;
+      var serviceLabel = serviceLabels[quote.serviceType] || 'Quote';
+      var displayName = quote.displayName || '(untitled)';
+      var timeAgo = this.formatTimeAgo(quote.updatedAt);
+      var statusLabel = status.toUpperCase();
+      
+      // Highlight current quote
+      var borderStyle = isCurrent 
+        ? 'border: 2px solid ' + statusColor + '; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);'
+        : 'border: 2px solid ' + statusColor + ';';
+      
+      var currentBadge = isCurrent 
+        ? '<span style="font-size: 10px; padding: 2px 6px; background: #3b82f6; color: white; border-radius: 4px; margin-left: 8px;">CURRENT</span>'
+        : '';
+
+      return '<details class="quote-panel" data-quote-id="' + this.escapeHtml(quote.id) + '" data-status="' + status + '" style="' + borderStyle + ' border-radius: 8px; margin-bottom: 8px;">' +
+        '<summary style="display: flex; gap: 12px; align-items: center; padding: 12px; cursor: pointer; list-style: none;">' +
+          '<input type="checkbox" class="quote-checkbox" onclick="event.stopPropagation()" />' +
+          '<span style="color: ' + statusColor + ';">●</span>' +
+          '<span style="font-weight: 600; flex: 1;">' + this.escapeHtml(displayName) + currentBadge + '</span>' +
+          '<span style="font-size: 12px; padding: 2px 8px; background: var(--color-light); border-radius: 4px;">' + serviceLabel + '</span>' +
+          '<span style="font-size: 11px; padding: 2px 10px; background: ' + statusColor + '; color: white; border-radius: 12px;">' + statusLabel + '</span>' +
+          '<span style="font-size: 12px; color: var(--color-secondary);">' + timeAgo + '</span>' +
+          '<span class="quote-chevron">▸</span>' +
+        '</summary>' +
+        '<div style="padding: 16px; border-top: 1px solid var(--color-border); background: var(--color-light);">' +
+          this.buildQuoteDetailsHTML(quote, isCurrent) +
+        '</div>' +
+      '</details>';
+    },
+
+    /**
+     * Build the expanded details HTML for a quote panel.
+     * @param {Object} quote
+     * @param {boolean} isCurrent
+     * @returns {string} HTML string
+     */
+    buildQuoteDetailsHTML: function(quote, isCurrent) {
+      var snapshot = quote.snapshot || {};
+      var client = snapshot.client || {};
+      
+      // Address can be at snapshot.address OR snapshot.client.address
+      var address = snapshot.address || client.address || {};
+      
+      var addressLines = [
+        address.line1 || address.address_line1,
+        address.line2 || address.address_line2,
+        address.suburb,
+        address.city,
+        address.postcode
+      ].filter(Boolean).join(', ') || '(no address)';
+
+      var clientName = client.name || snapshot.clientId || '(no name)';
+      var clientEmail = client.email || '';
+      var clientPhone = client.phone || '';
+      
+      var loadBtnText = isCurrent ? '✓ Currently Editing' : '📂 Load This Quote';
+      var loadBtnDisabled = isCurrent ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '';
+
+      return '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-md);">' +
+          '<div>' +
+            '<div style="font-size: 11px; color: var(--color-secondary); text-transform: uppercase; margin-bottom: 4px;">Client</div>' +
+            '<div style="font-weight: 500;">' + this.escapeHtml(clientName) + '</div>' +
+            (clientEmail ? '<div style="font-size: 13px; color: var(--color-secondary);">' + this.escapeHtml(clientEmail) + '</div>' : '') +
+            (clientPhone ? '<div style="font-size: 13px; color: var(--color-secondary);">' + this.escapeHtml(clientPhone) + '</div>' : '') +
+          '</div>' +
+          '<div>' +
+            '<div style="font-size: 11px; color: var(--color-secondary); text-transform: uppercase; margin-bottom: 4px;">Address</div>' +
+            '<div style="font-size: 13px;">' + this.escapeHtml(addressLines) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display: flex; gap: var(--space-sm);">' +
+          '<button type="button" class="btn btn-primary quote-panel-load-btn" ' + loadBtnDisabled + '>' + loadBtnText + '</button>' +
+          '<button type="button" class="btn btn-secondary quote-panel-delete-btn" style="color: #ef4444;">🗑️ Delete</button>' +
+        '</div>';
+    },
+
+    /**
+     * Format a timestamp as relative time (e.g., "2 hours ago", "yesterday").
+     * @param {string} isoString - ISO timestamp
+     * @returns {string}
+     */
+    formatTimeAgo: function(isoString) {
+      if (!isoString) return '';
+      
+      var date = new Date(isoString);
+      var now = new Date();
+      var diffMs = now - date;
+      var diffMins = Math.floor(diffMs / 60000);
+      var diffHours = Math.floor(diffMs / 3600000);
+      var diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'just now';
+      if (diffMins < 60) return diffMins + ' min ago';
+      if (diffHours < 24) return diffHours + ' hour' + (diffHours === 1 ? '' : 's') + ' ago';
+      if (diffDays === 1) return 'yesterday';
+      if (diffDays < 7) return diffDays + ' days ago';
+      
+      // Fallback to date
+      return date.toLocaleDateString();
+    },
+
+    /**
+     * Delete a quote and refresh the list.
+     * @param {string} quoteId
+     */
+    deleteQuote: function(quoteId) {
+      var self = this;
+      
+      if (typeof QuoteStorage === 'undefined' || !QuoteStorage.isReady()) {
+        alert('Quote storage not ready. Please try again.');
+        return;
+      }
+
+      // If deleting current quote, clear current ID
+      var currentId = this.getCurrentQuoteId();
+      
+      QuoteStorage.remove(quoteId)
+        .then(function() {
+          if (quoteId === currentId) {
+            self.setCurrentQuoteId(null);
+            // Create a new quote so user isn't left with nothing
+            return self.createQuoteFromCurrentState();
+          }
+        })
+        .then(function() {
+          self.renderQuoteList();
+          self.announce('Quote deleted');
+        })
+        .catch(function(err) {
+          console.error('[Checklist] Failed to delete quote:', err);
+          alert('Failed to delete quote. Please try again.');
+        });
+    },
+
+    /**
+     * Apply the selected bulk action to checked quotes.
+     */
+    applyBulkQuoteAction: function() {
+      var self = this;
+      var action = $('#quote-bulk-action').val();
+      
+      if (!action) {
+        alert('Please select an action.');
+        return;
+      }
+
+      var selectedIds = [];
+      $('#quote-list-container .quote-checkbox:checked').each(function() {
+        var id = $(this).closest('.quote-panel').attr('data-quote-id');
+        if (id) selectedIds.push(id);
+      });
+
+      if (selectedIds.length === 0) {
+        alert('Please select at least one quote.');
+        return;
+      }
+
+      if (action === 'delete') {
+        if (!confirm('Delete ' + selectedIds.length + ' quote(s)? This cannot be undone.')) {
+          return;
+        }
+        
+        QuoteStorage.removeMany(selectedIds)
+          .then(function(count) {
+            // If we deleted the current quote, create a new one
+            var currentId = self.getCurrentQuoteId();
+            if (selectedIds.indexOf(currentId) !== -1) {
+              self.setCurrentQuoteId(null);
+              return self.createQuoteFromCurrentState();
+            }
+          })
+          .then(function() {
+            self.renderQuoteList();
+            self.announce(selectedIds.length + ' quote(s) deleted');
+            $('#quote-bulk-action').val('');
+            $('#quote-select-all').prop('checked', false);
+          })
+          .catch(function(err) {
+            console.error('[Checklist] Bulk delete failed:', err);
+            alert('Some quotes could not be deleted. Please try again.');
+          });
+      } else if (action === 'sync') {
+        // For now, just trigger a general sync
+        self.flushEventQueue();
+        self.announce('Syncing...');
+        $('#quote-bulk-action').val('');
+        $('#quote-select-all').prop('checked', false);
       }
     },
 
@@ -1734,6 +3615,20 @@
           '3-4': { price: 80, hours: 2.0 },
           '5-6': { price: 110, hours: 2.5 },
           '7plus': { price: 145, hours: 3.0 }
+        },
+        floor_variants: {
+          carpet: { price: 0 },
+          wood: { price: 0 },
+          lino: { price: 0 },
+          tile: { price: 0 }
+        },
+        floor_types: {
+          carpet: { price: 0 },
+          wood: { price: 0 },
+          lino: { price: 0 },
+          tile: { price: 0 },
+          concrete: { price: 0 },
+          other: { price: 0 }
         }
       };
 
@@ -1760,7 +3655,7 @@
         return null;
       }
 
-      const group = VARIANTS[optionsKey];
+      const group = VARIANTS[optionsKey] || VARIANTS.floor_variants;
       if (!group) return null;
       return group[selected] || null;
     },
@@ -1904,11 +3799,200 @@
       const raw = localStorage.getItem(STORAGE_KEYS.snapshotFallback);
       if (!raw) return;
       try {
-        const snapshot = JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        
+        // CRITICAL: Verify draftId matches current quote to prevent cross-quote contamination
+        // Supports both old format (raw snapshot) and new format (wrapped with draftId)
+        const currentQuoteId = this.getCurrentQuoteId();
+        let snapshot;
+        
+        if (parsed && typeof parsed.draftId !== 'undefined' && parsed.snapshot) {
+          // New wrapped format
+          // Use == for comparison to handle number vs string (IndexedDB returns number, localStorage returns string)
+          if (String(parsed.draftId) !== String(currentQuoteId)) {
+            console.log('[Checklist] Snapshot draftId mismatch (stored:', parsed.draftId, 'current:', currentQuoteId, '), skipping restore');
+            return;
+          }
+          snapshot = parsed.snapshot;
+        } else {
+          // Legacy format (raw snapshot without draftId) - allow it for migration
+          console.log('[Checklist] Legacy snapshot format, applying without ID verification');
+          snapshot = parsed;
+        }
+        
         this.applySnapshot(snapshot);
       } catch (e) {
         console.warn('Snapshot restore failed:', e);
       }
+    },
+
+    /**
+     * Verify quote storage is ready and current quote exists (if set).
+     * DOES NOT create a new quote eagerly - that happens on first save.
+     * This prevents orphan records when users just open the page without doing anything.
+     */
+    initQuoteStorage: function() {
+      var self = this;
+      
+      // DEFENSIVE: Check QuoteStorage exists
+      if (typeof QuoteStorage === 'undefined') {
+        return;
+      }
+
+      // Wait for QuoteStorage to be ready (handles async timing)
+      QuoteStorage.whenReady().then(function() {
+        var currentId = self.getCurrentQuoteId();
+        
+        if (currentId) {
+          // Verify quote still exists
+          QuoteStorage.get(currentId).then(function(quote) {
+            if (!quote) {
+              // Quote was deleted - clear the stale ID
+              // New quote will be created lazily on first save
+              console.log('[Checklist] Quote', currentId, 'not found, clearing stale ID');
+              self.setCurrentQuoteId(null);
+            } else {
+              console.log('[Checklist] Current quote verified:', currentId);
+            }
+          }).catch(function(err) {
+            console.warn('[Checklist] Quote check failed:', err);
+          });
+        } else {
+          // No current quote - that's fine, will be created on first save
+          // This is LAZY creation - no orphan records
+          console.log('[Checklist] No current quote, will create on first save');
+        }
+      }).catch(function(err) {
+        console.warn('[Checklist] QuoteStorage init failed:', err);
+      });
+    },
+
+    /**
+     * Create a quote from the current form state and set it as current.
+     * @returns {Promise<Object>}
+     */
+    createQuoteFromCurrentState: function() {
+      var self = this;
+      
+      // DEFENSIVE: Check both existence AND ready state
+      if (typeof QuoteStorage === 'undefined' || !QuoteStorage.isReady()) {
+        return Promise.reject(new Error('QuoteStorage not ready'));
+      }
+
+      var snapshot = this.buildSnapshot();
+      var quote = QuoteStorage.createQuote(snapshot);
+      
+      return QuoteStorage.save(quote).then(function(saved) {
+        self.setCurrentQuoteId(saved.id);
+        console.log('[Checklist] Created quote from current state:', saved.id, saved.displayName);
+        return saved;
+      }).catch(function(err) {
+        console.error('[Checklist] Failed to create quote:', err);
+        throw err;
+      });
+    },
+
+    /**
+     * Enable swipe/drag horizontal scrolling for the service tabs.
+     * CSS overflow does most of the work; this adds "drag strip" behavior and
+     * prevents accidental tab clicks when the user is dragging.
+     */
+    initServiceTabsScroller: function() {
+      const tabsContainer = document.querySelector('.service-tabs');
+      if (!tabsContainer) return;
+      if (tabsContainer.dataset.aysTabsScrollerInit === '1') return;
+      tabsContainer.dataset.aysTabsScrollerInit = '1';
+
+      // Touch devices already get good momentum scrolling via CSS overflow.
+      // We only add "drag-to-scroll" for mouse users.
+      tabsContainer.classList.add('is-draggable');
+
+      let isDown = false;
+      let startX = 0;
+      let startScrollLeft = 0;
+      let didMove = false;
+      const MOVE_THRESHOLD = 6;
+
+      const getClientX = (e) => {
+        if (e && e.touches && e.touches.length) return e.touches[0].clientX;
+        return e.clientX;
+      };
+
+      const onDown = (e) => {
+        // Drag-to-scroll is for mouse/trackpad. Touch should use native overflow scrolling.
+        // In device emulation, the mouse may be reported as a touch pointer; using mouse
+        // events (below) ensures this still works while testing.
+        if (typeof e.button === 'number' && e.button !== 0) return;
+        isDown = true;
+        didMove = false;
+        startX = getClientX(e);
+        startScrollLeft = tabsContainer.scrollLeft;
+        tabsContainer.classList.add('is-dragging');
+      };
+
+      const onMove = (e) => {
+        if (!isDown) return;
+        const x = getClientX(e);
+        const dx = x - startX;
+        if (!didMove && Math.abs(dx) > MOVE_THRESHOLD) didMove = true;
+        if (!didMove) return;
+
+        tabsContainer.scrollLeft = startScrollLeft - dx;
+        if (e.cancelable) e.preventDefault();
+      };
+
+      const onUp = () => {
+        isDown = false;
+        tabsContainer.classList.remove('is-dragging');
+      };
+
+      // Mouse drag (works in desktop + mobile emulation)
+      tabsContainer.addEventListener('mousedown', onDown, { passive: true });
+      tabsContainer.addEventListener('mousemove', onMove, { passive: false });
+      window.addEventListener('mouseup', onUp, { passive: true });
+
+      // Edge-fade affordance: indicate overflow + hide fades when at ends
+      let rafPending = false;
+      const updateOverflowClasses = () => {
+        rafPending = false;
+        const maxScrollLeft = tabsContainer.scrollWidth - tabsContainer.clientWidth;
+        const hasOverflow = maxScrollLeft > 1;
+        tabsContainer.classList.toggle('has-overflow', hasOverflow);
+
+        if (!hasOverflow) {
+          tabsContainer.classList.remove('is-at-start');
+          tabsContainer.classList.remove('is-at-end');
+          return;
+        }
+
+        const left = tabsContainer.scrollLeft;
+        tabsContainer.classList.toggle('is-at-start', left <= 1);
+        tabsContainer.classList.toggle('is-at-end', left >= maxScrollLeft - 1);
+      };
+
+      const scheduleOverflowUpdate = () => {
+        if (rafPending) return;
+        rafPending = true;
+        requestAnimationFrame(updateOverflowClasses);
+      };
+
+      // Initial + ongoing updates
+      updateOverflowClasses();
+      tabsContainer.addEventListener('scroll', scheduleOverflowUpdate, { passive: true });
+      window.addEventListener('resize', scheduleOverflowUpdate, { passive: true });
+
+      // If the user was dragging, don't treat the following click as a tab activation.
+      // Capture phase so it runs before the delegated .tab click handler.
+      tabsContainer.addEventListener(
+        'click',
+        (e) => {
+          if (!didMove) return;
+          e.stopPropagation();
+          e.preventDefault();
+          didMove = false;
+        },
+        true
+      );
     },
 
     /**
@@ -1924,6 +4008,9 @@
         self.switchServiceTab(serviceType);
       });
 
+      // Enable swipe/drag scrolling for the tab strip
+      this.initServiceTabsScroller();
+
       // Checkbox change - delegated so tab switching still works
       $(document)
         .off('change.checklist', '.checklist-item input[type="checkbox"]')
@@ -1934,8 +4021,24 @@
           const $details = $checkbox.closest('details');
           const room = $details.data('room');
           const label = $checkbox.closest('.checklist-item').find('.item-label').text().trim();
+          const $item = $checkbox.closest('.checklist-item');
 
-          self.updateVariantDropdownVisibility($checkbox.closest('.checklist-item'), checked);
+          self.updateVariantDropdownVisibility($item, checked);
+          if (!checked) {
+            const $dropdown = $item.find('.variant-dropdown');
+            if ($dropdown.length) {
+              $dropdown.val('');
+              $item.attr('data-selected-variant', '');
+              self.updateFloorActionLabel($item, '', false);
+              try {
+                const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.variantSelections) || '{}');
+                delete current[id];
+                localStorage.setItem(STORAGE_KEYS.variantSelections, JSON.stringify(current));
+              } catch (_) {
+                // ignore
+              }
+            }
+          }
 
           self.enqueueEvent({
             type: 'checkbox',
@@ -1948,29 +4051,34 @@
           self.scheduleSnapshot(250);
           self.updateProgress($details);
           self.updateAllProgress();
+          self.updateFloorSummary();
         });
 
       // Details open/close with smooth height animation
-      this.$details.on('toggle', function(e) {
-        const $details = $(this);
-        const $content = $details.find('.room-details');
-        
-        if (this.open) {
-          animateOpen($content);
-        } else {
-          animateClose($content);
-        }
-        
-        self.saveProgress();
+      $(document)
+        .off('toggle.checklistDetails', 'details')
+        .on('toggle.checklistDetails', 'details', function() {
+          const $details = $(this);
+          const $content = $details.find('.room-details');
 
-        // Emit a small batch for this room when the section closes
-        if (!this.open && $details.data('room')) {
-          self.emitRoomPacket($details);
-        }
+          if (!$content.length) return;
 
-        // When a section is interacted with, snapshot it shortly after.
-        self.scheduleSnapshot(250);
-      });
+          if (this.open) {
+            animateOpen($content);
+          } else {
+            animateClose($content);
+          }
+
+          self.saveProgress();
+
+          // Emit a small batch for this room when the section closes
+          if (!this.open && $details.data('room')) {
+            self.emitRoomPacket($details);
+          }
+
+          // When a section is interacted with, snapshot it shortly after.
+          self.scheduleSnapshot(250);
+        });
 
       // Print button
       if (this.$printBtn.length) {
@@ -2054,7 +4162,56 @@
             payload: { id: checkboxId, selected }
           });
 
+          const isChecked = $item.find('input[type="checkbox"]').is(':checked');
+          self.updateFloorActionLabel($item, selected, isChecked);
           self.scheduleSnapshot(250);
+          self.updateFloorSummary();
+        });
+
+      // Apply floor type to other rooms
+      $(document)
+        .off('change.checklistVariantApply', '.checklist-item .variant-apply-scope')
+        .on('change.checklistVariantApply', '.checklist-item .variant-apply-scope', function() {
+          const $select = $(this);
+          const scope = ($select.val() || '').toString();
+          if (!scope) return;
+
+          const $item = $select.closest('.checklist-item');
+          const $checkbox = $item.find('input[type="checkbox"]');
+          const checked = $checkbox.is(':checked');
+          const optionsKey = ($item.data('optionsKey') || $item.data('variantKey') || '').toString();
+          const selectedVariant = ($item.attr('data-selected-variant') || $item.find('.variant-dropdown').val() || '').toString();
+
+          const roomId = ($item.closest('details').data('room') || '').toString();
+          const roomType = roomId.replace(/-\d+$/, '').replace(/\d+$/, '');
+
+          const $scopeRoot = $('.service-tab-content.is-active');
+          $scopeRoot.find('.checklist-item').each((_, el) => {
+            const $targetItem = $(el);
+            if ($targetItem.is($item)) return;
+
+            const targetOptionsKey = ($targetItem.data('optionsKey') || $targetItem.data('variantKey') || '').toString();
+            if (targetOptionsKey !== optionsKey) return;
+
+            const targetRoomId = ($targetItem.closest('details').data('room') || '').toString();
+            const targetRoomType = targetRoomId.replace(/-\d+$/, '').replace(/\d+$/, '');
+
+            if (scope === 'room-type' && targetRoomType !== roomType) return;
+
+            const $targetCheckbox = $targetItem.find('input[type="checkbox"]');
+            if ($targetCheckbox.length) {
+              $targetCheckbox.prop('checked', checked).trigger('change');
+            }
+
+            if (checked && selectedVariant) {
+              const $targetDropdown = $targetItem.find('.variant-dropdown');
+              if ($targetDropdown.length && $targetDropdown.find(`option[value="${selectedVariant}"]`).length) {
+                $targetDropdown.val(selectedVariant).trigger('change');
+              }
+            }
+          });
+
+          $select.val('');
         });
 
       // ======== QUOTES TAB HANDLERS ========
@@ -2237,17 +4394,102 @@
             // ignore
           }
         });
+
+      // ======== CLIENT FIELDS AUTO-SAVE ========
+      // Save client context as user types — don't wait for "Generate Quote"
+      const clientFieldSelectors = [
+        '#quote-client-name',
+        '#quote-client-email', 
+        '#quote-client-phone',
+        '#quote-address-line1',
+        '#quote-address-line2',
+        '#quote-suburb',
+        '#quote-city',
+        '#quote-region',
+        '#quote-postcode',
+        '#quote-country'
+      ].join(', ');
+
+      let clientSaveTimeout = null;
+      const scheduleClientSave = function() {
+        if (clientSaveTimeout) clearTimeout(clientSaveTimeout);
+        clientSaveTimeout = setTimeout(function() {
+          self.persistClientContext({
+            client_id: ($('#quote-client-id').val() || '').toString().trim() || null,
+            population_id: ($('#quote-population-id').val() || '').toString().trim() || null,
+            name: ($('#quote-client-name').val() || '').toString().trim() || null,
+            email: ($('#quote-client-email').val() || '').toString().trim() || null,
+            phone: ($('#quote-client-phone').val() || '').toString().trim() || null,
+            address: {
+              address_line1: ($('#quote-address-line1').val() || '').toString().trim() || null,
+              address_line2: ($('#quote-address-line2').val() || '').toString().trim() || null,
+              suburb: ($('#quote-suburb').val() || '').toString().trim() || null,
+              city: ($('#quote-city').val() || '').toString().trim() || null,
+              region: ($('#quote-region').val() || '').toString().trim() || null,
+              postcode: ($('#quote-postcode').val() || '').toString().trim() || null,
+              country: ($('#quote-country').val() || '').toString().trim() || null
+            }
+          });
+          // Also update the summary display in Quote section
+          self.updateClientSummary();
+        }, 300); // 300ms debounce
+      };
+
+      $(document).on('input change', clientFieldSelectors, scheduleClientSave);
+    },
+
+    /**
+     * Update client summary display in Quote section and preview text
+     */
+    updateClientSummary: function() {
+      const name = ($('#quote-client-name').val() || '').toString().trim();
+      const phone = ($('#quote-client-phone').val() || '').toString().trim();
+      const email = ($('#quote-client-email').val() || '').toString().trim();
+      
+      const addr1 = ($('#quote-address-line1').val() || '').toString().trim();
+      const suburb = ($('#quote-suburb').val() || '').toString().trim();
+      const city = ($('#quote-city').val() || '').toString().trim();
+      const postcode = ($('#quote-postcode').val() || '').toString().trim();
+      
+      const addressParts = [addr1, suburb, city, postcode].filter(Boolean);
+      const address = addressParts.length ? addressParts.join(', ') : '';
+      
+      // Update Quote section summary
+      $('#summary-client-name').text(name || '—');
+      $('#summary-client-phone').text(phone || '—');
+      $('#summary-client-email').text(email || '—');
+      $('#summary-client-address').text(address || '—');
+      
+      // Update collapsed card preview
+      if (name) {
+        $('#client-preview').text(name + (phone ? ' • ' + phone : ''));
+      } else {
+        $('#client-preview').text('New Client');
+      }
+      
+      // Update address preview
+      if (address) {
+        $('#address-preview').text(address.length > 40 ? address.substring(0, 40) + '…' : address);
+      } else {
+        $('#address-preview').text('Tap to add');
+      }
     },
 
     /**
      * Save checkbox states to localStorage
      */
     saveProgress: function() {
+      // Use fresh selector — cached this.$items may be stale after room rebuild
+      const $checkboxes = $('.checklist-item input[type="checkbox"]');
+      
+      // Guard: skip if no checkboxes exist yet (DOM not ready)
+      if ($checkboxes.length === 0) return;
+      
       const progress = {};
-      this.$items.each(function() {
+      $checkboxes.each(function() {
         const id = $(this).attr('id');
         if (id) {
-          progress[id] = $(this).is(':checked');
+          progress[id] = $(this).prop('checked');
         }
       });
       localStorage.setItem(STORAGE_KEYS.progress, JSON.stringify(progress));
@@ -2271,9 +4513,12 @@
               const $dropdown = $item.find('.variant-dropdown');
               if ($dropdown.length) {
                 if (progress[id]) {
-                  $dropdown.show();
+                  $dropdown.prop('hidden', false);
+                  $dropdown.prop('disabled', false);
+                  $dropdown.removeAttr('style');
                 } else {
-                  $dropdown.hide();
+                  $dropdown.prop('hidden', true);
+                  $dropdown.prop('disabled', true);
                 }
               }
             }
@@ -2294,6 +4539,8 @@
           if (!$dropdown.length) continue;
           $dropdown.val(selections[checkboxId] || '');
           $item.attr('data-selected-variant', selections[checkboxId] || '');
+          const isChecked = $checkbox.is(':checked');
+          this.updateFloorActionLabel($item, selections[checkboxId] || '', isChecked);
         }
       } catch (e) {
         console.warn('Error restoring variant selections:', e);
@@ -2304,6 +4551,10 @@
       const date = localStorage.getItem(STORAGE_KEYS.date);
       if (crew) this.$crewInput.val(crew);
       if (date) this.$dateInput.val(date);
+
+      if (typeof this.updateFloorSummary === 'function') {
+        this.updateFloorSummary();
+      }
     },
 
     /**
@@ -2445,18 +4696,47 @@
       $('.tab').removeClass('is-tab-selected');
       $('.tab[data-service="' + serviceType + '"]').addClass('is-tab-selected');
 
+      // Keep the selected tab visible in the horizontally scrollable strip
+      try {
+        const selectedTab = document.querySelector('.service-tabs .tab.is-tab-selected');
+        if (selectedTab && typeof selectedTab.scrollIntoView === 'function') {
+          selectedTab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      } catch (_) {
+        // ignore
+      }
+
       // Hide all service content tabs
       $('.service-tab-content').removeClass('is-active');
 
       // Show selected service content tab
       $('#service-' + serviceType).addClass('is-active');
 
+      // Collapse all disclosure cards in the newly activated tab (mobile-friendly default)
+      try {
+        $('#service-' + serviceType).find('details').prop('open', false);
+      } catch (e) {
+        // Non-fatal: tab switching should still work
+      }
+
       // Save preference to localStorage
       localStorage.setItem(STORAGE_KEYS.serviceType, serviceType);
+
+      // If this tab supports generated rooms, swap the active generator to it.
+      // (For settings/quotes/custom tabs, no generator swap occurs.)
+      try {
+        this.setActiveChecklistGenerator(serviceType);
+      } catch (_) {
+        // ignore
+      }
 
       // Re-cache DOM elements for the active tab
       this.cacheDOM();
       this.updateAllProgress();
+      this.updateFloorSummary();
+      
+      // Update client summary when switching tabs (especially for Quote tab)
+      this.updateClientSummary();
     },
 
     /**
@@ -2677,8 +4957,10 @@
       computed.staff_mode = useExtraHourly ? 'extra_hourly' : (useLegacyMultiplier ? 'multiplier' : 'none');
       computed.staff_applied = staffApplied && (useExtraHourly || useLegacyMultiplier);
       
-      // Generate quote ID
-      const quoteId = 'Q-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+      // Use the database ID as the quote ID (single source of truth)
+      // Format: Q-{database_id} for display purposes
+      const draftId = this.getCurrentQuoteId();
+      const quoteId = draftId ? ('Q-' + draftId) : ('Q-UNSAVED');
       
       // Store quote ID
       $('#quote-id').val(quoteId);
@@ -3001,6 +5283,8 @@
         theme: $('#setting-theme-dark').is(':checked') ? 'dark' : 'light',
         discount_percent: $('#setting-discount-percent').val(),
         discount_fixed: $('#setting-discount-fixed').val(),
+        carpark_open_price: $('#setting-carpark-open-price').val(),
+        carpark_covered_price: $('#setting-carpark-covered-price').val(),
         surcharge_single_oven: $('#surcharge-single-oven').val(),
         surcharge_double_oven: $('#surcharge-double-oven').val(),
         surcharge_windows: $('#surcharge-windows').val(),
@@ -3015,7 +5299,7 @@
         surcharge_carpet: $('#surcharge-carpet').val(),
         surcharge_drawers: $('#surcharge-drawers').val(),
         surcharge_garage: $('#surcharge-garage').val(),
-        service_api_endpoint: $('#service-api-endpoint').val()
+        service_api_endpoint: ($('#system-service-api-endpoint').val() || $('#service-api-endpoint').val())
       };
       
       localStorage.setItem('checklist_settings', JSON.stringify(settings));
@@ -3036,6 +5320,11 @@
         });
         this.flushEventQueue();
       }
+
+      if (settings.service_api_endpoint) {
+        this.saveEndpointToIdb(settings.service_api_endpoint);
+      }
+      this.updateEndpointBanner();
       alert('Settings saved successfully!');
     },
 
@@ -3054,6 +5343,8 @@
       $('#setting-theme-dark').prop('checked', false);
       $('#setting-discount-percent').val('0');
       $('#setting-discount-fixed').val('0');
+      $('#setting-carpark-open-price').val('40');
+      $('#setting-carpark-covered-price').val('180');
       $('#surcharge-single-oven').val('150');
       $('#surcharge-double-oven').val('200');
       $('#surcharge-windows').val('65');
@@ -3061,12 +5352,24 @@
       $('#surcharge-drawers').val('50');
       $('#surcharge-garage').val('100');
       $('#service-api-endpoint').val('');
+      $('#system-service-api-endpoint').val('');
       
       localStorage.removeItem('checklist_settings');
+      this.saveEndpointToIdb('');
+      this.updateEndpointBanner();
 
       // Return to explicit light theme after reset.
       this.applyTheme('light');
       alert('Settings reset to defaults!');
+    },
+
+    registerServiceWorker: function() {
+      if (!('serviceWorker' in navigator)) return;
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').catch(() => {
+          // silent fail
+        });
+      });
     }
   };
 

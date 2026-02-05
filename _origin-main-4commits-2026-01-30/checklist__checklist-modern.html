@@ -7,8 +7,6 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>Cleaning Checklist</title>
 
-  <link rel="manifest" href="manifest.json" />
-
   <!-- Theme bootstrap (runs before CSS to avoid flash) -->
   <script>
     (function() {
@@ -46,21 +44,15 @@
 <body>
   <div class="checklist-wrapper">
 
-
     <!-- Accessibility: announces dynamic status updates for screen readers/voice control -->
     <div id="aria-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
     <!-- ========================================
          HEADER
          ======================================== -->
     <header class="checklist-header">
-      <h1>✓ Cleaning Checklist</h1>
+      <h1>Γ£ô Cleaning Checklist</h1>
       <p>Complete inspection & cleaning verification</p>
-      <p style="font-size: var(--font-size-sm); color: var(--color-secondary); margin-top: 6px;">
-        Recommended: tablet, foldable laptop, or touchscreen device.
-      </p>
     </header>
-
-    <div id="endpoint-banner" class="endpoint-banner" role="status" aria-live="polite"></div>
 
     <!-- ========================================
          SERVICE TYPE TABS
@@ -83,10 +75,10 @@
         <span class="tab-label">Custom Service</span>
       </div>
       <div class="tab tab-quotes" id="tab-quotes" data-service="quotes">
-        <span class="tab-label">💰 Quotes</span>
+        <span class="tab-label">≡ƒÆ░ Quotes</span>
       </div>
       <div class="tab tab-settings" id="tab-settings" data-service="settings" data-role="admin">
-        <span class="tab-label">⚙️ Settings</span>
+        <span class="tab-label">ΓÜÖ∩╕Å Settings</span>
       </div>
     </div>
 
@@ -94,111 +86,26 @@
          META INFORMATION
          ======================================== -->
     <div class="checklist-meta">
-      <div class="meta-field quote-id-field">
-        <label>Quote</label>
-        <span id="current-quote-id" class="quote-id-badge" title="Current quote ID">---</span>
-        <button type="button" id="btn-new-quote-header" class="btn-new-quote-small" title="Start new quote">+</button>
-      </div>
       <div class="meta-field">
-        <label for="crew-name">Crew</label>
-        <input type="text" id="crew-name" placeholder="Crew name" class="crew-name-input" autocomplete="organization" />
+        <label for="crew-name">Cleaning Crew Name <span style="font-size: 0.85em; color: var(--color-secondary);">(optional for custom items)</span></label>
+        <input 
+          type="text" 
+          id="crew-name" 
+          placeholder="e.g., John's Cleaning Team" 
+          class="crew-name-input"
+          autocomplete="organization"
+        />
       </div>
       <div class="meta-field">
         <label for="checklist-date">Date</label>
-        <input type="date" id="checklist-date" class="date-input" autocomplete="off" />
+        <input 
+          type="date" 
+          id="checklist-date" 
+          class="date-input"
+          autocomplete="off"
+        />
       </div>
     </div>
-
-    <!-- ========================================
-         SERVICE TYPE SELECTOR (Global)
-         This controls what items appear in the checklist.
-         Always visible, persists across tab changes.
-         Drives form rebuild via QuoteOrchestrator.
-         ======================================== -->
-    <div class="service-type-selector">
-      <div class="service-type-selector-inner">
-        <label for="global-service-type" class="service-type-label">Service Type</label>
-        <select id="global-service-type" class="service-type-dropdown">
-          <option value="eot" selected>🏠 End of Tenancy</option>
-          <option value="residential">🧹 Residential</option>
-          <option value="commercial">🏢 Commercial</option>
-          <option value="custom">✨ Custom</option>
-        </select>
-        <span class="service-type-indicator" id="service-type-indicator">
-          <span class="indicator-dot"></span>
-          <span class="indicator-text">EOT Mode</span>
-        </span>
-      </div>
-    </div>
-
-    <!-- ========================================
-         CLIENT ESSENTIALS
-         Capture client info immediately when starting a quote
-         Uses collapsible details/summary pattern
-         ======================================== -->
-    <details class="client-essentials-card" open>
-      <summary class="client-essentials-header">
-        <span class="client-essentials-title">Client Details</span>
-        <span class="client-essentials-preview" id="client-preview">New Client</span>
-      </summary>
-      
-      <div class="client-essentials-body">
-        <div class="client-essentials-inner">
-          <!-- Primary: Name, Phone, Email in single row -->
-          <div class="client-essentials-row">
-            <div class="meta-field">
-              <label for="quote-client-name">Name</label>
-              <input type="text" id="quote-client-name" placeholder="Jane Doe" autocomplete="name" />
-            </div>
-            <div class="meta-field">
-              <label for="quote-client-phone">Phone</label>
-              <input type="tel" id="quote-client-phone" placeholder="021 123 4567" autocomplete="tel" inputmode="tel" />
-            </div>
-            <div class="meta-field">
-              <label for="quote-client-email">Email</label>
-              <input type="email" id="quote-client-email" placeholder="jane@example.com" autocomplete="email" inputmode="email" />
-            </div>
-          </div>
-
-          <!-- Address (nested collapsible) -->
-          <details class="client-address-card">
-            <summary class="client-address-header">
-              <span>Address</span>
-              <span class="client-address-preview" id="address-preview">Tap to add</span>
-            </summary>
-            <div class="client-address-body">
-              <div class="client-address-inner">
-                <div class="client-essentials-row">
-                  <div class="meta-field">
-                    <label for="quote-address-line1">Street</label>
-                    <input type="text" id="quote-address-line1" placeholder="123 Main St" autocomplete="address-line1" />
-                  </div>
-                  <div class="meta-field">
-                    <label for="quote-suburb">Suburb</label>
-                    <input type="text" id="quote-suburb" placeholder="Suburb" autocomplete="address-level3" />
-                  </div>
-                  <div class="meta-field">
-                    <label for="quote-city">City</label>
-                    <input type="text" id="quote-city" placeholder="City" autocomplete="address-level2" />
-                  </div>
-                  <div class="meta-field">
-                    <label for="quote-postcode">Post</label>
-                    <input type="text" id="quote-postcode" placeholder="1234" autocomplete="postal-code" inputmode="numeric" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </details>
-        </div>
-      </div>
-      
-      <!-- Hidden fields for compatibility -->
-      <input type="hidden" id="quote-address-line2" />
-      <input type="hidden" id="quote-region" />
-      <input type="hidden" id="quote-country" />
-      <input type="hidden" id="quote-client-id" />
-      <input type="hidden" id="quote-population-id" />
-    </details>
 
     <!-- ========================================
          SERVICE CONTENT CONTAINER
@@ -213,9 +120,15 @@
              Controls how many bedrooms/bathrooms are rendered
              ======================================== -->
         <div class="property-size-selector">
-          <div class="meta-field" style="margin-bottom: var(--space-md);">
-            <label for="property-type-quick">Property Type:</label>
-            <select id="property-type-quick" style="padding: 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 500px; background: var(--color-white); color: var(--color-primary); font-weight: 600;"></select>
+          <label for="property-bedrooms">Property Size:</label>
+          <div class="button-group" id="property-size-buttons">
+            <button class="size-btn" data-bedrooms="1" data-bathrooms="1">1 Bed</button>
+            <button class="size-btn" data-bedrooms="2" data-bathrooms="1">2 Bed</button>
+            <button class="size-btn" data-bedrooms="3" data-bathrooms="2">3 Bed</button>
+            <button class="size-btn" data-bedrooms="4" data-bathrooms="2" class="active">4 Bed</button>
+            <button class="size-btn" data-bedrooms="5" data-bathrooms="3">5 Bed</button>
+            <button class="size-btn" data-bedrooms="6" data-bathrooms="3">6 Bed</button>
+            <button class="size-btn" data-bedrooms="7" data-bathrooms="4">7 Bed</button>
           </div>
         </div>
 
@@ -226,17 +139,13 @@
 
           <!-- GENERATED ROOMS: Populated by ChecklistPageGenerator -->
           <div id="rooms-container"></div>
-          <div id="floor-summary-container"></div>
 
-          <!-- LEGACY: KITCHEN (fallback if generator is not running) -->
-          <div class="room-section">
-            <div style="font-size: 10px; line-height: 1.2; color: var(--color-secondary); margin: 6px 0 8px;">
-              Legacy fallback block — remove when Kitchen is generated via the config/classes.
-            </div>
+          <!-- LEGACY: KITCHEN [REPLACED BY GENERATOR] -->
+          <div class="room-section" style="display:none;">
         <details data-room="kitchen">
           <summary>
             <div class="summary-header">
-              <span class="room-title">🍳 Kitchen</span>
+              <span class="room-title">≡ƒì│ Kitchen</span>
               <span class="progress-badge">0/9</span>
             </div>
           </summary>
@@ -302,7 +211,7 @@
         <details data-room="living-room">
           <summary>
             <div class="summary-header">
-              <span class="room-title">🛋️ Living Room</span>
+              <span class="room-title">≡ƒ¢ï∩╕Å Living Room</span>
               <span class="progress-badge">0/7</span>
             </div>
           </summary>
@@ -353,7 +262,7 @@
         <details data-room="entryway">
           <summary>
             <div class="summary-header">
-              <span class="room-title">🚪 Entryway</span>
+              <span class="room-title">≡ƒÜ¬ Entryway</span>
               <span class="progress-badge">0/5</span>
             </div>
           </summary>
@@ -394,7 +303,7 @@
         <details data-room="laundry">
           <summary>
             <div class="summary-header">
-              <span class="room-title">🧺 Laundry Room</span>
+              <span class="room-title">≡ƒº║ Laundry Room</span>
               <span class="progress-badge">0/8</span>
             </div>
           </summary>
@@ -457,7 +366,7 @@
         <details data-room="bathrooms">
           <summary>
             <div class="summary-header">
-              <span class="room-title">🛁 Bathrooms (1-4)</span>
+              <span class="room-title">≡ƒ¢ü Bathrooms (1-4)</span>
               <span class="progress-badge">0/40</span>
             </div>
           </summary>
@@ -686,7 +595,7 @@
         <details data-room="bedrooms">
           <summary>
             <div class="summary-header">
-              <span class="room-title">🛏️ Bedrooms (1-4)</span>
+              <span class="room-title">≡ƒ¢Å∩╕Å Bedrooms (1-4)</span>
               <span class="progress-badge">0/20</span>
             </div>
           </summary>
@@ -816,7 +725,7 @@
         <details data-room="deep-cleaning">
           <summary>
             <div class="summary-header">
-              <span class="room-title">✨ Deep Cleaning</span>
+              <span class="room-title">Γ£¿ Deep Cleaning</span>
               <span class="progress-badge">0/12</span>
             </div>
           </summary>
@@ -828,22 +737,22 @@
                 <span class="item-label">Oven (inside)</span>
                 <select style="display: none;" data-options-select="oven_variants" class="variant-dropdown">
                   <option value="">Choose oven...</option>
-                  <option value="single-1">1 × Single oven</option>
-                  <option value="single-2">2 × Single ovens</option>
-                  <option value="single-3">3 × Single ovens</option>
-                  <option value="single-4">4 × Single ovens</option>
-                  <option value="single-5">5 × Single ovens</option>
-                  <option value="single-6">6 × Single ovens</option>
-                  <option value="single-7">7 × Single ovens</option>
-                  <option value="single-8">8 × Single ovens</option>
-                  <option value="double-1">1 × Double oven</option>
-                  <option value="double-2">2 × Double ovens</option>
-                  <option value="double-3">3 × Double ovens</option>
-                  <option value="double-4">4 × Double ovens</option>
-                  <option value="double-5">5 × Double ovens</option>
-                  <option value="double-6">6 × Double ovens</option>
-                  <option value="double-7">7 × Double ovens</option>
-                  <option value="double-8">8 × Double ovens</option>
+                  <option value="single-1">1 ├ù Single oven</option>
+                  <option value="single-2">2 ├ù Single ovens</option>
+                  <option value="single-3">3 ├ù Single ovens</option>
+                  <option value="single-4">4 ├ù Single ovens</option>
+                  <option value="single-5">5 ├ù Single ovens</option>
+                  <option value="single-6">6 ├ù Single ovens</option>
+                  <option value="single-7">7 ├ù Single ovens</option>
+                  <option value="single-8">8 ├ù Single ovens</option>
+                  <option value="double-1">1 ├ù Double oven</option>
+                  <option value="double-2">2 ├ù Double ovens</option>
+                  <option value="double-3">3 ├ù Double ovens</option>
+                  <option value="double-4">4 ├ù Double ovens</option>
+                  <option value="double-5">5 ├ù Double ovens</option>
+                  <option value="double-6">6 ├ù Double ovens</option>
+                  <option value="double-7">7 ├ù Double ovens</option>
+                  <option value="double-8">8 ├ù Double ovens</option>
                 </select>
               </label>
               <label class="checklist-item" data-item-id="deep-fridge" data-room="deep-cleaning" data-category="fridge" data-hours="1.0" data-difficulty="deep">
@@ -913,7 +822,7 @@
         <details data-room="special">
           <summary>
             <div class="summary-header">
-              <span class="room-title">⭐ Special Requests & Extras</span>
+              <span class="room-title">Γ¡É Special Requests & Extras</span>
               <span class="progress-badge">0/5</span>
             </div>
           </summary>
@@ -962,7 +871,7 @@
         <details data-room="quotable-services-eot">
           <summary>
             <div class="summary-header">
-              <span class="room-title">📋 Quotable Services</span>
+              <span class="room-title">≡ƒôï Quotable Services</span>
               <span class="progress-badge">Select services</span>
             </div>
           </summary>
@@ -1021,20 +930,12 @@
       <div class="service-tab-content" data-service="residential" id="service-residential">
         <div class="checklist-content">
 
-          <!-- GENERATED ROOMS (Residential): Populated by AysChecklistFormFactory -->
-		  <p>This is GENERATED ROOMS (Residential)</p><!-- TODO: remove for production (testing visual cue) -->
-          <div id="rooms-container-residential"></div>
-          <div id="floor-summary-container-residential"></div>
-
-          <!-- LEGACY ROOMS (Residential): fallback only if generator fails -->
-          <div id="legacy-rooms-residential">
-
           <!-- KITCHEN - RESIDENTIAL -->
           <div class="room-section">
             <details data-room="res-kitchen">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🍳 Kitchen</span>
+                  <span class="room-title">≡ƒì│ Kitchen</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1061,22 +962,22 @@
                     <span class="item-label">Oven (inside)</span>
                     <select style="display: none;" data-options-select="oven_variants" class="variant-dropdown">
                       <option value="">Choose oven...</option>
-                      <option value="single-1">1 × Single oven</option>
-                      <option value="single-2">2 × Single ovens</option>
-                      <option value="single-3">3 × Single ovens</option>
-                      <option value="single-4">4 × Single ovens</option>
-                      <option value="single-5">5 × Single ovens</option>
-                      <option value="single-6">6 × Single ovens</option>
-                      <option value="single-7">7 × Single ovens</option>
-                      <option value="single-8">8 × Single ovens</option>
-                      <option value="double-1">1 × Double oven</option>
-                      <option value="double-2">2 × Double ovens</option>
-                      <option value="double-3">3 × Double ovens</option>
-                      <option value="double-4">4 × Double ovens</option>
-                      <option value="double-5">5 × Double ovens</option>
-                      <option value="double-6">6 × Double ovens</option>
-                      <option value="double-7">7 × Double ovens</option>
-                      <option value="double-8">8 × Double ovens</option>
+                      <option value="single-1">1 ├ù Single oven</option>
+                      <option value="single-2">2 ├ù Single ovens</option>
+                      <option value="single-3">3 ├ù Single ovens</option>
+                      <option value="single-4">4 ├ù Single ovens</option>
+                      <option value="single-5">5 ├ù Single ovens</option>
+                      <option value="single-6">6 ├ù Single ovens</option>
+                      <option value="single-7">7 ├ù Single ovens</option>
+                      <option value="single-8">8 ├ù Single ovens</option>
+                      <option value="double-1">1 ├ù Double oven</option>
+                      <option value="double-2">2 ├ù Double ovens</option>
+                      <option value="double-3">3 ├ù Double ovens</option>
+                      <option value="double-4">4 ├ù Double ovens</option>
+                      <option value="double-5">5 ├ù Double ovens</option>
+                      <option value="double-6">6 ├ù Double ovens</option>
+                      <option value="double-7">7 ├ù Double ovens</option>
+                      <option value="double-8">8 ├ù Double ovens</option>
                     </select>
                   </label>
                   <label class="checklist-item">
@@ -1114,7 +1015,7 @@
             <details data-room="res-living">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🛋️ Living Room</span>
+                  <span class="room-title">≡ƒ¢ï∩╕Å Living Room</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1160,7 +1061,7 @@
             <details data-room="res-bedrooms">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🛏️ Bedrooms</span>
+                  <span class="room-title">≡ƒ¢Å∩╕Å Bedrooms</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1211,7 +1112,7 @@
             <details data-room="res-bathrooms">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🛁 Bathrooms</span>
+                  <span class="room-title">≡ƒ¢ü Bathrooms</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1267,7 +1168,7 @@
             <details data-room="res-entryway">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🚪 Entryway & Hallways</span>
+                  <span class="room-title">≡ƒÜ¬ Entryway & Hallways</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1303,14 +1204,12 @@
             </details>
           </div>
 
-          </div> <!-- END: LEGACY ROOMS (Residential) -->
-
           <!-- GENERAL TIDYING - RESIDENTIAL -->
           <div class="room-section">
             <details data-room="res-general">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">✨ General Tidying & Details</span>
+                  <span class="room-title">Γ£¿ General Tidying & Details</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1356,7 +1255,7 @@
             <details data-room="res-notes">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">📝 Special Requests & Notes</span>
+                  <span class="room-title">≡ƒô¥ Special Requests & Notes</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1378,7 +1277,7 @@
         <details data-room="quotable-services-res">
           <summary>
             <div class="summary-header">
-              <span class="room-title">📋 Quotable Services</span>
+              <span class="room-title">≡ƒôï Quotable Services</span>
               <span class="progress-badge">Select services</span>
             </div>
           </summary>
@@ -1435,10 +1334,6 @@
       <!-- COMMERCIAL SERVICE TAB -->
       <div class="service-tab-content" data-service="commercial" id="service-commercial">
         <div class="checklist-content">
-
-        <!-- GENERATED ROOMS (Commercial): Populated by AysChecklistFormFactory -->
-        <div id="rooms-container-commercial"></div>
-        <div id="floor-summary-container-commercial"></div>
         <!-- ========================================
              COMMERCIAL CLEANING CHECKLIST
              
@@ -1450,8 +1345,8 @@
              - Deep cleans: For long-neglected areas (2-3+ years)
              
              PHP Integration Notes:
-             - Multiplier-based: # of desks × 3 (typical per desk)
-             - Area calculation: square footage ÷ 400 = hours needed
+             - Multiplier-based: # of desks ├ù 3 (typical per desk)
+             - Area calculation: square footage ├╖ 400 = hours needed
              - Consumable tracking: track checked items for invoicing
              - Deep clean surcharge: flag items for special pricing
              ======================================== -->
@@ -1461,7 +1356,7 @@
             <details data-room="com-bathrooms">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🛁 Bathrooms (Toilets & Hygiene)</span>
+                  <span class="room-title">≡ƒ¢ü Bathrooms (Toilets & Hygiene)</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1510,7 +1405,7 @@
             <details data-room="com-consumables">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🧴 Consumables & Supplies (Refill/Provide)</span>
+                  <span class="room-title">≡ƒº┤ Consumables & Supplies (Refill/Provide)</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1559,7 +1454,7 @@
             <details data-room="com-hallways">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🚪 Hallways & Corridors</span>
+                  <span class="room-title">≡ƒÜ¬ Hallways & Corridors</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1595,7 +1490,7 @@
             <details data-room="com-kitchen">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">☕ Kitchen & Break Areas</span>
+                  <span class="room-title">Γÿò Kitchen & Break Areas</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1630,22 +1525,22 @@
                     <span class="item-label">Oven (inside)</span>
                     <select style="display: none;" data-options-select="oven_variants" class="variant-dropdown">
                       <option value="">Choose oven...</option>
-                      <option value="single-1">1 × Single oven</option>
-                      <option value="single-2">2 × Single ovens</option>
-                      <option value="single-3">3 × Single ovens</option>
-                      <option value="single-4">4 × Single ovens</option>
-                      <option value="single-5">5 × Single ovens</option>
-                      <option value="single-6">6 × Single ovens</option>
-                      <option value="single-7">7 × Single ovens</option>
-                      <option value="single-8">8 × Single ovens</option>
-                      <option value="double-1">1 × Double oven</option>
-                      <option value="double-2">2 × Double ovens</option>
-                      <option value="double-3">3 × Double ovens</option>
-                      <option value="double-4">4 × Double ovens</option>
-                      <option value="double-5">5 × Double ovens</option>
-                      <option value="double-6">6 × Double ovens</option>
-                      <option value="double-7">7 × Double ovens</option>
-                      <option value="double-8">8 × Double ovens</option>
+                      <option value="single-1">1 ├ù Single oven</option>
+                      <option value="single-2">2 ├ù Single ovens</option>
+                      <option value="single-3">3 ├ù Single ovens</option>
+                      <option value="single-4">4 ├ù Single ovens</option>
+                      <option value="single-5">5 ├ù Single ovens</option>
+                      <option value="single-6">6 ├ù Single ovens</option>
+                      <option value="single-7">7 ├ù Single ovens</option>
+                      <option value="single-8">8 ├ù Single ovens</option>
+                      <option value="double-1">1 ├ù Double oven</option>
+                      <option value="double-2">2 ├ù Double ovens</option>
+                      <option value="double-3">3 ├ù Double ovens</option>
+                      <option value="double-4">4 ├ù Double ovens</option>
+                      <option value="double-5">5 ├ù Double ovens</option>
+                      <option value="double-6">6 ├ù Double ovens</option>
+                      <option value="double-7">7 ├ù Double ovens</option>
+                      <option value="double-8">8 ├ù Double ovens</option>
                     </select>
                   </label>
                   <label class="checklist-item">
@@ -1678,7 +1573,7 @@
             <details data-room="com-desks">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🖥️ Desks & Workstations</span>
+                  <span class="room-title">≡ƒûÑ∩╕Å Desks & Workstations</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1731,7 +1626,7 @@
             <details data-room="com-general">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🏢 General Areas & Shared Spaces</span>
+                  <span class="room-title">≡ƒÅó General Areas & Shared Spaces</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1740,7 +1635,7 @@
                   <label for="com-area-sqft">Approximate square footage to clean:</label>
                   <input type="number" id="com-area-sqft" name="com-area-sqft" min="0" placeholder="e.g., 2000" />
                   <p style="font-size: var(--font-size-sm); color: var(--color-secondary); margin-top: 5px;">
-                    <em>Note: 400 sq ft ≈ 1 hour at standard rate</em>
+                    <em>Note: 400 sq ft Γëê 1 hour at standard rate</em>
                   </p>
                 </div>
                 <div class="checklist-items">
@@ -1784,7 +1679,7 @@
             <details data-room="com-deep">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">✨ Special Deep Cleans (Long-Neglected Areas)</span>
+                  <span class="room-title">Γ£¿ Special Deep Cleans (Long-Neglected Areas)</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
@@ -1828,7 +1723,7 @@
         <details data-room="quotable-services-com">
           <summary>
             <div class="summary-header">
-              <span class="room-title">📋 Quotable Services</span>
+              <span class="room-title">≡ƒôï Quotable Services</span>
               <span class="progress-badge">Select services</span>
             </div>
           </summary>
@@ -1889,18 +1784,18 @@
             <details data-room="custom-items">
               <summary>
                 <div class="summary-header">
-                  <span class="room-title">🧩 Custom Items</span>
+                  <span class="room-title">≡ƒº⌐ Custom Items</span>
                   <span class="progress-badge">0/0</span>
                 </div>
               </summary>
               <div class="room-details">
                 <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
-                  Add extra checklist items here when they aren’t already on the list.
+                  Add extra checklist items here when they arenΓÇÖt already on the list.
                 </p>
 
                 <div class="admin-only" id="custom-items-admin" aria-label="Custom items editor">
                   <div class="card mb-lg">
-                    <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">➕ Custom Items</h3>
+                    <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">Γ₧ò Custom Items</h3>
                     <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Add one-off tasks to the checklist. Only the item label is required.</p>
 
                     <input type="hidden" id="custom-item-id" value="">
@@ -1919,8 +1814,8 @@
                     </div>
 
                     <div style="display: flex; gap: var(--space-md);">
-                      <button type="button" id="btn-save-custom-item" class="btn btn-primary flex-1">💾 Save item</button>
-                      <button type="button" id="btn-clear-custom-item" class="btn btn-secondary flex-1">↻ Clear</button>
+                      <button type="button" id="btn-save-custom-item" class="btn btn-primary flex-1">≡ƒÆ╛ Save item</button>
+                      <button type="button" id="btn-clear-custom-item" class="btn btn-secondary flex-1">Γå╗ Clear</button>
                     </div>
                   </div>
                 </div>
@@ -1961,30 +1856,77 @@
                 </div>
               </div>
 
-              <!-- Client Details (Summary - actual fields are at top of page) -->
-              <div class="client-summary-box" style="background: var(--color-light); border: 1px solid var(--color-border); padding: var(--space-md); border-radius: 4px; margin-top: var(--space-md);">
-                <h4 style="color: var(--color-primary); margin: 0 0 var(--space-sm) 0;">👤 Client Details</h4>
-                <p style="font-size: var(--font-size-sm); color: var(--color-secondary); margin-bottom: var(--space-sm);">
-                  Client info is entered at the top of the page. Scroll up or use the summary below.
-                </p>
-                <div id="client-details-summary" style="font-size: var(--font-size-base);">
-                  <div><strong>Name:</strong> <span id="summary-client-name">—</span></div>
-                  <div><strong>Phone:</strong> <span id="summary-client-phone">—</span></div>
-                  <div><strong>Email:</strong> <span id="summary-client-email">—</span></div>
-                  <div><strong>Address:</strong> <span id="summary-client-address">—</span></div>
+              <!-- Client Details (Grid) -->
+              <div class="grid grid-3col gap-md mt-md">
+                <div class="meta-field">
+                  <label for="quote-client-name">Client Name</label>
+                  <input type="text" id="quote-client-name" placeholder="Full name" autocomplete="name" />
                 </div>
-                <button type="button" onclick="document.getElementById('quote-client-name').focus(); window.scrollTo({top: 0, behavior: 'smooth'});" class="btn btn-secondary" style="margin-top: var(--space-sm);">
-                  ✏️ Edit Client Info
-                </button>
+                <div class="meta-field">
+                  <label for="quote-client-email">Email <span style="color: var(--color-accent); font-weight: bold;">*</span></label>
+                  <input type="email" id="quote-client-email" placeholder="email@example.com" autocomplete="email" inputmode="email" />
+                  <p style="color: var(--color-error); font-size: 12px; margin-top: 4px; display: none;" id="email-required-msg">Email is required to send quote</p>
+                </div>
+                <div class="meta-field">
+                  <label for="quote-client-phone">Phone</label>
+                  <input type="tel" id="quote-client-phone" placeholder="(555) 123-4567" autocomplete="tel" inputmode="tel" />
+                </div>
+              </div>
+
+              <!-- Full Address Structure (mapped to wp_avs_population table) -->
+              <div style="background: var(--color-light); border: 1px solid var(--color-border); padding: var(--space-md); border-radius: 4px; margin-top: var(--space-md);">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                  <h4 style="color: var(--color-primary); margin: 0;">
+                    ≡ƒôì Property Address
+                    <!-- Internal reference only (not shown publicly): population_id ties this address back to wp_avs_population -->
+                    <span class="dev-only">(population_id: <span id="display-population-id">-</span>)</span>
+                  </h4>
+                  <button type="button" id="btn-toggle-address-edit" class="btn btn-secondary" style="padding: 8px 12px; min-height: 36px;">Edit address</button>
+                </div>
+                
+                <div class="grid grid-2col-wide-left gap-md">
+                  <div class="meta-field">
+                    <label for="quote-address-line1">Address Line 1</label>
+                    <input type="text" id="quote-address-line1" placeholder="Street address" readonly autocomplete="address-line1" />
+                  </div>
+                  <div class="meta-field">
+                    <label for="quote-address-line2">Address Line 2</label>
+                    <input type="text" id="quote-address-line2" placeholder="Apt, Suite, etc." readonly autocomplete="address-line2" />
+                  </div>
+                </div>
+                
+                <div class="grid grid-4col gap-md">
+                  <div class="meta-field">
+                    <label for="quote-suburb">Suburb</label>
+                    <input type="text" id="quote-suburb" placeholder="Suburb" readonly autocomplete="address-level2" />
+                  </div>
+                  <div class="meta-field">
+                    <label for="quote-city">City</label>
+                    <input type="text" id="quote-city" placeholder="City" readonly autocomplete="address-level2" />
+                  </div>
+                  <div class="meta-field">
+                    <label for="quote-region">Region</label>
+                    <input type="text" id="quote-region" placeholder="Region" readonly autocomplete="address-level1" />
+                  </div>
+                  <div class="meta-field">
+                    <label for="quote-postcode">Postcode</label>
+                    <input type="text" id="quote-postcode" placeholder="Postcode" readonly autocomplete="postal-code" inputmode="numeric" />
+                  </div>
+                </div>
+                
+                <div class="meta-field mt-sm">
+                  <label for="quote-country">Country</label>
+                  <input type="text" id="quote-country" placeholder="Country" readonly autocomplete="country-name" />
+                </div>
               </div>
 
               <!-- Quick Actions -->
               <div style="display: flex; gap: 8px; margin-top: var(--space-md);">
                 <button type="button" id="btn-use-lead-data" class="btn btn-secondary flex-1">
-                  📋 Use Lead Data
+                  ≡ƒôï Use Lead Data
                 </button>
                 <button type="button" id="btn-add-new-client" class="btn btn-secondary flex-1">
-                  ➕ Create New Client
+                  Γ₧ò Create New Client
                 </button>
               </div>
 
@@ -1992,7 +1934,7 @@
             <div class="grid grid-2col gap-lg mb-lg">
               <!-- Service Selection -->
               <div class="card">
-                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🎯 Service</h3>
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒÄ» Service</h3>
                 <div class="meta-field">
                   <label for="quote-service-type">Service Type</label>
                   <select id="quote-service-type" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; width: 100%; background: var(--color-white); color: var(--color-primary);">
@@ -2007,7 +1949,7 @@
 
               <!-- Booking Date/Time -->
               <div class="card">
-                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📅 Booking</h3>
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒôà Booking</h3>
                 <div class="meta-field">
                   <label for="quote-booking-date">Preferred Job Date</label>
                   <input type="date" id="quote-booking-date" />
@@ -2017,7 +1959,7 @@
 
             <!-- QUOTE SUMMARY SECTION -->
             <div style="border: 2px solid var(--color-accent); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg); background: rgba(28, 201, 80, 0.08);">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">💰 Quote Summary</h3>
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒÆ░ Quote Summary</h3>
               
               <div class="grid grid-2col gap-md mb-lg">
                 <div>
@@ -2031,7 +1973,7 @@
               </div>
 
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-lg);">
-                Estimate: <strong id="quote-items-count">0</strong> items • <strong id="quote-hours-total">0.0</strong> hours
+                Estimate: <strong id="quote-items-count">0</strong> items ΓÇó <strong id="quote-hours-total">0.0</strong> hours
               </p>
 
               <div id="quote-internal-breakdown" style="display: none; background: var(--color-white); border-radius: 4px; padding: var(--space-md); margin-bottom: var(--space-lg);">
@@ -2064,12 +2006,12 @@
               </div>
 
               <button type="button" id="btn-generate-quote" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">
-                🔢 Calculate Quote
+                ≡ƒöó Calculate Quote
               </button>
 
               <div id="quote-scope" style="background: var(--color-white); border-radius: 4px; padding: var(--space-md);">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px;">
-                  <h4 style="margin: 0; color: var(--color-secondary);">🧾 Included Scope</h4>
+                  <h4 style="margin: 0; color: var(--color-secondary);">≡ƒº╛ Included Scope</h4>
                   <span id="quote-scope-count" style="color: var(--color-secondary); font-size: 12px;">0 items</span>
                 </div>
                 <p style="margin: 8px 0 12px; color: var(--color-secondary); font-size: var(--font-size-sm);">
@@ -2081,27 +2023,27 @@
 
             <!-- SEND OPTIONS SECTION -->
             <div class="card mb-lg">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📤 Send Quote</h3>
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒôñ Send Quote</h3>
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">How would you like to send this quote?</p>
 
               <div class="grid grid-4col gap-md mb-lg">
                 <button type="button" class="btn btn-secondary send-quote-option" data-method="email" style="padding: var(--space-md);">
-                  📧 Email
+                  ≡ƒôº Email
                 </button>
                 <button type="button" class="btn btn-secondary send-quote-option" data-method="sms" style="padding: var(--space-md);">
-                  💬 SMS
+                  ≡ƒÆ¼ SMS
                 </button>
                 <button type="button" class="btn btn-secondary send-quote-option" data-method="later" style="padding: var(--space-md);">
-                  ⏰ Send Later
+                  ΓÅ░ Send Later
                 </button>
                 <button type="button" class="btn btn-secondary send-quote-option" data-method="copy" style="padding: var(--space-md);">
-                  📋 Copy Link
+                  ≡ƒôï Copy Link
                 </button>
               </div>
 
               <!-- Email Send Details (shown when Email selected) -->
               <div id="email-send-details" style="display: none; border: 1px solid var(--color-accent); border-radius: 4px; padding: var(--space-md); background: rgba(28, 201, 80, 0.05);">
-                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">📧 Email Quote to Client</h4>
+                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">≡ƒôº Email Quote to Client</h4>
                 <div class="meta-field">
                   <label for="quote-email-subject">Email Subject</label>
                   <input type="text" id="quote-email-subject" value="Cleaning Quote - Your Property" />
@@ -2111,43 +2053,43 @@
                   <textarea id="quote-email-message" placeholder="Hi [Client Name],\n\nHere's your cleaning quote...\n\nThank you,\n[Crew Name]" class="textarea-lg"></textarea>
                 </div>
                 <button type="button" id="btn-send-email-quote" class="btn btn-primary" style="width: 100%;">
-                  ✉️ Send Email Quote
+                  Γ£ë∩╕Å Send Email Quote
                 </button>
               </div>
 
               <!-- SMS Send Details (shown when SMS selected) -->
               <div id="sms-send-details" style="display: none; border: 1px solid var(--color-accent); border-radius: 4px; padding: var(--space-md); background: rgba(28, 201, 80, 0.05);">
-                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">💬 Send Quote via SMS</h4>
+                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">≡ƒÆ¼ Send Quote via SMS</h4>
                 <div class="meta-field">
                   <label for="quote-sms-message">SMS Message</label>
                   <textarea id="quote-sms-message" placeholder="Hi [Client Name], your quote is ready! Total: [TOTAL]. Reply to confirm." class="textarea-md" style="max-height: 80px;"></textarea>
                   <p style="color: var(--color-secondary); font-size: 12px; margin-top: 4px;">Character count: <span id="sms-char-count">0</span>/160</p>
                 </div>
                 <button type="button" id="btn-send-sms-quote" class="btn btn-primary" style="width: 100%;">
-                  📱 Send SMS
+                  ≡ƒô▒ Send SMS
                 </button>
               </div>
 
               <!-- Later/Schedule Details -->
               <div id="later-send-details" style="display: none; border: 1px solid var(--color-accent); border-radius: 4px; padding: var(--space-md); background: rgba(28, 201, 80, 0.05);">
-                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">⏰ Schedule Quote Send</h4>
+                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">ΓÅ░ Schedule Quote Send</h4>
                 <div class="meta-field">
                   <label for="quote-send-datetime">Send At</label>
                   <input type="datetime-local" id="quote-send-datetime" />
                 </div>
                 <button type="button" id="btn-schedule-quote" class="btn btn-primary" style="width: 100%;">
-                  📅 Schedule Send
+                  ≡ƒôà Schedule Send
                 </button>
               </div>
 
               <!-- Copy Link Details -->
               <div id="copy-send-details" style="display: none; border: 1px solid var(--color-accent); border-radius: 4px; padding: var(--space-md); background: rgba(28, 201, 80, 0.05);">
-                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">🔗 Shareable Quote Link</h4>
+                <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">≡ƒöù Shareable Quote Link</h4>
                 <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);">Copy this link and share with client:</p>
                 <div style="display: flex; gap: 8px;">
                   <input type="text" id="quote-share-link" value="https://quotes.example.com/quote/abc123" readonly style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; flex: 1; background: var(--color-light); color: var(--color-primary);" />
                   <button type="button" id="btn-copy-link" class="btn btn-secondary">
-                    📋 Copy
+                    ≡ƒôï Copy
                   </button>
                 </div>
               </div>
@@ -2155,7 +2097,7 @@
 
             <!-- QUOTE NOTES -->
             <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg);">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📝 Notes</h3>
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒô¥ Notes</h3>
               <textarea id="quote-notes" placeholder="Add any additional notes for the quote (not visible to client)..." class="textarea-lg"></textarea>
             </div>
 
@@ -2167,36 +2109,36 @@
       <!-- SETTINGS SERVICE TAB -->
       <div class="service-tab-content" data-service="settings" id="service-settings" data-role="admin">
         <div class="checklist-content">
-          <div style="padding: var(--space-md);">
+          <div style="padding: var(--space-lg);">
+            <h2 style="margin-bottom: var(--space-md); color: var(--color-secondary);">System Settings</h2>
+            <p style="color: var(--color-secondary); margin-bottom: var(--space-lg);">Configure pricing, services, and system options.</p>
+
             <!-- Settings Tab Navigation -->
             <div style="display: flex; gap: 8px; margin-bottom: var(--space-lg); border-bottom: 2px solid var(--color-border); padding-bottom: 0;">
               <button class="settings-tab-button is-active" data-tab="property" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid var(--color-accent); margin-bottom: -2px;">
-                🏠 Property
+                ≡ƒÅá Property
               </button>
               <button class="settings-tab-button" data-tab="pricing" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
-                💵 Pricing
+                ≡ƒÆ╡ Pricing
               </button>
               <button class="settings-tab-button" data-tab="production-rate" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
-                ⚡ Production Rate
+                ΓÜí Production Rate
               </button>
               <button class="settings-tab-button" data-tab="surcharges" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
-                🔧 Surcharges
+                ≡ƒöº Surcharges
               </button>
               <button class="settings-tab-button" data-tab="services" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
-                🎯 Services
-              </button>
-              <button class="settings-tab-button" data-tab="manage-quotes" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
-                📋 Manage Quotes
+                ≡ƒÄ» Services
               </button>
               <button class="settings-tab-button" data-tab="system" style="padding: 12px 16px; border: none; background: none; cursor: pointer; font-weight: 600; color: var(--color-secondary); border-bottom: 3px solid transparent; margin-bottom: -2px;">
-                ⚙️ System
+                ΓÜÖ∩╕Å System
               </button>
             </div>
 
-            <!-- TAB: Property Configuration (SOURCE OF TRUTH) -->
-            <div class="settings-tab-content is-active" data-tab="property">
+            <!-- TAB 0: Property Configuration (SOURCE OF TRUTH) -->
+            <div class="settings-tab-content is-active" data-tab="property" style="display: block;">
               <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
-                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🏠 Property Configuration</h3>
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒÅá Property Configuration</h3>
                 <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
                   <strong>SOURCE OF TRUTH:</strong> Settings here control what appears on your checklist. 
                   Change property type, bedrooms, bathrooms, or office count below.
@@ -2206,58 +2148,15 @@
                 <div class="meta-field" style="margin-bottom: var(--space-lg);">
                   <label for="setting-property-type" style="font-weight: 600;">Property Type:</label>
                   <select id="setting-property-type" style="padding: 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 500px; background: var(--color-white); color: var(--color-primary); font-weight: 600;">
-                    <option value="residential">🏘️ Residential (Parametric)</option>
-                    <option value="residential_1bed">🏘️ Residential - 1 Bed, 1 Bath (Preset)</option>
-                    <option value="residential_2bed">🏘️ Residential - 2 Bed, 1 Bath (Preset)</option>
-                    <option value="residential_3bed">🏘️ Residential - 3 Bed, 2 Bath (Preset)</option>
-                    <option value="residential_4bed">🏘️ Residential - 4 Bed, 2 Bath (Preset)</option>
-                    <option value="residential_6bed">🏘️ Residential - 6 Bed, 3 Bath (Preset)</option>
-                    <option value="eot_residential">🧼 End of Tenancy - Residential</option>
-                    <option value="commercial_office">🏢 Commercial Office (Parametric)</option>
-                    <option value="commercial_gym">💪 Commercial Gym (Parametric)</option>
-                    <option value="commercial_retail">🛍️ Commercial Retail</option>
-                    <option value="commercial_warehouse">📦 Commercial Warehouse (Parametric)</option>
+                    <option value="residential">≡ƒÅÿ∩╕Å Residential (Parametric)</option>
+                    <option value="residential_3bed">≡ƒÅÿ∩╕Å Residential - 3 Bed, 2 Bath (Preset)</option>
+                    <option value="residential_4bed">≡ƒÅÿ∩╕Å Residential - 4 Bed, 2 Bath (Preset)</option>
+                    <option value="residential_6bed">≡ƒÅÿ∩╕Å Residential - 6 Bed, 3 Bath (Preset)</option>
+                    <option value="commercial_office">≡ƒÅó Commercial Office (Parametric)</option>
+                    <option value="commercial_gym">≡ƒÆ¬ Commercial Gym (Parametric)</option>
+                    <option value="commercial_retail">≡ƒ¢ì∩╕Å Commercial Retail</option>
+                    <option value="commercial_warehouse">≡ƒôª Commercial Warehouse (Parametric)</option>
                   </select>
-                </div>
-
-                <div id="floor-defaults-panel" style="background: var(--color-light); padding: var(--space-md); border-radius: 4px; margin-bottom: var(--space-md);">
-                  <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">🧾 Floor Type Defaults (Optional)</h4>
-                  <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);">
-                    Set starter floor types by room category. These defaults prefill per-room selections (no items removed).
-                  </p>
-                  <div class="grid grid-2col gap-md">
-                    <div class="meta-field">
-                      <label for="floor-default-bedroom">Bedrooms</label>
-                      <select id="floor-default-bedroom" data-floor-default="bedroom"></select>
-                    </div>
-                    <div class="meta-field">
-                      <label for="floor-default-bathroom">Bathrooms / Toilets</label>
-                      <select id="floor-default-bathroom" data-floor-default="bathroom"></select>
-                    </div>
-                    <div class="meta-field">
-                      <label for="floor-default-living">Living Areas</label>
-                      <select id="floor-default-living" data-floor-default="living"></select>
-                    </div>
-                    <div class="meta-field">
-                      <label for="floor-default-kitchen">Kitchen / Lunchroom</label>
-                      <select id="floor-default-kitchen" data-floor-default="kitchen"></select>
-                    </div>
-                    <div class="meta-field">
-                      <label for="floor-default-hallway">Hallways / Entry</label>
-                      <select id="floor-default-hallway" data-floor-default="hallway"></select>
-                    </div>
-                    <div class="meta-field">
-                      <label for="floor-default-office">Office / Reception</label>
-                      <select id="floor-default-office" data-floor-default="office"></select>
-                    </div>
-                    <div class="meta-field">
-                      <label for="floor-default-warehouse">Warehouse</label>
-                      <select id="floor-default-warehouse" data-floor-default="warehouse"></select>
-                    </div>
-                  </div>
-                  <div style="margin-top: var(--space-sm);">
-                    <button type="button" id="btn-apply-floor-defaults" class="btn btn-secondary">Apply defaults</button>
-                  </div>
                 </div>
 
                 <!-- Residential Parameters (shown/hidden based on property type) -->
@@ -2279,7 +2178,7 @@
                 <div id="property-office-params" style="display: none; background: var(--color-light); padding: var(--space-md); border-radius: 4px; margin-bottom: var(--space-md);">
                   <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Office Configuration</h4>
                   <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-sm);">
-                    Single-floor: set Office Count. Multi-floor: set Floors × Offices per Floor.
+                    Single-floor: set Office Count. Multi-floor: set Floors ├ù Offices per Floor.
                   </p>
                   <div class="grid grid-2col gap-md">
                     <div class="meta-field">
@@ -2326,7 +2225,7 @@
                 <!-- Action Buttons -->
                 <div style="display: flex; gap: var(--space-md);">
                   <button type="button" id="btn-regenerate-checklist" class="btn btn-primary" style="padding: 12px 24px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                    <span id="regenerate-spinner" style="display: inline-block;">🔄</span>
+                    <span id="regenerate-spinner" style="display: inline-block;">≡ƒöä</span>
                     <span id="regenerate-text">Regenerate Checklist</span>
                   </button>
                   <p id="property-auto-regen-note" style="color: var(--color-secondary); font-size: var(--font-size-sm); margin: auto 0;">
@@ -2336,10 +2235,10 @@
               </div>
             </div>
 
-            <!-- TAB: Pricing Settings -->
-            <div class="settings-tab-content" data-tab="pricing">
+            <!-- TAB 1: Pricing Settings -->
+            <div class="settings-tab-content" data-tab="pricing" style="display: none;">
               <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
-                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">💵 Pricing Settings</h3>
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒÆ╡ Pricing Settings</h3>
               
               <div class="grid grid-2col gap-md">
                 <div class="meta-field">
@@ -2370,23 +2269,13 @@
                   <label for="setting-discount-fixed">Discount ($)</label>
                   <input type="number" id="setting-discount-fixed" value="0" step="5" min="0" />
                 </div>
-
-                <div class="meta-field">
-                  <label for="setting-carpark-open-price">Carpark - Frontage/entry sweep ($ per 100m²)</label>
-                  <input type="number" id="setting-carpark-open-price" value="40" step="5" min="0" />
-                </div>
-                <div class="meta-field">
-                  <label for="setting-carpark-covered-price">Carpark - Full sweep ($ per 500m²)</label>
-                  <input type="number" id="setting-carpark-covered-price" value="180" step="5" min="0" />
-                </div>
               </div>
             </div>
-            </div>
 
-            <!-- TAB: Production Rate Settings -->
-            <div class="settings-tab-content" data-tab="production-rate">
+            <!-- TAB 2: Production Rate Settings -->
+            <div class="settings-tab-content" data-tab="production-rate" style="display: none;">
               <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
-                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">⚡ Production Rate Settings</h3>
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">ΓÜí Production Rate Settings</h3>
                 <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Configure how many square feet your team cleans per hour. This affects labor hour estimates for quotes.</p>
                 
                 <div id="production-rate-light-container" style="margin-bottom: var(--space-lg);"></div>
@@ -2394,9 +2283,9 @@
               </div>
             </div>
 
-            <!-- TAB: Surcharges -->
-            <div class="settings-tab-content" data-tab="surcharges">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">⭐ Window Cleaning - Dynamic Pricing (by BR count & panes)</h3>
+            <!-- TAB 3: Surcharges -->
+            <div class="settings-tab-content" data-tab="surcharges" style="display: none;">
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">Γ¡É Window Cleaning - Dynamic Pricing (by BR count & panes)</h3>
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">35 panes = 1 hour. Minimum $120 for any job.</p>
               
               <div class="grid grid-2col gap-md">
@@ -2436,7 +2325,7 @@
               
               <hr style="margin: var(--space-lg) 0; border: none; border-top: 1px solid var(--color-border);" />
               
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🔧 Other Surcharges</h3>
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒöº Other Surcharges</h3>
               
               <div class="grid grid-2col gap-md">
                 <div class="meta-field">
@@ -2462,9 +2351,9 @@
               </div>
             </div>
 
-            <!-- TAB: Services -->
-            <div class="settings-tab-content" data-tab="services">
-              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">🎯 Service Configuration</h3>
+            <!-- TAB 4: Services -->
+            <div class="settings-tab-content" data-tab="services" style="display: none;">
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒÄ» Service Configuration</h3>
               <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Select which optional services apply to this property type.</p>
               
               <!-- Service Toggles Container -->
@@ -2489,7 +2378,7 @@
                   cursor: pointer;
                   user-select: none;
                 ">
-                  ⚙️ API Configuration (Advanced)
+                  ΓÜÖ∩╕Å API Configuration (Advanced)
                 </summary>
                 
                 <div style="padding: var(--space-md); background: var(--color-light); border-radius: 4px; margin-top: var(--space-md);">
@@ -2540,113 +2429,13 @@
               </details>
             </div>
 
-            <!-- TAB: Manage Quotes -->
-            <div class="settings-tab-content" data-tab="manage-quotes">
+            <!-- TAB 5: System -->
+            <div class="settings-tab-content" data-tab="system" style="display: none;">
+              <!-- Customer ID Linking Section -->
               <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
-                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">📋 Manage Quotes</h3>
-                <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
-                  Quotes saved on this device. Select a quote to continue working, or start a new one.
-                </p>
+                <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">≡ƒöù Customer ID Linking</h3>
+                <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">Link this checklist to a customer workflow: Lead ΓåÆ Customer Data ΓåÆ Bookings ΓåÆ Invoicing</p>
                 
-                <!-- Bulk Actions Bar -->
-                <div style="display: flex; gap: var(--space-sm); align-items: center; margin-bottom: var(--space-md); padding: var(--space-sm); background: var(--color-light); border-radius: 4px;">
-                  <select id="quote-bulk-action" style="padding: 8px; border: 1px solid var(--color-border); border-radius: 4px;">
-                    <option value="">Bulk Actions...</option>
-                    <option value="sync">Sync Selected</option>
-                    <option value="delete">Delete Selected</option>
-                  </select>
-                  <button type="button" id="btn-apply-bulk-action" class="btn btn-secondary" style="padding: 8px 16px;">Apply</button>
-                  <label style="margin-left: auto; display: flex; align-items: center; gap: 4px; font-size: var(--font-size-sm); color: var(--color-secondary);">
-                    <input type="checkbox" id="quote-select-all" />
-                    Select All
-                  </label>
-                </div>
-                
-                <!-- Quote List Container -->
-                <div id="quote-list-container">
-                  <!-- Populated dynamically by JavaScript from IndexedDB -->
-                  <p style="color: var(--color-secondary); padding: var(--space-md); text-align: center;">Loading quotes...</p>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div style="display: flex; gap: var(--space-md); margin-top: var(--space-lg);">
-                  <button type="button" id="btn-new-quote" class="btn btn-primary">
-                    ➕ New Quote
-                  </button>
-                  <button type="button" id="btn-sync-all-quotes" class="btn btn-secondary">
-                    🔄 Sync All
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- TAB: System -->
-            <div class="settings-tab-content" data-tab="system">
-
-              <!-- ═══════════════════════════════════════════════════════════
-                   BASE INFO PANEL (ALWAYS RENDERS - NOT CONDITIONAL)
-                   This block provides visual anchor even with no integrations
-                   ═══════════════════════════════════════════════════════════ -->
-              <div class="system-info-panel">
-                <h3>📱 System &amp; Device Information</h3>
-                <p>
-                  This checklist is built for on-site use and looks best on <strong>tablets</strong>, <strong>foldable laptops</strong>, 
-                  and larger phones. It's designed to keep the layout readable while you're walking the property and ticking items off quickly. 
-                  Progress is saved automatically in your browser, so you can keep working even if the signal drops.
-                </p>
-                <p>
-                  When you connect online services, this tab will also show <strong>sync status</strong>, your 
-                  <strong>endpoint/webhook URL</strong>, and any integration controls (greyed out until configured).
-                </p>
-              </div>
-
-              <!-- ═══════════════════════════════════════════════════════════
-                   SYNC STATUS (PWA Online/Offline indicator)
-                   ═══════════════════════════════════════════════════════════ -->
-              <div class="system-section">
-                <h4>🔄 Sync Status</h4>
-                <div class="system-status-row">
-                  <span class="status-label">Connection:</span>
-                  <span id="system-connection-status" class="status-badge status-unknown">Checking...</span>
-                </div>
-                <div class="system-status-row">
-                  <span class="status-label">Last sync:</span>
-                  <span id="system-last-sync">Never</span>
-                </div>
-                <div class="system-status-row">
-                  <span class="status-label">Pending items:</span>
-                  <span id="system-pending-count">0</span>
-                </div>
-              </div>
-
-              <!-- ═══════════════════════════════════════════════════════════
-                   SYNC ENDPOINT CONFIGURATION
-                   ═══════════════════════════════════════════════════════════ -->
-              <div class="system-section">
-                <h4>🌐 Sync Endpoint</h4>
-                <p class="section-description">
-                  Configure the server URL for background sync. Leave empty to work offline only.
-                </p>
-                <div class="meta-field">
-                  <label for="system-service-api-endpoint">Endpoint URL</label>
-                  <input type="url" id="system-service-api-endpoint" placeholder="https://api.example.com" />
-                </div>
-                <div class="first-run-actions">
-                  <button type="button" id="first-run-test" class="btn btn-secondary">Test connection</button>
-                  <button type="button" id="first-run-save" class="btn btn-primary" disabled>Save endpoint</button>
-                  <button type="button" id="first-run-offline" class="btn btn-secondary">Clear &amp; go offline</button>
-                </div>
-                <p id="first-run-status" class="first-run-status" role="status" aria-live="polite"></p>
-              </div>
-
-              <!-- ═══════════════════════════════════════════════════════════
-                   CUSTOMER ID LINKING
-                   ═══════════════════════════════════════════════════════════ -->
-              <div class="system-section">
-                <h4>🔗 Customer ID Linking</h4>
-                <p class="section-description">
-                  Link this checklist to a customer workflow: Lead → Customer Data → Bookings → Invoicing
-                </p>
                 <div class="meta-field">
                   <label for="setting-customer-id-prefix">Customer ID Prefix</label>
                   <input type="text" id="setting-customer-id-prefix" value="CUST" maxlength="10" placeholder="e.g., CUST" />
@@ -2659,47 +2448,46 @@
                 </div>
               </div>
 
-              <!-- ═══════════════════════════════════════════════════════════
-                   APP PREFERENCES
-                   ═══════════════════════════════════════════════════════════ -->
-              <div class="system-section">
-                <h4>⚙️ App Preferences</h4>
-                <div class="meta-field">
-                  <label for="setting-staff-threshold">Staff Threshold (hours)</label>
-                  <input type="number" id="setting-staff-threshold" value="7" step="0.5" min="0" />
-                  <p class="field-hint">Jobs over this duration require multiple staff</p>
-                </div>
-                <div class="meta-field">
-                  <label for="setting-currency">Currency</label>
-                  <select id="setting-currency">
-                    <option value="USD">US Dollar ($)</option>
-                    <option value="NZD">New Zealand Dollar (NZ$)</option>
-                    <option value="AUD">Australian Dollar ($)</option>
-                    <option value="GBP">British Pound (£)</option>
-                    <option value="EUR">Euro (€)</option>
-                  </select>
-                </div>
-                <div class="meta-field">
-                  <label for="setting-theme-dark">Theme</label>
-                  <div class="theme-toggle">
-                    <input type="checkbox" id="setting-theme-dark" />
-                    <label for="setting-theme-dark" class="theme-toggle-label">
-                      <span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span>
-                      <span class="theme-toggle-text">Dark mode</span>
-                    </label>
-                  </div>
-                </div>
+            <!-- System Options Section -->
+            <div style="border: 1px solid var(--color-border); border-radius: 4px; padding: var(--space-lg); margin-bottom: var(--space-lg);">
+              <h3 style="color: var(--color-secondary); margin-bottom: var(--space-md);">ΓÜÖ∩╕Å System Options</h3>
+              
+              <div class="meta-field">
+                <label for="setting-staff-threshold">Staff Threshold (hours)</label>
+                <input type="number" id="setting-staff-threshold" value="7" step="0.5" min="0" />
+                <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-top: 4px;">Jobs over this duration require multiple staff</p>
+              </div>
+              <div class="meta-field">
+                <label for="setting-currency">Currency</label>
+                <select id="setting-currency" style="padding: 10px; border: 1px solid var(--color-border); border-radius: 4px; font-family: inherit; background: var(--color-white); color: var(--color-primary);">
+                  <option value="USD">US Dollar ($)</option>
+                  <option value="NZD">New Zealand Dollar (NZ$)</option>
+                  <option value="AUD">Australian Dollar ($)</option>
+                  <option value="GBP">British Pound (┬ú)</option>
+                  <option value="EUR">Euro (Γé¼)</option>
+                </select>
               </div>
 
+              <div class="meta-field">
+                <label for="setting-theme-dark">Theme</label>
+                <div class="theme-toggle">
+                  <input type="checkbox" id="setting-theme-dark" />
+                  <label for="setting-theme-dark" class="theme-toggle-label">
+                    <span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span>
+                    <span class="theme-toggle-text">Dark mode</span>
+                  </label>
+                </div>
+              </div>
+            </div>
             </div>
 
             <!-- Save Settings Button -->
             <div style="display: flex; gap: var(--space-md);">
               <button type="button" id="btn-save-settings" class="btn btn-primary" style="flex: 1;">
-                💾 Save Settings
+                ≡ƒÆ╛ Save Settings
               </button>
               <button type="button" id="btn-reset-settings" class="btn btn-secondary" style="flex: 1;">
-                ↻ Reset to Defaults
+                Γå╗ Reset to Defaults
               </button>
             </div>
           </div>
@@ -2714,16 +2502,16 @@
          ======================================== -->
     <div class="checklist-actions">
       <button type="button" id="btn-print" class="btn btn-secondary">
-        🖨️ Print
+        ≡ƒû¿∩╕Å Print
       </button>
       <button type="button" id="btn-download-pdf" class="btn btn-secondary">
-        📥 Download PDF
+        ≡ƒôÑ Download PDF
       </button>
       <button type="button" id="btn-complete-all" class="btn btn-primary">
-        ✓ Complete All
+        Γ£ô Complete All
       </button>
       <button type="button" id="btn-reset" class="btn btn-secondary">
-        ↻ Reset All
+        Γå╗ Reset All
       </button>
     </div>
 
@@ -2742,7 +2530,7 @@
   <!-- Data Definitions: Item definitions for all services -->
   <script src="js/data/ITEM_DEFINITIONS.js"></script>
 
-  <!-- Room Base + Commercial OOP -->
+  <!-- Room Classes -->
   <script src="js/classes/Room.js"></script>
   <script src="js/classes/CommercialRoom.js"></script>
   <script src="js/classes/Bedroom.js"></script>
@@ -2750,12 +2538,6 @@
   <script src="js/classes/Kitchen.js"></script>
   <script src="js/classes/LivingArea.js"></script>
   <script src="js/classes/Laundry.js"></script>
-  <script src="js/classes/Entryway.js"></script>
-  <script src="js/classes/Basement.js"></script>
-  <script src="js/classes/UtilitySpecial.js"></script>
-  <script src="js/classes/HomeOffice.js"></script>
-  <script src="js/classes/Outdoor.js"></script>
-  <script src="js/classes/Garage.js"></script>
   <script src="js/classes/Office.js"></script>
   <script src="js/classes/Reception.js"></script>
   <script src="js/classes/Boardroom.js"></script>
@@ -2765,23 +2547,24 @@
   <script src="js/classes/Stockroom.js"></script>
   <script src="js/classes/LockerRoom.js"></script>
   <script src="js/classes/Shower.js"></script>
-  <script src="js/classes/Toilet.js"></script>
   <script src="js/classes/Warehouse.js"></script>
   <script src="js/classes/LoadingDock.js"></script>
-  <script src="js/classes/RubbishHandling.js"></script>
   <script src="js/classes/Carpark.js"></script>
+  <script src="js/classes/Toilet.js"></script>
+  <script src="js/classes/RubbishHandling.js"></script>
   <script src="js/classes/Utility.js"></script>
   <script src="js/classes/Staircase.js"></script>
   <script src="js/classes/TradeWorkshop.js"></script>
-
-  <!-- Registry: Map room type names to classes -->
+  <script src="js/classes/Entryway.js"></script>
+  <script src="js/classes/Basement.js"></script>
+  <script src="js/classes/UtilitySpecial.js"></script>
+  <script src="js/classes/HomeOffice.js"></script>
+  <script src="js/classes/Outdoor.js"></script>
   <script src="js/classes/RoomRegistry.js"></script>
   
   <!-- Component System: AysDisclosureRoomCard + AysChecklistItemCheckbox -->
   <script src="js/components/AysDisclosureRoomCard.js"></script>
   <script src="js/components/AysChecklistItemCheckbox.js"></script>
-  <script src="js/components/AysRoomMetadataLookup.js"></script>
-  <script src="js/components/AysRoomOrchestrator.js"></script>
   <script src="js/components/AysProductionRateSettings.js"></script>
   <script src="js/components/AysServiceToggleRenderer.js"></script>
   
@@ -2932,16 +2715,7 @@
         if (typeof CHECKLIST_CONFIG !== 'undefined') {
           const generator = new AysChecklistFormFactory('rooms-container');
           generator.generate(CHECKLIST_CONFIG);
-          console.log('✓ Initial checklist generated:', generator.getCards().length, 'rooms');
-
-          // Hide legacy hardcoded rooms in the EOT tab (generator is now the source of truth).
-          try {
-            document.querySelectorAll('#service-end-of-tenancy .room-section').forEach((el) => {
-              el.style.display = 'none';
-            });
-          } catch (_) {
-            // ignore
-          }
+          console.log('Γ£ô Initial checklist generated:', generator.getCards().length, 'rooms');
           
           // Store generator globally so property type changes can regenerate
           window.checklistGenerator = generator;
@@ -3013,19 +2787,54 @@
         });
       }
 
+      // Initialize Settings Tab Navigation
+      const settingsTabButtons = document.querySelectorAll('.settings-tab-button');
+      const settingsTabContents = document.querySelectorAll('.settings-tab-content');
+
+      settingsTabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const tabName = this.getAttribute('data-tab');
+          
+          // Remove active state from all buttons and contents
+          settingsTabButtons.forEach(btn => btn.classList.remove('is-active'));
+          settingsTabContents.forEach(content => {
+            content.style.display = 'none';
+            content.classList.remove('is-active');
+          });
+          
+          // Add active state to clicked button and corresponding content
+          this.classList.add('is-active');
+          const activeContent = document.querySelector(`.settings-tab-content[data-tab="${tabName}"]`);
+          if (activeContent) {
+            activeContent.style.display = 'block';
+            activeContent.classList.add('is-active');
+          }
+          
+          // Update button styling
+          settingsTabButtons.forEach(btn => {
+            if (btn.getAttribute('data-tab') === tabName) {
+              btn.style.borderBottomColor = 'var(--color-accent)';
+              btn.style.color = 'var(--color-secondary)';
+            } else {
+              btn.style.borderBottomColor = 'transparent';
+            }
+          });
+        });
+      });
+
       // Initialize Production Rate Settings Components
       if (typeof AysProductionRateSettings !== 'undefined') {
         const lightComponent = new AysProductionRateSettings({
           classification: 'light',
           onSave: (settings) => {
-            console.log('✓ Light commercial production rate saved:', settings);
+            console.log('Γ£ô Light commercial production rate saved:', settings);
           }
         });
 
         const heavyComponent = new AysProductionRateSettings({
           classification: 'heavy',
           onSave: (settings) => {
-            console.log('✓ Heavy commercial production rate saved:', settings);
+            console.log('Γ£ô Heavy commercial production rate saved:', settings);
           }
         });
 
@@ -3042,57 +2851,18 @@
     });
   </script>
 
-  <!-- IndexedDB Quote Storage -->
-  <script src="js/storage/QuoteStorage.js"></script>
-
   <script src="js/checklist-script.js"></script>
 
   <!-- Initialize Flatpickr for date input -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize IndexedDB for quote storage, then init the app
-      const initApp = () => {
-        if (typeof Checklist !== 'undefined' && Checklist.init) {
-          console.log('[APP] Initializing Checklist...');
-          Checklist.init();
-          console.log('[APP] Checklist initialized');
-        } else {
-          console.error('[APP] Checklist object not found or init method missing');
-        }
-      };
-
-      if (typeof QuoteStorage !== 'undefined') {
-        QuoteStorage.init()
-          .then(() => {
-            console.log('[APP] QuoteStorage initialized');
-            // One-time migration from legacy single-snapshot
-            if (!QuoteStorage.hasMigrated()) {
-              return QuoteStorage.migrateFromEventWorker().then(migrated => {
-                QuoteStorage.setMigrated();
-                if (migrated) {
-                  console.log('[APP] Migrated legacy snapshot to quote:', migrated.displayName);
-                }
-              });
-            }
-          })
-          .then(() => {
-            // One-time seed demo data (John Doe & Jane Doe)
-            if (!QuoteStorage.hasSeeded()) {
-              return QuoteStorage.seedDemoData();
-            }
-          })
-          .then(() => {
-            // QuoteStorage ready, now init the app
-            initApp();
-          })
-          .catch(err => {
-            console.error('[APP] QuoteStorage init failed:', err);
-            // Still init the app even if QuoteStorage fails
-            initApp();
-          });
+      // Initialize the checklist application
+      if (typeof Checklist !== 'undefined' && Checklist.init) {
+        console.log('[APP] Initializing Checklist...');
+        Checklist.init();
+        console.log('[APP] Checklist initialized');
       } else {
-        // QuoteStorage not available, init app without it
-        initApp();
+        console.error('[APP] Checklist object not found or init method missing');
       }
 
       if (typeof flatpickr !== 'undefined') {
