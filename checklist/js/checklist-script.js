@@ -3072,19 +3072,24 @@
 
     /**
      * Get the current working quote ID.
-     * @returns {string|null}
+     * Returns integer (matching IndexedDB autoIncrement keys) or null.
+     * @returns {number|null}
      */
     getCurrentQuoteId: function() {
-      return localStorage.getItem(STORAGE_KEYS.currentQuoteId) || null;
+      var stored = localStorage.getItem(STORAGE_KEYS.currentQuoteId);
+      if (!stored) return null;
+      var num = parseInt(stored, 10);
+      return isNaN(num) ? null : num;
     },
 
     /**
      * Set the current working quote ID.
-     * @param {string|null} id
+     * Accepts number or string, stores as string in localStorage.
+     * @param {number|string|null} id
      */
     setCurrentQuoteId: function(id) {
-      if (id) {
-        localStorage.setItem(STORAGE_KEYS.currentQuoteId, id);
+      if (id !== null && id !== undefined) {
+        localStorage.setItem(STORAGE_KEYS.currentQuoteId, String(id));
       } else {
         localStorage.removeItem(STORAGE_KEYS.currentQuoteId);
       }
@@ -3144,14 +3149,13 @@
 
     /**
      * Load a quote by ID into the form.
-     * @param {number|string} quoteId - Quote ID (will be parsed to integer)
+     * @param {number|string} quoteId - Quote ID (will be normalized to integer)
      * @returns {Promise<Object>} The loaded quote
      */
     loadQuote: function(quoteId) {
       var self = this;
       
-      // CRITICAL: IndexedDB uses integer keys with autoIncrement
-      // DOM attributes return strings, so we must parse to int
+      // Normalize to integer (DOM attributes return strings)
       var numericId = parseInt(quoteId, 10);
       if (isNaN(numericId)) {
         return Promise.reject(new Error('Invalid quote ID: ' + quoteId));
@@ -3162,11 +3166,10 @@
         return Promise.reject(new Error('QuoteStorage not ready'));
       }
 
-      // Save current state first
+      // Save current state first (getCurrentQuoteId already returns int)
       var currentId = this.getCurrentQuoteId();
-      var currentNumericId = currentId ? parseInt(currentId, 10) : null;
-      var savePromise = (currentNumericId && currentNumericId !== numericId)
-        ? QuoteStorage.updateSnapshot(currentNumericId, this.buildSnapshot())
+      var savePromise = (currentId && currentId !== numericId)
+        ? QuoteStorage.updateSnapshot(currentId, this.buildSnapshot())
         : Promise.resolve();
 
       return savePromise
@@ -3382,10 +3385,10 @@
             return;
           }
 
+          // getCurrentQuoteId now returns int, direct comparison with quote.id works
           var currentId = self.getCurrentQuoteId();
-          var currentNumericId = currentId ? parseInt(currentId, 10) : null;
           var html = quotes.map(function(quote) {
-            return self.buildQuotePanelHTML(quote, quote.id === currentNumericId);
+            return self.buildQuotePanelHTML(quote, quote.id === currentId);
           }).join('');
           
           container.innerHTML = html;
@@ -3521,12 +3524,12 @@
 
     /**
      * Delete a quote and refresh the list.
-     * @param {number|string} quoteId - Quote ID (will be parsed to integer)
+     * @param {number|string} quoteId - Quote ID (will be normalized to integer)
      */
     deleteQuote: function(quoteId) {
       var self = this;
       
-      // CRITICAL: IndexedDB uses integer keys with autoIncrement
+      // Normalize to integer (DOM attributes return strings)
       var numericId = parseInt(quoteId, 10);
       if (isNaN(numericId)) {
         alert('Invalid quote ID');
@@ -3538,13 +3541,12 @@
         return;
       }
 
-      // If deleting current quote, clear current ID
+      // getCurrentQuoteId now returns int, so direct comparison works
       var currentId = this.getCurrentQuoteId();
-      var currentNumericId = currentId ? parseInt(currentId, 10) : null;
       
       QuoteStorage.remove(numericId)
         .then(function() {
-          if (numericId === currentNumericId) {
+          if (numericId === currentId) {
             self.setCurrentQuoteId(null);
             // Create a new quote so user isn't left with nothing
             return self.createQuoteFromCurrentState();
@@ -3592,9 +3594,9 @@
         QuoteStorage.removeMany(selectedIds)
           .then(function(count) {
             // If we deleted the current quote, create a new one
+            // getCurrentQuoteId returns int, selectedIds are ints, direct comparison works
             var currentId = self.getCurrentQuoteId();
-            var currentNumericId = currentId ? parseInt(currentId, 10) : null;
-            if (currentNumericId && selectedIds.indexOf(currentNumericId) !== -1) {
+            if (currentId && selectedIds.indexOf(currentId) !== -1) {
               self.setCurrentQuoteId(null);
               return self.createQuoteFromCurrentState();
             }
