@@ -3144,11 +3144,18 @@
 
     /**
      * Load a quote by ID into the form.
-     * @param {string} quoteId
+     * @param {number|string} quoteId - Quote ID (will be parsed to integer)
      * @returns {Promise<Object>} The loaded quote
      */
     loadQuote: function(quoteId) {
       var self = this;
+      
+      // CRITICAL: IndexedDB uses integer keys with autoIncrement
+      // DOM attributes return strings, so we must parse to int
+      var numericId = parseInt(quoteId, 10);
+      if (isNaN(numericId)) {
+        return Promise.reject(new Error('Invalid quote ID: ' + quoteId));
+      }
       
       // DEFENSIVE: Check both existence AND ready state
       if (typeof QuoteStorage === 'undefined' || !QuoteStorage.isReady()) {
@@ -3157,8 +3164,9 @@
 
       // Save current state first
       var currentId = this.getCurrentQuoteId();
-      var savePromise = (currentId && currentId !== quoteId)
-        ? QuoteStorage.updateSnapshot(currentId, this.buildSnapshot())
+      var currentNumericId = currentId ? parseInt(currentId, 10) : null;
+      var savePromise = (currentNumericId && currentNumericId !== numericId)
+        ? QuoteStorage.updateSnapshot(currentNumericId, this.buildSnapshot())
         : Promise.resolve();
 
       return savePromise
@@ -3166,7 +3174,7 @@
           console.warn('[Checklist] Failed to save current quote before load:', err);
         })
         .then(function() {
-          return QuoteStorage.get(quoteId);
+          return QuoteStorage.get(numericId);
         })
         .then(function(quote) {
           if (!quote) {
@@ -3375,8 +3383,9 @@
           }
 
           var currentId = self.getCurrentQuoteId();
+          var currentNumericId = currentId ? parseInt(currentId, 10) : null;
           var html = quotes.map(function(quote) {
-            return self.buildQuotePanelHTML(quote, quote.id === currentId);
+            return self.buildQuotePanelHTML(quote, quote.id === currentNumericId);
           }).join('');
           
           container.innerHTML = html;
@@ -3512,10 +3521,17 @@
 
     /**
      * Delete a quote and refresh the list.
-     * @param {string} quoteId
+     * @param {number|string} quoteId - Quote ID (will be parsed to integer)
      */
     deleteQuote: function(quoteId) {
       var self = this;
+      
+      // CRITICAL: IndexedDB uses integer keys with autoIncrement
+      var numericId = parseInt(quoteId, 10);
+      if (isNaN(numericId)) {
+        alert('Invalid quote ID');
+        return;
+      }
       
       if (typeof QuoteStorage === 'undefined' || !QuoteStorage.isReady()) {
         alert('Quote storage not ready. Please try again.');
@@ -3524,10 +3540,11 @@
 
       // If deleting current quote, clear current ID
       var currentId = this.getCurrentQuoteId();
+      var currentNumericId = currentId ? parseInt(currentId, 10) : null;
       
-      QuoteStorage.remove(quoteId)
+      QuoteStorage.remove(numericId)
         .then(function() {
-          if (quoteId === currentId) {
+          if (numericId === currentNumericId) {
             self.setCurrentQuoteId(null);
             // Create a new quote so user isn't left with nothing
             return self.createQuoteFromCurrentState();
@@ -3558,7 +3575,8 @@
       var selectedIds = [];
       $('#quote-list-container .quote-checkbox:checked').each(function() {
         var id = $(this).closest('.quote-panel').attr('data-quote-id');
-        if (id) selectedIds.push(id);
+        // CRITICAL: Parse to integer for IndexedDB
+        if (id) selectedIds.push(parseInt(id, 10));
       });
 
       if (selectedIds.length === 0) {
@@ -3575,7 +3593,8 @@
           .then(function(count) {
             // If we deleted the current quote, create a new one
             var currentId = self.getCurrentQuoteId();
-            if (selectedIds.indexOf(currentId) !== -1) {
+            var currentNumericId = currentId ? parseInt(currentId, 10) : null;
+            if (currentNumericId && selectedIds.indexOf(currentNumericId) !== -1) {
               self.setCurrentQuoteId(null);
               return self.createQuoteFromCurrentState();
             }

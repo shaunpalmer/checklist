@@ -1929,6 +1929,266 @@ details[open] .progress-badge {
 }
 
 /* ============================================================================
+   SETTINGS FORM ELEMENTS
+   Dropdowns, radio buttons, checkboxes, inputs for Settings tabs
+   ============================================================================ */
+
+/* Base dropdown styling for settings */
+.settings-tab-content select,
+.meta-field select {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-white);
+  color: var(--color-primary);
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.settings-tab-content select:hover,
+.meta-field select:hover {
+  border-color: var(--color-accent);
+}
+
+.settings-tab-content select:focus,
+.meta-field select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+/* Base input styling for settings */
+.settings-tab-content input[type="number"],
+.settings-tab-content input[type="text"],
+.meta-field input[type="number"],
+.meta-field input[type="text"] {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-white);
+  color: var(--color-primary);
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-tab-content input:hover,
+.meta-field input:hover {
+  border-color: var(--color-accent);
+}
+
+.settings-tab-content input:focus,
+.meta-field input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+/* Grid layout for settings */
+.settings-tab-content .grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.settings-tab-content .grid-2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.settings-tab-content .grid-3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 600px) {
+  .settings-tab-content .grid-2col,
+  .settings-tab-content .grid-3col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   PRODUCTION RATE SETTINGS COMPONENT
+   ============================================================================ */
+
+.ays-production-rate-settings {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.ays-production-rate-settings .setting-title {
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-xs);
+}
+
+.ays-production-rate-settings .setting-description {
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-md);
+}
+
+/* Radio button group */
+.ays-production-rate-settings .radio-group {
+  margin-bottom: var(--space-md);
+}
+
+.ays-production-rate-settings .radio-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+
+.ays-production-rate-settings .radio-label:hover {
+  background: var(--color-light);
+}
+
+.ays-production-rate-settings .radio-label input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.ays-production-rate-settings .radio-text {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+}
+
+.ays-production-rate-settings .radio-description {
+  padding-left: 38px;
+  color: var(--color-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-sm);
+}
+
+/* Custom rate input section */
+.ays-production-rate-settings .custom-rate-section {
+  padding-left: 38px;
+  margin-top: var(--space-sm);
+}
+
+.ays-production-rate-settings .input-group {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.ays-production-rate-settings .rate-input {
+  flex: 0 0 120px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.ays-production-rate-settings .rate-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+.ays-production-rate-settings .rate-input.warning {
+  border-color: #f57c00;
+  background: #fff8e1;
+}
+
+.ays-production-rate-settings .unit-select {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  background: var(--color-white);
+  cursor: pointer;
+}
+
+.ays-production-rate-settings .unit-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+/* Checkbox section */
+.ays-production-rate-settings .checkbox-section {
+  margin: var(--space-md) 0;
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.ays-production-rate-settings .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.ays-production-rate-settings .checkbox-input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.ays-production-rate-settings .checkbox-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+}
+
+/* Current setting display */
+.ays-production-rate-settings .current-setting {
+  background: var(--color-light);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-secondary);
+}
+
+.ays-production-rate-settings .warning-text {
+  color: #f57c00;
+}
+
+/* Save button */
+.ays-production-rate-settings .save-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: var(--color-accent);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.ays-production-rate-settings .save-button:hover {
+  background: #1b5e20;
+}
+
+.ays-production-rate-settings .save-button:active {
+  transform: scale(0.98);
+}
+
+/* ============================================================================
    PRINT STYLES
    ============================================================================ */
 
