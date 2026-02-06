@@ -1,11 +1,38 @@
 # Agent Memory (Rolling) — Object-Driven Checklist
 
-**Last updated**: 2026-02-06
+**Last updated**: 2026-02-07
 
 This file is the running "brain dump" for fast-paced development. It captures:
 - What we've already changed (so we don't re-break it)
 - What decisions are locked (so we don't drift)
 - The active backlog (so we can move quickly without losing threads)
+
+---
+
+## Session Notes — 2026-02-07 (BOOT SEQUENCE FIX)
+
+### ✅ COMPLETED: DB-First Boot Sequence
+
+**Problem**: Boot order was wrong — snapshot applied BEFORE DB verified quoteId.
+
+**Solution**: Reordered `init()` to chain DB-dependent calls after `initQuoteStorage()`.
+
+| Before | After |
+|--------|-------|
+| `restoreSnapshotBestEffort()` | `initQuoteStorage().finally(() => {` |
+| `initQuoteStorage()` | `  restoreSnapshotBestEffort()` |
+| `initQuoteManager()` | `  initQuoteManager()` |
+| | `  ...` |
+| | `})` |
+
+**Files Modified**:
+- `checklist-script.js` — `init()` reordered, `initQuoteStorage()` returns Promise
+- `docs/BOOT-SEQUENCE-FIX.md` — Plan document created
+
+**Key Invariant Enforced**:
+> At any time in runtime, there is exactly **one active `quoteId`**, and all snapshots reference that `quoteId`.
+
+**Test**: Set `localStorage.setItem('ays_current_quote_id', '99999')`, reload, expect "clearing stale ID" log BEFORE any snapshot message.
 
 ---
 

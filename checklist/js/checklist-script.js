@@ -78,17 +78,27 @@
       this.initEndpointFromUrl();
       this.initFirstRunSetup();
       this.initVoiceDictationMicButtons();
-      this.restoreSnapshotBestEffort();
-      this.initQuoteStorage();
-      this.initQuoteManager();
-      this.refreshQuoteCountBadge();  // Show quote count on tab immediately
-      this.restoreClientContextBestEffort();
-      this.loadProgress();
-      this.updateAllProgress();
-      this.updateClientSummary();
-      this.updateSystemStatus();
-      
-      // Listen for online/offline events to update System tab
+
+      // ---- DB-FIRST BOOT SEQUENCE ----
+      // 1. Verify/clear quoteId from DB FIRST
+      // 2. Then apply snapshot as overlay (bound to verified quoteId)
+      // 3. Then UI managers that depend on stable quoteId
+      // This enforces: "DB is the spine, snapshot is the overlay"
+      var self = this;
+
+      this.initQuoteStorage()
+        .finally(function() {
+          self.restoreSnapshotBestEffort();
+          self.initQuoteManager();
+          self.refreshQuoteCountBadge();
+          self.restoreClientContextBestEffort();
+          self.loadProgress();
+          self.updateAllProgress();
+          self.updateClientSummary();
+          self.updateSystemStatus();
+        });
+
+      // Listen for online/offline events (independent of quote chain)
       window.addEventListener('online', () => this.updateSystemStatus());
       window.addEventListener('offline', () => this.updateSystemStatus());
       
@@ -3899,21 +3909,29 @@
      * DOES NOT create a new quote eagerly - that happens on first save.
      * This prevents orphan records when users just open the page without doing anything.
      */
+    /**
+     * Verify quote storage is ready and current quote exists (if set).
+     * DOES NOT create a new quote eagerly - that happens on first save.
+     * This prevents orphan records when users just open the page without doing anything.
+     *
+     * RETURNS Promise so boot sequence can chain DB-dependent calls.
+     * @returns {Promise<void>}
+     */
     initQuoteStorage: function() {
       var self = this;
       
       // DEFENSIVE: Check QuoteStorage exists
       if (typeof QuoteStorage === 'undefined') {
-        return;
+        return Promise.resolve();
       }
 
       // Wait for QuoteStorage to be ready (handles async timing)
-      QuoteStorage.whenReady().then(function() {
+      return QuoteStorage.whenReady().then(function() {
         var currentId = self.getCurrentQuoteId();
         
         if (currentId) {
           // Verify quote still exists
-          QuoteStorage.get(currentId).then(function(quote) {
+          return QuoteStorage.get(currentId).then(function(quote) {
             if (!quote) {
               // Quote was deleted - clear the stale ID
               // New quote will be created lazily on first save
@@ -3925,11 +3943,10 @@
           }).catch(function(err) {
             console.warn('[Checklist] Quote check failed:', err);
           });
-        } else {
-          // No current quote - that's fine, will be created on first save
-          // This is LAZY creation - no orphan records
-          console.log('[Checklist] No current quote, will create on first save');
         }
+        // No current quote - that's fine, will be created on first save
+        // This is LAZY creation - no orphan records
+        console.log('[Checklist] No current quote, will create on first save');
       }).catch(function(err) {
         console.warn('[Checklist] QuoteStorage init failed:', err);
       });
