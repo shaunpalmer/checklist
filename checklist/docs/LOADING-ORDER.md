@@ -1,5 +1,20 @@
 # Loading Order & Data Flow - Critical Path Analysis
 
+**Last Updated**: 2026-02-07
+
+> ⚠️ **CRITICAL CHANGE (2026-02-07)**: Boot sequence now uses DB-first pattern.
+> See [BOOT-SEQUENCE-FIX.md](BOOT-SEQUENCE-FIX.md) for details.
+
+---
+
+## Key Invariant
+
+> At any time in runtime, there is exactly **one active `quoteId`**, and all snapshots reference that `quoteId`.
+
+**DB is the spine, snapshot is the overlay.**
+
+---
+
 ## Script Loading Sequence (HTML)
 
 ```
@@ -99,12 +114,33 @@
 
   <script src="js/checklist-script.js">
     ├─ Creates: window.Checklist object with methods
-    ├─ Size: ~3286 lines
+    ├─ Size: ~5700 lines
     └─ Key Methods:
         ├─ init()
         │   └─ Called on DOMContentLoaded via Checklist.init()
         │   ├─ Calls various initialization methods
-        │   └─ Calls initServiceToggleRenderer() [ASYNC]
+        │   ├─ ⚠️ DB-FIRST BOOT SEQUENCE (2026-02-07):
+        │   │   └─ initQuoteStorage().finally(() => {
+        │   │       └─ restoreSnapshotBestEffort()  // Snapshot AFTER DB verified
+        │   │       └─ initQuoteManager()
+        │   │       └─ refreshQuoteCountBadge()
+        │   │       └─ restoreClientContextBestEffort()
+        │   │       └─ loadProgress()
+        │   │       └─ updateAllProgress()
+        │   │       └─ updateClientSummary()
+        │   │       └─ updateSystemStatus()
+        │   │   })
+        │   └─ Calls initServiceToggleRenderer() [ASYNC, parallel]
+        │
+        ├─ initQuoteStorage() [RETURNS PROMISE]
+        │   └─ Verifies current quoteId exists in IndexedDB
+        │   └─ If stale (quote deleted), clears the ID
+        │   └─ Does NOT create new quote (lazy creation on first save)
+        │
+        ├─ restoreSnapshotBestEffort()
+        │   └─ Loads snapshot from localStorage
+        │   └─ Verifies snapshot.draftId matches current quoteId
+        │   └─ Skips restore if mismatch (prevents cross-quote contamination)
         │
         ├─ initServiceToggleRenderer()
         │   └─ Calls AysServiceToggleRenderer.render() [PROMISE-BASED]
@@ -118,6 +154,68 @@
   </script>
 </body>
 ```
+
+---
+
+## Boot Sequence: DB-First Pattern (CRITICAL)
+
+**Fixed 2026-02-07** — See [BOOT-SEQUENCE-FIX.md](BOOT-SEQUENCE-FIX.md)
+
+### The Problem (Before Fix)
+
+```javascript
+// OLD (wrong order - caused race conditions)
+this.restoreSnapshotBestEffort();  // Snapshot applied BEFORE DB verified
+this.initQuoteStorage();            // DB verification happens AFTER
+this.initQuoteManager();
+```
+
+Snapshot could hydrate with a `quoteId` that gets cleared moments later.
+
+### The Solution (After Fix)
+
+```javascript
+// NEW (DB-first - correct order)
+this.initQuoteStorage()             // 1. Verify/clear quoteId from DB FIRST
+  .finally(function() {
+    self.restoreSnapshotBestEffort();  // 2. Apply snapshot as overlay
+    self.initQuoteManager();           // 3. Manager UI (stable quoteId)
+    // ... other dependent init
+  });
+```
+
+### Boot Sequence Flow
+
+```
+1. initQuoteStorage() runs
+   ├─ Wait for QuoteStorage.whenReady()
+   ├─ Get currentQuoteId from localStorage
+   ├─ If quoteId exists:
+   │   ├─ Verify quote still exists in IndexedDB
+   │   ├─ If NOT found: clear stale ID (setCurrentQuoteId(null))
+   │   └─ If found: log "verified"
+   └─ Return Promise (resolves when verification complete)
+
+2. .finally() runs AFTER verification
+   ├─ restoreSnapshotBestEffort()
+   │   ├─ Load snapshot from localStorage
+   │   ├─ Check snapshot.draftId matches currentQuoteId
+   │   ├─ If mismatch: skip restore (log warning)
+   │   └─ If match: applySnapshot()
+   ├─ initQuoteManager()
+   ├─ refreshQuoteCountBadge()
+   └─ ... other dependent init
+```
+
+### Why This Matters
+
+| Scenario | Old Behavior | New Behavior |
+|----------|--------------|--------------|
+| Stale quoteId in localStorage | Snapshot restores with bad ID, then ID cleared → orphan state | ID cleared FIRST, snapshot skipped |
+| Quote deleted by user | Snapshot restores deleted quote's state | Snapshot sees null ID, applies fresh |
+| Fresh page load | Race between snapshot and DB | DB always wins, snapshot is overlay |
+
+---
 
 ## Data Flow: What Happens on Page Load
 
@@ -144,7 +242,27 @@
    ├─ initAdminView()
    ├─ cacheDOM()
    ├─ ... [other initialization methods] ...
-   └─ initServiceToggleRenderer() [CRITICAL - ASYNC]
+   │
+   ├─ ⚠️ DB-FIRST BOOT CHAIN (Promise-based):
+   │   ├─ initQuoteStorage() [RETURNS PROMISE]
+   │   │   ├─ Wait for QuoteStorage.whenReady()
+   │   │   ├─ Verify currentQuoteId exists in DB
+   │   │   └─ Clear if stale (quote was deleted)
+   │   │
+   │   └─ .finally() — runs AFTER DB verification:
+   │       ├─ restoreSnapshotBestEffort()
+   │       │   └─ Loads localStorage snapshot
+   │       │   └─ Verifies draftId matches quoteId
+   │       │   └─ Skips if mismatch
+   │       ├─ initQuoteManager()
+   │       ├─ refreshQuoteCountBadge()
+   │       ├─ restoreClientContextBestEffort()
+   │       ├─ loadProgress()
+   │       ├─ updateAllProgress()
+   │       ├─ updateClientSummary()
+   │       └─ updateSystemStatus()
+   │
+   └─ initServiceToggleRenderer() [ASYNC - runs in parallel]
        ├─ Calls AysServiceToggleRenderer.render() [RETURNS PROMISE]
        ├─ Promise-based flow:
        │   ├─ Show loading indicator in #service-toggles-container
@@ -232,6 +350,7 @@
 
 | Scenario | Problem | Prevention |
 |---|---|---|
+| **Snapshot before DB verification** | Hydrates with stale quoteId that gets cleared | `initQuoteStorage().finally()` chains snapshot after DB |
 | ITEM_DEFINITIONS loads AFTER render() | Toggle lookup fails silently | `waitForDependency()` blocks and waits |
 | AysPropertyType missing when building config | Config builder fails | Script loads before checklist-config.js |
 | Factory.regenerate() called without generator | No regeneration happens | Store generator in window.checklistGenerator |
@@ -248,6 +367,13 @@
 
 ## Testing Checklist
 
+### Boot Sequence Tests (DB-First)
+- [ ] Set stale quoteId: `localStorage.setItem('ays_current_quote_id', '99999')`
+- [ ] Reload page
+- [ ] Verify logs show "clearing stale ID" BEFORE any snapshot message
+- [ ] Verify form loads clean (not with stale data)
+
+### Service Toggle Tests
 - [ ] Page loads without errors
 - [ ] Service toggles appear for residential (windows, carpet, gardening)
 - [ ] Service toggles appear for gym (windows ONLY)
