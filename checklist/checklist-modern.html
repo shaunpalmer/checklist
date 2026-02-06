@@ -84,6 +84,7 @@
       </div>
       <div class="tab tab-quotes" id="tab-quotes" data-service="quotes">
         <span class="tab-label">💰 Quotes</span>
+        <span id="quotes-count-badge" class="tab-count-badge" style="display: none;">0</span>
       </div>
       <div class="tab tab-settings" id="tab-settings" data-service="settings" data-role="admin">
         <span class="tab-label">⚙️ Settings</span>
@@ -2736,6 +2737,9 @@
   </div> <!-- End class="checklist-wrapper" -->
 
   <!-- Scripts -->
+  <!-- Utilities: String normalization, DOM caching (load first) -->
+  <script src="js/utils/AysStringUtils.js"></script>
+
   <!-- Type System: Property type hierarchy + polymorphic rendering -->
   <script src="js/patterns/AysPropertyType.js"></script>
   

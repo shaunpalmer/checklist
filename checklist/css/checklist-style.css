@@ -391,6 +391,30 @@ body {
   white-space: nowrap;
 }
 
+/* Tab Count Badge - Shows count of items (e.g., saved quotes) */
+.tab-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  color: var(--color-white);
+  background: var(--color-accent);
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* When parent tab is selected, invert badge colors for contrast */
+.tab.is-tab-selected .tab-count-badge {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--color-white);
+}
+
 /* Desktop affordance for drag-to-scroll */
 .service-tabs.is-draggable {
   cursor: grab;
@@ -471,14 +495,15 @@ body {
   background: rgba(255,255,255,0.15);
 }
 
-/* Quote ID Badge in Header */
+/* Quote ID Badge in Header - Must stay horizontal */
 .quote-id-field {
-  display: flex;
-  flex-direction: row;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
   flex: 0 0 auto;
-  max-width: 180px;
+  max-width: none;
 }
 
 .quote-id-field label {
@@ -487,6 +512,8 @@ body {
   letter-spacing: 0.5px;
   color: rgba(255,255,255,0.7);
   font-weight: var(--font-weight-semibold);
+  margin-bottom: 0;
+  white-space: nowrap;
 }
 
 .quote-id-badge {
@@ -538,6 +565,12 @@ body {
   .checklist-meta .meta-field,
   .checklist-meta .meta-field:last-child {
     max-width: none;
+  }
+
+  /* Quote ID field stays horizontal even on mobile */
+  .quote-id-field {
+    flex-direction: row !important;
+    justify-content: flex-start;
   }
 }
 

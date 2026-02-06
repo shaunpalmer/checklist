@@ -1,11 +1,106 @@
 # Agent Memory (Rolling) — Object-Driven Checklist
 
-**Last updated**: 2026-02-01
+**Last updated**: 2026-02-06
 
 This file is the running "brain dump" for fast-paced development. It captures:
 - What we've already changed (so we don't re-break it)
 - What decisions are locked (so we don't drift)
 - The active backlog (so we can move quickly without losing threads)
+
+---
+
+## Session Notes — 2026-02-06 (DEEPER CODE QUALITY REVIEW)
+
+### Key Discovery: The Architecture is GOOD
+
+After deeper qmd search and file exploration, the **OOP architecture is well-designed**:
+
+| Layer | Files | Quality |
+|-------|-------|---------|
+| Room Classes | `Room.js` + 20 subclasses | ✅ Clean inheritance |
+| PropertyService | `PropertyService.js` + 3 subclasses | ✅ Pluggable pattern |
+| Orchestrators | `AysRoomOrchestrator.js`, `PropertyServiceOrchestrator.js` | ✅ Good separation |
+| Data Envelope | `AysQuoteEnvelope.js` | ✅ Clean serialization |
+| Storage | `QuoteStorage.js` | ✅ Promise-based, well-documented |
+| Sync | `event-worker.js` | ✅ Durable queue, fingerprint deduplication |
+| Registry | `RoomRegistry.js`, `AysPropertyType.js` | ✅ Polymorphic type system |
+
+### The Real Problem: `checklist-script.js` God Object
+
+- **5,700 lines**, **~120 methods** in single `Checklist` object
+- Violates Single Responsibility Principle
+- Source of all DRY violations and timing issues
+- See `docs/problems/timing-mess.md` for race condition details
+
+### Recommended Decomposition
+
+| New Module | Responsibility |
+|------------|----------------|
+| `ChecklistInit` | Initialization, DOM caching |
+| `ChecklistState` | Snapshot, progress, persistence |
+| `ChecklistQuote` | Quote generation, pricing |
+| `ChecklistSync` | Event worker, sync status |
+| `ChecklistCustomItems` | Custom item CRUD |
+| `ChecklistUI` | UI interactions, animations |
+| `ChecklistVoice` | Voice dictation |
+
+### Updated `CODE-QUALITY-REVIEW.md`
+- Added Section 0: God Object Problem (CRITICAL)
+- Revised executive summary to acknowledge good OOP architecture
+- Kept DRY and utility recommendations
+
+---
+
+## Session Notes — 2026-02-03 (CODE QUALITY REVIEW)
+
+### ✅ COMPLETED This Session
+
+#### 1. Code Quality Review — Horizontal Data Flow
+- **Audited**: Form State → `buildSnapshot()` → `QuoteStorage` → `event-worker.js`
+- **Documented 8 issues** in `docs/CODE-QUALITY-REVIEW.md`
+- **Key findings**:
+  - 20+ DRY violations (`.toString().trim()` pattern repeated everywhere)
+  - Missing utility layer
+  - Magic strings for selectors
+  - Inconsistent error handling
+
+#### 2. Created `AysStringUtils.js` Utility Module
+- **Location**: `js/utils/AysStringUtils.js`
+- **Functions**:
+  - `toTrimmedString(value)` - Defensive string normalization
+  - `getInputValue(selector)` - jQuery input extraction
+  - `extractFirst(obj, ...keys)` - Flexible key fallback extraction
+  - `isEmpty(value)` / `hasContent(value)` - Empty checks
+  - `coalesce(...values)` - First non-empty value
+  - `normalizePhone(phone)` / `normalizeEmail(email)`
+- **Loaded first** in `checklist-modern.html`
+- **Frozen object** - Immutable, attached to `window.AysStringUtils`
+
+#### 3. Refactored `parseIncomingClientData()` to Use Utility
+- **Before**: 12 repetitive inline `.toString().trim()` patterns
+- **After**: Clean `S.extractFirst(obj, 'key1', 'key2', ...)` calls
+- **Result**: ~40% fewer lines, more readable, DRY
+
+### Files Created
+- `js/utils/AysStringUtils.js` — New utility module
+- `docs/CODE-QUALITY-REVIEW.md` — Detailed quality audit
+
+### Files Modified
+- `checklist-modern.html` — Added script tag for AysStringUtils.js
+- `checklist-script.js` — Refactored `parseIncomingClientData()` normalize function
+
+---
+
+## 🎯 NEXT STEPS (Continuing Quality Refactor)
+
+### P1 — Quick Wins Remaining
+1. [ ] Replace remaining `.toString().trim()` patterns in `buildSnapshot()` with `AysStringUtils`
+2. [ ] Add try/catch to `buildSnapshot()` for resilience
+3. [ ] Create `AysFieldRegistry.js` for selector magic strings
+
+### P2 — Medium Effort
+4. [ ] Extract `buildSnapshot()` sub-functions (progress, client, variants, customItems)
+5. [ ] Standardize optional chaining across codebase
 
 ---
 

@@ -81,6 +81,7 @@
       this.restoreSnapshotBestEffort();
       this.initQuoteStorage();
       this.initQuoteManager();
+      this.refreshQuoteCountBadge();  // Show quote count on tab immediately
       this.restoreClientContextBestEffort();
       this.loadProgress();
       this.updateAllProgress();
@@ -1482,7 +1483,8 @@
           postcode: params.get('lead_postcode') || params.get('postcode') || null,
           country: params.get('lead_country') || params.get('country') || null
         };
-        const hasAny = Object.values(fromParams).some(v => (v || '').toString().trim() !== '');
+        const S = window.AysStringUtils;
+        const hasAny = Object.values(fromParams).some(v => S.hasContent(v));
         if (hasAny) candidates.push(fromParams);
       } catch (_) {
         // ignore
@@ -1492,24 +1494,24 @@
       const normalize = (obj) => {
         if (!obj || typeof obj !== 'object') return null;
 
-        // Support common lead sources + your CPT meta keys (ays_*)
-        const name = (obj.name || obj.client_name || obj.full_name || obj.ays_name || '').toString().trim();
-        const email = (obj.email || obj.client_email || obj.ays_email || '').toString().trim();
-        const phone = (obj.phone || obj.client_phone || obj.mobile || obj.ays_phone || '').toString().trim();
-        const notes = (obj.notes || obj.lead_notes || obj.ays_notes || '').toString().trim();
+        // Use AysStringUtils.extractFirst for flexible key mapping
+        const S = window.AysStringUtils;
+        const name = S.extractFirst(obj, 'name', 'client_name', 'full_name', 'ays_name');
+        const email = S.extractFirst(obj, 'email', 'client_email', 'ays_email');
+        const phone = S.extractFirst(obj, 'phone', 'client_phone', 'mobile', 'ays_phone');
+        const notes = S.extractFirst(obj, 'notes', 'lead_notes', 'ays_notes');
 
-        const bookingDate = (obj.booking_date || obj.ays_booking_date || '').toString().trim();
-        const bookingTime = (obj.booking_time || obj.ays_booking_time || '').toString().trim();
+        const bookingDate = S.extractFirst(obj, 'booking_date', 'ays_booking_date');
+        const bookingTime = S.extractFirst(obj, 'booking_time', 'ays_booking_time');
 
         const addr = obj.address && typeof obj.address === 'object' ? obj.address : obj;
-        // Some sources only have a single address string
-        const address_line1 = (addr.address_line1 || addr.line1 || addr.street || addr.ays_address || addr.address || '').toString().trim();
-        const address_line2 = (addr.address_line2 || addr.line2 || '').toString().trim();
-        const suburb = (addr.suburb || addr.address_suburb || '').toString().trim();
-        const city = (addr.city || addr.town || '').toString().trim();
-        const region = (addr.region || addr.state || addr.province || '').toString().trim();
-        const postcode = (addr.postcode || addr.zip || addr.postal_code || '').toString().trim();
-        const country = (addr.country || addr.country_name || '').toString().trim();
+        const address_line1 = S.extractFirst(addr, 'address_line1', 'line1', 'street', 'ays_address', 'address');
+        const address_line2 = S.extractFirst(addr, 'address_line2', 'line2');
+        const suburb = S.extractFirst(addr, 'suburb', 'address_suburb');
+        const city = S.extractFirst(addr, 'city', 'town');
+        const region = S.extractFirst(addr, 'region', 'state', 'province');
+        const postcode = S.extractFirst(addr, 'postcode', 'zip', 'postal_code');
+        const country = S.extractFirst(addr, 'country', 'country_name');
 
         const hasAny = !!(name || email || phone || address_line1 || suburb || city || region || postcode || country);
         if (!hasAny) return null;
@@ -3344,6 +3346,48 @@
     },
 
     /**
+     * Update the quote count badge on the Quotes tab.
+     * Shows the badge if count > 0, hides it if 0.
+     * @param {number} count - Number of quotes
+     */
+    updateQuoteCountBadge: function(count) {
+      var badge = document.getElementById('quotes-count-badge');
+      if (!badge) return;
+
+      if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : count.toString();
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    },
+
+    /**
+     * Refresh the quote count badge from storage.
+     * Called on init to show badge before user navigates to quotes.
+     */
+    refreshQuoteCountBadge: function() {
+      var self = this;
+      if (typeof QuoteStorage === 'undefined') return;
+
+      // Wait for QuoteStorage if not ready
+      var checkReady = QuoteStorage.isReady() 
+        ? Promise.resolve() 
+        : QuoteStorage.whenReady();
+
+      checkReady
+        .then(function() {
+          return QuoteStorage.getAll();
+        })
+        .then(function(quotes) {
+          self.updateQuoteCountBadge(quotes ? quotes.length : 0);
+        })
+        .catch(function() {
+          // Silently fail - badge will show 0 or stay hidden
+        });
+    },
+
+    /**
      * Render the quote list from IndexedDB.
      * Waits for QuoteStorage to be ready if needed.
      */
@@ -3380,6 +3424,9 @@
 
       QuoteStorage.getAll({ sortBy: 'updatedAt', sortOrder: 'desc' })
         .then(function(quotes) {
+          // Update the quote count badge in the Quotes tab
+          self.updateQuoteCountBadge(quotes ? quotes.length : 0);
+
           if (!quotes || quotes.length === 0) {
             container.innerHTML = '<p style="color: var(--color-secondary); padding: var(--space-md); text-align: center; font-style: italic;">No quotes yet. Click "➕ New Quote" to get started.</p>';
             return;
