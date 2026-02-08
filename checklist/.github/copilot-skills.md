@@ -17,6 +17,8 @@
 8. [Performance](#8-performance)
 9. [Documentation](#9-documentation)
 10. [Tools & Workflow](#10-tools--workflow)
+11. [Code Excellence](#11-code-excellence)
+12. [Answer Quality](#12-answer-quality)
 
 ---
 
@@ -947,7 +949,7 @@ Collections: `docs` (78 files), `ays-premium` (517), `superclean-plugins` (404),
 
 ---
 
-### 10.4 Skill Authoring
+### 10.4 Skill Authoring (meta)
 
 **When to use:** Creating or updating skills in THIS file. One file, no sprawl.
 
@@ -986,6 +988,157 @@ Collections: `docs` (78 files), `ays-premium` (517), `superclean-plugins` (404),
 - [ ] No duplicate content with existing sections?
 - [ ] Under 100 lines for this skill? (split into sub-sections if longer)
 - [ ] Examples are concrete, not generic?
+
+---
+
+## 11. Code Excellence
+
+**Purpose:** Not "it works" — it works WELL. Push past the first solution to the right solution.
+
+### 11.1 The Quality Bar
+
+| Level | Description | Accept? |
+|-------|-------------|--------|
+| Broken | Doesn't run | Never |
+| Works | Produces correct output | **Not enough** |
+| Works Well | Clean, maintainable, handles edges | Minimum bar |
+| Elegant | Simple, obvious, hard to misuse | Target |
+
+Before committing, ask: "Would I be proud to code-review this?" If no — fix it first.
+
+### 11.2 Lazy Patterns to Reject
+
+| Lazy Pattern | Do This Instead |
+|---|---|
+| Copy-paste with minor tweaks | Extract shared function with parameters |
+| Nested ternary | `if/else` or early return |
+| Boolean parameter changing behaviour | Two separate functions |
+| Catch-all `try/catch` that swallows errors | Specific handling per failure mode |
+| Returning mixed types (`string \|\| null \|\| undefined`) | One failure signal, documented |
+| "Works on my machine" fix | Reproduce conditions, fix root cause |
+| 200-line function | Split at responsibility boundaries |
+| `any` type / untyped | Explicit types — use JSDoc if not TS |
+
+### 11.3 The Right Abstraction
+
+Don't reach for a pattern — reach for the **simplest** one that solves the problem:
+
+```
+1. Can a plain function do it?           → function
+2. Does it need state?                   → object / class
+3. Does it need multiple implementations? → strategy / factory
+4. Does it need lifecycle management?     → full component
+```
+
+Over-engineering is as bad as under-engineering. A 10-line utility doesn't need a class, a factory, and a registry.
+
+### 11.4 Proactive Eye
+
+When reading code to fix X, if you notice Y:
+
+| What You See | Do This |
+|---|---|
+| Dead code | Flag: "Found unused function at line N" |
+| Inconsistent naming | Note it, offer fix in separate commit |
+| Missing null guard | Add it if directly related to the fix |
+| Performance anti-pattern | Flag with specific fix suggestion |
+| Duplicated logic | Note extraction opportunity |
+
+Don't silently walk past problems. Don't "while I'm here" fix them either — **flag them**, let the user decide.
+
+### 11.5 Code Smell Responses
+
+```javascript
+// ❌ "It works" level — swallows the problem
+try {
+  await db.put(draft);
+} catch (e) {
+  console.log('save failed');
+}
+
+// ✅ "Works well" level — handles it properly
+try {
+  await db.put(draft);
+} catch (e) {
+  if (e.name === 'QuotaExceededError') {
+    await cleanupOldDrafts();
+    await db.put(draft); // retry once
+  } else {
+    console.error(`Draft save failed: ${e.name}`, e);
+    saveFallbackToLocalStorage(draft);
+  }
+}
+```
+
+---
+
+## 12. Answer Quality
+
+**Purpose:** Beat the LLM default. Be specific, opinionated, and useful — not safe and generic.
+
+### 12.1 Anti-Mediocrity Rules
+
+| Default LLM Tendency | Do This Instead |
+|---|---|
+| "There are several approaches..." | Pick the best one. Explain why. |
+| "You could use X or Y" | "Use X because [reason]. Y doesn't fit here because [reason]." |
+| Generic code sample | Code that uses THIS project's patterns, naming, structure |
+| Explaining what code does | Explaining WHY the code was written this way |
+| Safe non-committal hedge | Commit to an approach. Be wrong sometimes — that's fine. |
+| Boilerplate-heavy response | Tight, minimal, zero fluff |
+| "Here's a comprehensive solution..." | Here's the MINIMUM change to fix this properly |
+| Restating the question back | Just answer it |
+
+### 12.2 Specificity Over Safety
+
+```javascript
+// ❌ Generic (any LLM would say this)
+// "Consider adding error handling to your async functions"
+
+// ✅ Specific (knows THIS codebase)
+// DraftManager.save() needs a try/catch wrapping the
+// IndexedDB transaction — if the store is mid-upgrade,
+// put() throws InvalidStateError and the draft is
+// silently lost. Catch → retry once → fallback to
+// localStorage snapshot.
+```
+
+Every suggestion must reference a **real file, real function, real line** in this codebase — not a hypothetical.
+
+### 12.3 Opinionated Defaults
+
+When the user doesn't specify preference:
+
+1. Pick the approach that matches existing codebase patterns
+2. Pick the simpler option over the "theoretically correct" one
+3. Pick the option that's easier to undo if wrong
+4. State what you picked and why — user can override
+
+**Never:** "It depends" without then picking one. "Both are valid." "You could go either way."
+
+### 12.4 No Padding
+
+Every sentence earns its place or gets cut:
+
+- No "Great question!" or "That's an interesting point"
+- No restating the question back
+- No "Let me explain..." — just explain
+- No "In conclusion..." — if you're done, stop
+- No listing things the user already knows
+- No "I'll now use the X tool" — just use it
+
+### 12.5 The "So What" Test
+
+Before including any piece of information, ask: **"So what? Does the user need this to act?"**
+
+```
+❌ "JavaScript has both == and === operators for comparison."
+   So what? User knows this.
+
+✅ "Line 47: use === instead of == — loose equality lets
+   undefined slip through as null here."
+   Actionable, specific, references a line.
+```
 
 ---
 
