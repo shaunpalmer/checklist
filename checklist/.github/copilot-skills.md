@@ -21,6 +21,9 @@
 12. [Answer Quality](#12-answer-quality)
 13. [Playwright](#13-playwright)
 14. [Chrome DevTools](#14-chrome-devtools)
+15. [Error Recovery](#15-error-recovery)
+16. [Migration & Schema Safety](#16-migration--schema-safety)
+17. [Debugging Strategy](#17-debugging-strategy)
 
 ---
 
@@ -1401,6 +1404,238 @@ async () => {
 - Use `evaluate_script` to verify a fix works BEFORE editing source
 - Performance traces: keep recording short (< 10s) and focused on one action
 - Screenshots: use for user-facing bug reports and before/after proof
+
+---
+
+## 15. Error Recovery
+
+**Purpose:** Don't just catch errors — recover from them. This is a PWA on job sites with dodgy signal. Losing user data is unacceptable.
+
+### 15.1 Fallback Chain
+
+Every critical operation needs a fallback chain — not just a try/catch that logs and moves on.
+
+```
+Primary    → IndexedDB put()
+  │ fail
+  ▼
+Retry      → Wait 500ms, try once more
+  │ fail
+  ▼
+Fallback   → localStorage snapshot (smaller, but data survives)
+  │ fail
+  ▼
+Last Resort → Hold in memory + warn user ("Save pending…")
+  │ page unload
+  ▼
+Emergency  → navigator.sendBeacon() with minimal payload
+```
+
+### 15.2 Recovery Patterns
+
+| Error | Recovery | Never Do |
+|-------|----------|----------|
+| `QuotaExceededError` (IndexedDB) | Clean up synced drafts > 14 days, retry | Silently discard the draft |
+| Service worker fetch fail | Return cached response, queue for retry | Show blank page |
+| IndexedDB upgrade blocked | Prompt user to close other tabs | Force-close or ignore |
+| Sync POST fails (network) | Queue in sync list, retry with backoff | Retry in tight loop |
+| JSON parse error on draft | Log corrupted data, offer "start fresh" | Delete without trace |
+| `visibilitychange` during save | Immediate flush, no debounce | Trust the debounce timer |
+
+### 15.3 Retry Strategy
+
+```javascript
+async function withRetry(fn, { maxAttempts = 3, backoff = 500 } = {}) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (attempt === maxAttempts) throw e;
+      await new Promise(r => setTimeout(r, backoff * attempt));
+    }
+  }
+}
+
+// Usage
+await withRetry(() => db.put(draft), { maxAttempts: 3, backoff: 500 });
+```
+
+### 15.4 Degradation Levels
+
+| Level | State | User Experience |
+|-------|-------|----------------|
+| Full | Online, IndexedDB working | Everything works normally |
+| Offline | No network | All features work, sync queued |
+| Storage Pressure | Quota near limit | Old synced drafts auto-cleaned, warning shown |
+| Storage Failed | Can't write to IndexedDB | localStorage fallback, urgent warning |
+| Critical | Both storage mechanisms full | In-memory only, "Do not close app" banner |
+
+**Rule:** Never let the user lose work silently. If recovery fails, TELL THEM.
+
+---
+
+## 16. Migration & Schema Safety
+
+**Purpose:** Safe upgrades when IndexedDB schema, cache versions, or data structures change. Users on old versions must not lose data.
+
+### 16.1 IndexedDB Version Upgrades
+
+```javascript
+const request = indexedDB.open('ays_quotes', newVersion);
+
+request.onupgradeneeded = (event) => {
+  const db = event.target.result;
+  const oldVersion = event.oldVersion;
+
+  // Step through each version sequentially
+  if (oldVersion < 1) {
+    db.createObjectStore('drafts', { keyPath: 'draftId' });
+  }
+  if (oldVersion < 2) {
+    // Add index, don't delete store
+    const store = event.target.transaction.objectStore('drafts');
+    store.createIndex('syncStatus', 'syncStatus');
+  }
+  if (oldVersion < 3) {
+    // New store for settings
+    db.createObjectStore('settings', { keyPath: 'key' });
+  }
+};
+```
+
+**Rules:**
+
+| Rule | Why |
+|------|-----|
+| Step through versions sequentially (if < 1, if < 2…) | User jumping v1 → v3 must hit all migrations |
+| Never delete an object store with data | Data loss |
+| Add fields as optional with defaults | Old drafts without the field still load |
+| Test upgrade path: v1 → latest | Not just vN → vN+1 |
+| Handle `onblocked` event | Other tabs have old connection open |
+
+### 16.2 Backward-Compatible Fields
+
+When adding a new field to drafts:
+
+```javascript
+// ✅ Safe: default in the reader, not the schema
+function getProductionRate(draft) {
+  return draft.productionRate ?? 35; // default for old drafts
+}
+
+// ❌ Dangerous: migration that modifies every record
+// Don't bulk-update 500 drafts on upgrade — slow, error-prone
+```
+
+### 16.3 Service Worker Cache Versioning
+
+```
+Current: checklist-shell-v10
+```
+
+| Rule | Why |
+|------|-----|
+| Bump version when ANY cached asset changes | Stale files = broken app |
+| Old cache deleted in `activate` event | Free storage |
+| Never cache `.php`, `auth/`, `config/`, `storage/` | Dynamic content |
+| `skipWaiting()` + `clients.claim()` for immediate activation | User gets new version without manual refresh |
+| Test: load app → deploy new SW → reload → verify new assets | Catch SW update bugs |
+
+### 16.4 Data Transformation
+
+When a data structure changes:
+
+```javascript
+// Version-gate the transformation
+function migrateDraft(draft) {
+  // v1 → v2: serviceType was called "mode"
+  if ('mode' in draft && !('serviceType' in draft)) {
+    draft.serviceType = draft.mode;
+    delete draft.mode;
+  }
+  // v2 → v3: rooms was flat array, now keyed by type
+  if (Array.isArray(draft.rooms)) {
+    draft.rooms = groupBy(draft.rooms, 'roomType');
+  }
+  return draft;
+}
+```
+
+**Sequence:** Read old → Transform → Validate → Write new → Verify. Never transform in-place without a backup read.
+
+---
+
+## 17. Debugging Strategy
+
+**Purpose:** Scientific debugging. Prove the root cause before writing a fix. Stop guessing.
+
+### 17.1 The Method
+
+```
+1. REPRODUCE    → Can you make it happen consistently?
+                   If not: add logging, narrow conditions
+
+2. ISOLATE      → What's the smallest input that triggers it?
+                   Remove variables until only the cause remains
+
+3. HYPOTHESIZE  → State your theory: "X happens because Y"
+                   Be specific: which function, which line, which value
+
+4. VERIFY       → Prove your hypothesis BEFORE changing code
+                   • Add a console.log that confirms the bad state
+                   • Use Chrome DevTools evaluate_script
+                   • Read the code path step by step
+
+5. FIX          → Minimal patch. One change that addresses root cause.
+                   NOT: "I'll refactor this whole section while I'm here"
+
+6. REGRESSION   → Why did this bug exist? Add a guard so it can't recur.
+                   • Null check, type check, assertion, or test
+```
+
+### 17.2 Common Traps
+
+| Trap | What Happens | Do This Instead |
+|------|-------------|----------------|
+| Guess-and-patch | Fix works for wrong reason, real bug surfaces later | Verify hypothesis with logging before changing code |
+| Shotgun debugging | Change 5 things, one works, no idea which | One change at a time, test after each |
+| "Works now" | Coincidental fix — underlying cause still live | Explain WHY your fix works, not just that it does |
+| Blame the framework | "Must be a browser bug" | It's almost never the framework. Check your code. |
+| Fix the symptom | Suppress error message instead of fixing cause | Ask: "Why does this error happen?" not "How do I hide it?" |
+| "Can't reproduce" | Give up | Add logging, try different browsers, check mobile, check offline |
+
+### 17.3 State Your Diagnosis
+
+Before proposing ANY fix, state:
+
+```
+ROOT CAUSE: [What is actually wrong]
+EVIDENCE:   [How I proved it — log output, code path, test result]
+FIX:        [Minimal change to address root cause]
+GUARD:      [What prevents this from recurring]
+```
+
+Example from this codebase:
+```
+ROOT CAUSE: buildChecklistConfigFor() falls through to residential
+            when serviceType is undefined, returning bedrooms in
+            commercial mode.
+EVIDENCE:   Added console.log in catch block — serviceType was
+            undefined because draft.serviceType wasn't being read.
+FIX:        Hard-guard: return null instead of stale config.
+GUARD:      Null check at call site prevents silent fallback.
+```
+
+### 17.4 PWA-Specific Debugging
+
+| Symptom | Check First |
+|---------|------------|
+| Stale UI after code change | Cache version bumped? SW activated? |
+| Works on desktop, fails on mobile | Touch events, viewport, `visibilitychange` handling |
+| Data gone after refresh | Autosave actually fired? Check IndexedDB directly |
+| Feature works then stops | SW serving cached old JS. Hard refresh or bump version. |
+| Works online, fails offline | `fetch()` without cache fallback? API call without queue? |
+| "Save failed" on phone lock | `visibilitychange` handler missing or debounced too long |
 
 ---
 
