@@ -118,6 +118,8 @@ const QuoteStorage = (function() {
         console.log('[QuoteStorage] Created object store with autoIncrement IDs');
       };
     });
+
+    return _initPromise;
   }
 
   // ============================================================

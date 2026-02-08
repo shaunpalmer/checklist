@@ -3069,7 +3069,12 @@
 
         // Get or create factory for this service type
         this._generatorsByService = this._generatorsByService || {};
-        const containerId = 'generated-rooms-' + serviceType;
+        const containerMap = this._generatorContainerByService || {
+          'end-of-tenancy': 'rooms-container',
+          'residential': 'rooms-container-residential',
+          'commercial': 'rooms-container-commercial'
+        };
+        const containerId = containerMap[serviceType] || 'rooms-container';
         if (!this._generatorsByService[serviceType]) {
           this._generatorsByService[serviceType] = new AysChecklistFormFactory(containerId);
         }
