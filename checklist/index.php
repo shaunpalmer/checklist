@@ -15,8 +15,11 @@
 
 require_once __DIR__ . '/config/auth-guard.php';
 
+// Signal to checklist-modern.php that auth has passed (prevents direct access)
+define('AYS_AUTH_PASSED', true);
+
 // $current_user is now available (set by auth-guard.php):
 //   $current_user['email'], $current_user['name'], $current_user['role']
 
-// Include the actual app HTML
-include __DIR__ . '/checklist-modern.html';
+// Include the actual app
+include __DIR__ . '/checklist-modern.php';

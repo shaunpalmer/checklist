@@ -1,3 +1,14 @@
+<?php
+/**
+ * Auth guard — prevents direct access to this file.
+ * Must be loaded via index.php (which runs auth-guard.php first).
+ * If accessed directly, redirect to login.
+ */
+if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 

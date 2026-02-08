@@ -107,6 +107,14 @@
  *   views should remain empathetic and matter-of-fact.
  */
 -->
+<?php
+/**
+ * Auth guard — prevents direct access to this file.
+ * Must be loaded via an authenticated PHP entry point.
+ * If accessed directly, redirect to login.
+ */
+require_once __DIR__ . '/config/auth-guard.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

@@ -1,7 +1,6 @@
-const CACHE_VERSION = 'checklist-shell-v11';
+const CACHE_VERSION = 'checklist-shell-v12';
 const SHELL_ASSETS = [
   './',
-  './checklist-modern.html',
   './manifest.json',
   './css/checklist-variables.css',
   './css/checklist-style.css',
