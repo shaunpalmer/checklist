@@ -10,23 +10,9 @@ You are working on the **AYS Checklist PWA** — an offline-first quoting tool f
 
 ## Skills Reference
 
-This project uses modular skills in `.vscode/skills/`. **Read the relevant SKILL.md before acting.**
+**All skills live in one file:** `.github/copilot-skills.md` — read it top to bottom before acting.
 
-| Trigger | Skill | File |
-|---------|-------|------|
-| load, hydrate, open | Draft Hydrator | `.vscode/skills/draft-hydrator/SKILL.md` |
-| edit, generate, refactor | Arch Drift Guard | `.vscode/skills/arch-drift-guard/SKILL.md` |
-| design, render, mode | Invariant Shield | `.vscode/skills/invariant-shield/SKILL.md` |
-| rename, export | Naming Enforcer | `.vscode/skills/naming-cop/SKILL.md` |
-| commit | Commit Guard | `.vscode/skills/commit-formatter/SKILL.md` |
-| push, review, audit | Security Auditor | `.vscode/skills/security-auditor/SKILL.md` |
-| refactor, extract | Refactor Safely | `.vscode/skills/refactor-safely/SKILL.md` |
-| test, implement | Test Anchor | `.vscode/skills/test-anchor/SKILL.md` |
-| generate, review | Code Review Cop | `.vscode/skills/code-review-cop/SKILL.md` |
-| design, pattern | Pattern First | `.vscode/skills/solid-patterns/SKILL.md` |
-| query, db, sql | Query Gate | `.vscode/skills/query-gate/SKILL.md` |
-| import, require, npm | Dependency Hunter | `.vscode/skills/dependency-hunter/SKILL.md` |
-| config, env, set | Config Whisperer | `.vscode/skills/config-whisperer/SKILL.md` |
+Do NOT look for separate SKILL.md files — they were consolidated. One file, no sprawl.
 
 ## Core Laws (Always Active)
 
@@ -80,7 +66,7 @@ checklist/
 ### QMD (Query Markup Documents)
 
 You have access to a local CLI tool called `qmd` for searching markdown files.
-This project has 80+ markdown docs across `docs/`, `.github/skills/`, and `.vscode/skills/`.
+This project has 80+ markdown docs in `docs/` and skills in `.github/copilot-skills.md`.
 
 **When to use:** Whenever you need to search documentation, find architecture decisions,
 check prior session notes, or answer questions about the project's history and design.
