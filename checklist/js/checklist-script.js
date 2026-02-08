@@ -276,7 +276,7 @@
         const next = { ...settings, service_api_endpoint: endpoint };
         localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(next));
         $('#service-api-endpoint').val(endpoint);
-        $('#system-service-api-endpoint').val(endpoint);
+        $('#first-run-endpoint').val(endpoint);
         this.updateEndpointBanner();
         if (this._eventWorker) {
           this._eventWorker.postMessage({ op: 'config', config: { endpoint } });

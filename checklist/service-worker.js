@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'checklist-shell-v13';
+const CACHE_VERSION = 'checklist-shell-v14';
 const SHELL_ASSETS = [
   './',
   './manifest.json',

@@ -2644,8 +2644,8 @@ if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
                   Configure the server URL for background sync. Leave empty to work offline only.
                 </p>
                 <div class="meta-field">
-                  <label for="system-service-api-endpoint">Endpoint URL</label>
-                  <input type="url" id="system-service-api-endpoint" placeholder="https://api.example.com" />
+                  <label for="first-run-endpoint">Endpoint URL</label>
+                  <input type="url" id="first-run-endpoint" placeholder="https://api.example.com" />
                 </div>
                 <div class="first-run-actions">
                   <button type="button" id="first-run-test" class="btn btn-secondary">Test connection</button>
