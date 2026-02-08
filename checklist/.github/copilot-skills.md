@@ -709,7 +709,43 @@ powershell -File tools/reaper.ps1 -Message "description" -Push
 
 ---
 
-### 7.2 QMD Search
+### 7.2 GitHub Routine (MCP)
+
+**When to use:** PRs, issues, repo workflows — anything that talks to GitHub.
+
+**Pre-flight:** Always reaper (commit + push) local changes before any GitHub operation. Never create a PR with uncommitted work.
+
+**PR Creation:**
+
+```
+1. Reaper push local changes
+2. Create PR against main
+3. Title prefix: [FE] frontend, [BE] backend, [INFRA] tooling
+4. Description: What changed, Why, Testing steps
+5. Squash merge preferred
+```
+
+**Issue Management:**
+
+- Bug reports → `create_issue` with `bug` + `triage` labels
+- Include repro steps and file references
+- Search before creating (no duplicates)
+
+**Common Triggers:**
+
+| User Says | Action |
+|-----------|--------|
+| "Create a PR" | Reaper push, then `create_pull_request` |
+| "What are my open issues?" | `list_issues` filtered by assignee |
+| "Log this as a bug" | `create_issue` with labels |
+| "What PRs are open?" | `list_pull_requests` state=open |
+| "Merge that PR" | `merge_pull_request` (squash) |
+
+**Rules:** Push before PR. Label issues. Reference issue numbers in PRs. Don't merge without review. Don't leave PRs open 7+ days.
+
+---
+
+### 7.3 QMD Search
 
 Use `qmd` to search through local markdown notes.
 
