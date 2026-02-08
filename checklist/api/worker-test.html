@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Event Worker Sync Test</title>
+<style>
+  body { font-family: monospace; padding: 2rem; background: #1a1a2e; color: #e0e0e0; }
+  h1 { color: #00d2ff; }
+  .step { margin: 0.5rem 0; padding: 0.5rem; border-left: 3px solid #333; }
+  .pass { border-left-color: #0f0; }
+  .fail { border-left-color: #f00; }
+  .pending { border-left-color: #ff0; }
+  pre { background: #111; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+  button { background: #00d2ff; color: #000; border: none; padding: 0.5rem 1rem; 
+           cursor: pointer; font-size: 1rem; margin: 0.3rem; border-radius: 4px; }
+  button:hover { background: #00b4d8; }
+</style>
+</head>
+<body>
+<h1>🔬 Event Worker Sync Test</h1>
+<p>Tests the event-worker.js flush pipeline end-to-end against the local test-receiver.php</p>
+
+<div>
+  <button onclick="runFullTest()">▶ Run Full Test</button>
+  <button onclick="checkReceiver()">📋 Check Receiver Log</button>
+  <button onclick="clearReceiverLog()">🗑️ Clear Receiver Log</button>
+</div>
+
+<div id="log"></div>
+
+<script>
+const ENDPOINT = 'http://localhost/checklist/checklist/api/test-receiver.php';
+let worker = null;
+
+function log(msg, cls = '') {
+  const el = document.createElement('div');
+  el.className = 'step ' + cls;
+  if (typeof msg === 'object') {
+    const pre = document.createElement('pre');
+    pre.textContent = JSON.stringify(msg, null, 2);
+    el.appendChild(pre);
+  } else {
+    el.textContent = msg;
+  }
+  document.getElementById('log').appendChild(el);
+}
+
+async function runFullTest() {
+  document.getElementById('log').innerHTML = '';
+  log('=== Event Worker Sync Test ===');
+  
+  // Step 1: Clear receiver log
+  log('Step 1: Clearing receiver log...', 'pending');
+  try {
+    await fetch(ENDPOINT + '?action=clear', { method: 'DELETE' });
+    log('✓ Receiver log cleared', 'pass');
+  } catch(e) {
+    log('✗ Failed to clear log: ' + e.message, 'fail');
+  }
+
+  // Step 1b: Clear old IndexedDB to avoid stale records with delivered_at: null
+  log('Step 1b: Clearing old IndexedDB...', 'pending');
+  try {
+    const delReq = indexedDB.deleteDatabase('checklist_event_queue');
+    await new Promise((resolve, reject) => {
+      delReq.onsuccess = resolve;
+      delReq.onerror = reject;
+      delReq.onblocked = () => { log('IDB blocked — close other tabs', 'fail'); reject(new Error('blocked')); };
+    });
+    log('✓ IndexedDB cleared', 'pass');
+  } catch(e) {
+    log('⚠ IDB clear: ' + e.message, 'pending');
+  }
+
+  // Step 2: Instantiate the worker (cache-busted)
+  log('Step 2: Instantiating event-worker.js (cache-busted)...', 'pending');
+  try {
+    worker = new Worker('../js/event-worker.js?v=' + Date.now());
+    log('✓ Worker instantiated', 'pass');
+  } catch(e) {
+    log('✗ Worker failed: ' + e.message, 'fail');
+    return;
+  }
+
+  // Step 3: Listen for worker messages
+  const workerMessages = [];
+  worker.onmessage = (e) => {
+    workerMessages.push(e.data);
+    log('← Worker says: ' + JSON.stringify(e.data));
+  };
+  worker.onerror = (e) => {
+    log('✗ Worker error: ' + e.message, 'fail');
+  };
+
+  // Step 4: Ping the worker
+  log('Step 3: Pinging worker...', 'pending');
+  worker.postMessage({ op: 'ping' });
+  await sleep(500);
+
+  // Step 5: Configure endpoint
+  log('Step 4: Configuring endpoint → ' + ENDPOINT, 'pending');
+  worker.postMessage({ 
+    op: 'config', 
+    config: { endpoint: ENDPOINT } 
+  });
+  await sleep(500);
+  log('✓ Endpoint configured', 'pass');
+
+  // Step 6: Capture test events
+  log('Step 5: Capturing 3 test events...', 'pending');
+  const testEvents = [
+    {
+      type: 'item_check',
+      ts: new Date().toISOString(),
+      context: { page: '/test', serviceType: 'eot', room: 'Kitchen' },
+      payload: { itemId: 'test_sink_clean', checked: true, label: 'Sink - cleaned and polished' }
+    },
+    {
+      type: 'item_check',
+      ts: new Date().toISOString(),
+      context: { page: '/test', serviceType: 'eot', room: 'Kitchen' },
+      payload: { itemId: 'test_bench_wipe', checked: true, label: 'Bench tops - wiped down' }
+    },
+    {
+      type: 'meta',
+      ts: new Date().toISOString(),
+      context: { page: '/test', serviceType: 'eot' },
+      payload: { field: 'crew', value: 'Test Crew Alpha' }
+    }
+  ];
+
+  for (const evt of testEvents) {
+    worker.postMessage({ op: 'capture', event: evt });
+    await sleep(200);
+  }
+  log('✓ 3 events captured into worker queue', 'pass');
+
+  // Step 7: Request status
+  log('Step 6: Checking worker queue status...', 'pending');
+  worker.postMessage({ op: 'status' });
+  await sleep(500);
+
+  // Step 8: Flush!
+  log('Step 7: Flushing events to endpoint...', 'pending');
+  worker.postMessage({ op: 'flush', online: true });
+  
+  // Wait for flush to complete
+  await sleep(3000);
+
+  // Step 9: Check receiver
+  log('Step 8: Checking receiver for delivered events...', 'pending');
+  try {
+    const resp = await fetch(ENDPOINT);
+    const data = await resp.json();
+    if (data.total_received > 0) {
+      log('✓ SYNC SUCCESS! Receiver got ' + data.total_received + ' batch(es)', 'pass');
+      log('Received data:');
+      log(data);
+    } else {
+      log('✗ Receiver has no events — flush may have failed', 'fail');
+    }
+  } catch(e) {
+    log('✗ Failed to check receiver: ' + e.message, 'fail');
+  }
+
+  // Step 10: Final worker status
+  log('Step 9: Final worker status...', 'pending');
+  worker.postMessage({ op: 'status' });
+  await sleep(500);
+  
+  log('=== Test Complete ===', 'pass');
+}
+
+async function checkReceiver() {
+  document.getElementById('log').innerHTML = '';
+  log('Fetching receiver log...');
+  try {
+    const resp = await fetch(ENDPOINT);
+    const data = await resp.json();
+    log('Receiver status:');
+    log(data);
+  } catch(e) {
+    log('Error: ' + e.message, 'fail');
+  }
+}
+
+async function clearReceiverLog() {
+  try {
+    await fetch(ENDPOINT + '?action=clear', { method: 'DELETE' });
+    log('Log cleared', 'pass');
+  } catch(e) {
+    log('Error: ' + e.message, 'fail');
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

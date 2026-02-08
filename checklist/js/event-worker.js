@@ -134,7 +134,7 @@ function idbGetManyPending(limit) {
     return new Promise((resolve, reject) => {
       const results = [];
       const index = store.index('by_delivered');
-      const req = index.openCursor(IDBKeyRange.only(null));
+      const req = index.openCursor(IDBKeyRange.only(0));
 
       req.onsuccess = () => {
         const cursor = req.result;
@@ -263,7 +263,7 @@ async function capture(entry) {
     context: entry?.context || {},
     payload: entry?.payload || {},
     fingerprint: entry?.fingerprint || computeFingerprint(entry),
-    delivered_at: null,
+    delivered_at: 0,
     attempts: 0,
     next_attempt_at: nowIso()
   };
@@ -333,8 +333,8 @@ async function countPendingEvents() {
     const tx = db.transaction(STORE_EVENTS, 'readonly');
     const store = tx.objectStore(STORE_EVENTS);
     const index = store.index('by_delivered');
-    // Count events where delivered_at is null (IDBKeyRange.only works for exact match)
-    const req = index.count(IDBKeyRange.only(null));
+    // Count events where delivered_at is 0 (sentinel for "not yet delivered")
+    const req = index.count(IDBKeyRange.only(0));
     req.onsuccess = () => {
       db.close();
       resolve(req.result || 0);
