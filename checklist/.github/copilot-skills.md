@@ -13,7 +13,10 @@
 4. [Room Composition](#4-room-composition)
 5. [Code Quality](#5-code-quality)
 6. [Testing](#6-testing)
-7. [Tools & Workflow](#7-tools--workflow)
+7. [Bug Scanning](#7-bug-scanning)
+8. [Performance](#8-performance)
+9. [Documentation](#9-documentation)
+10. [Tools & Workflow](#10-tools--workflow)
 
 ---
 
@@ -508,11 +511,17 @@ const tasks = taskRegistry.bedroom_addons; // = 3 items (the "3-item rooms" bug)
 
 ### 5.1 Code Review
 
+**Every change gets a mental review before commit. Check these:**
+
+**Structure:**
 - One responsibility per function. No god functions.
 - Prefer clarity over clever. No nested ternary hell.
-- Magic numbers → named constants. Magic strings → constants.
 - If over 50 lines → probably split it.
 - Copy-pasted block → extract to shared function.
+
+**Naming & Constants:**
+- Magic numbers → named constants. Magic strings → constants.
+- Names describe what it IS, not what it does temporarily.
 
 ```javascript
 // ❌ Magic
@@ -522,6 +531,18 @@ if (retries > 3) { ... }
 const MAX_RETRIES = 3;
 if (retries > MAX_RETRIES) { ... }
 ```
+
+**Diff Review (before pushing):**
+
+| Check | What to Look For |
+|-------|-----------------|
+| Unintended changes | Files you didn't mean to touch |
+| Debug leftovers | `console.log`, `debugger`, `TODO` |
+| Hardcoded values | URLs, credentials, magic numbers |
+| Error handling | Every `async` has `try/catch`, every `querySelector` has null check |
+| State consistency | State updated AND UI updated (never one without the other) |
+| Cache version | Bumped if any cached asset changed |
+| Naming | No dashes, consistent casing within file |
 
 ---
 
@@ -565,14 +586,36 @@ const apiUrl = "https://api.example.com";
 
 ---
 
-### 5.5 Security
+### 5.5 Security Audit
 
-- Scan for `password`, `token`, `key`, `secret` — flag any hardcoded values.
-- No `console.log` in production code.
-- Validate all inputs. Escape outputs.
-- Never `innerHTML` with user input → use `textContent`.
-- Never `eval()`.
-- Secrets go in `.env`. Never commit.
+**Proactive scanning — run before every push.**
+
+**Auto-scan for these patterns:**
+
+| Pattern | Action |
+|---------|--------|
+| `password`, `token`, `key`, `secret` (hardcoded) | Flag, move to `.env` |
+| `console.log` with sensitive data | Remove before prod |
+| `innerHTML` with user input | Replace with `textContent` |
+| `eval()` or `Function()` constructor | Remove, find alternative |
+| SQL string interpolation | Use parameterised queries |
+| Exposed file paths in client code | Redact or remove |
+| CORS `*` wildcard | Restrict to known origins |
+
+**Input/Output Rules:**
+- Validate all inputs — type, length, range
+- Escape all outputs — HTML entities, SQL params
+- Secrets go in `.env` — never commit, never log
+- CSRF tokens on every form submission (already in auth system)
+- Rate limiting on auth endpoints (already implemented)
+
+**On violation:** Stop. Flag the line. Suggest fix. Don't push until resolved.
+
+**PHP-specific (our auth system):**
+- Session fixation: `session_regenerate_id(true)` on login ✅
+- Password hashing: bcrypt via `password_hash()` ✅
+- CSRF: token per session, validated on POST ✅
+- Rate limiting: IP-based, 5 failures → 15-min lockout ✅
 
 ---
 
@@ -657,9 +700,152 @@ describe('ModuleName', () => {
 
 ---
 
-## 7. Tools & Workflow
+## 7. Bug Scanning
 
-### 7.1 Git Routine (Reaper)
+**Purpose:** Proactively find bugs before they ship. Run before every push.
+
+### 7.1 Pre-Push Checklist
+
+```
+1. node syntax-check.js        → parser validation
+2. node parse-check.js         → structural validation
+3. Grep for common bug patterns → see below
+4. If all clean → reaper push
+```
+
+### 7.2 Bug Patterns to Scan For
+
+| Pattern | Why It's a Bug | Fix |
+|---------|---------------|-----|
+| `== null` or `== undefined` | Loose equality misses cases | Use `=== null` or `=== undefined` |
+| `.length` without null check | TypeError on null/undefined | Guard: `if (!arr \|\| !arr.length)` |
+| `addEventListener` without `removeEventListener` | Memory leak on re-render | Store reference, remove on cleanup |
+| `setTimeout` / `setInterval` without clear | Orphaned timers | Store ID, clear on teardown |
+| `async` function without `try/catch` | Unhandled rejection | Wrap in try/catch or `.catch()` |
+| `querySelector` result used without null check | TypeError | Guard: `const el = qs(sel); if (!el) return;` |
+| String concatenation in DOM (`+=`) | XSS risk + performance | Use `textContent` or template |
+| `for...in` on array | Iterates prototype properties | Use `for...of` or `.forEach()` |
+| Floating point comparison (`=== 0.3`) | IEEE 754 imprecision | Use epsilon: `Math.abs(a - b) < 0.001` |
+| Event handler in loop without closure | All handlers share last value | Use `let` not `var`, or bind |
+
+### 7.3 PWA-Specific Bugs
+
+| Pattern | Why It's a Bug |
+|---------|---------------|
+| `fetch()` without offline fallback | Breaks offline-first |
+| Cache version not bumped after asset change | Users get stale files |
+| `localStorage` for large data (>5MB) | Quota exceeded on mobile |
+| No `visibilitychange` save handler | Data lost on phone lock |
+| Service worker caching `.php` files | Dynamic pages served stale |
+
+---
+
+## 8. Performance
+
+**Purpose:** This is a PWA running on phones at job sites. Battery, memory, and network matter.
+
+### 8.1 Rendering
+
+| Rule | Why |
+|------|-----|
+| Batch DOM writes | Avoid layout thrashing |
+| Use `documentFragment` for lists | One reflow instead of N |
+| Debounce input handlers (800ms+) | Don't fire on every keystroke |
+| Use `requestAnimationFrame` for visual updates | Sync with paint cycle |
+| Avoid `offsetHeight` / `getBoundingClientRect` in loops | Forces synchronous layout |
+
+### 8.2 Memory
+
+| Rule | Why |
+|------|-----|
+| Remove event listeners on component teardown | Prevent leaks |
+| Nullify large object references when done | Allow GC |
+| Don't cache DOM node references across re-renders | Stale references |
+| Limit IndexedDB transaction scope | Release locks faster |
+| Keep drafts list under 50 without cleanup overhead | UI responsiveness |
+
+### 8.3 Network & Storage
+
+| Rule | Why |
+|------|-----|
+| Service worker: cache-first for static assets | Instant load offline |
+| Autosave debounce: 800-1500ms | Battery + write amplification |
+| Sync queue: batch, don't fire per-item | Reduce network calls |
+| Compress payloads before sync | Reduce data on mobile |
+| Clean up synced drafts after 14 days | Free storage |
+
+### 8.4 Mobile-Specific
+
+| Rule | Why |
+|------|-----|
+| Touch targets: minimum 44x44px | Fat finger compliance |
+| No hover-dependent UI | Touch devices don't hover |
+| Handle `visibilitychange` + `pagehide` | Phone lock / app switch |
+| Test on slow 3G | Job sites have poor signal |
+| Keep JS bundle under 500KB | First paint speed |
+
+---
+
+## 9. Documentation
+
+**Purpose:** Document decisions, not obvious code. Future-you (and future-agents) need context.
+
+### 9.1 When to Document
+
+| Trigger | What to Write | Where |
+|---------|---------------|-------|
+| Architectural decision | Why we chose X over Y | `docs/` folder |
+| Non-obvious bug fix | What broke, root cause, fix | Commit message body |
+| New canonical interface | Function signature + usage | JSDoc in the source file |
+| Breaking change | What changed, migration path | `docs/` folder |
+| Session with major changes | Summary of what was done | Agent memory |
+
+### 9.2 What NOT to Document
+
+- Obvious code (`// increment counter` above `counter++`)
+- Temporary debug notes (remove after fix)
+- Full file rewrites (the diff IS the documentation)
+- Things that change weekly (docs go stale fast)
+
+### 9.3 Code Comments
+
+```javascript
+// ✅ Good: explains WHY
+// Hard-guard: return null instead of stale config to prevent
+// bedrooms leaking into commercial mode (see docs/ui-sync.md)
+if (!config) return null;
+
+// ❌ Bad: explains WHAT (obvious from the code)
+// Check if config is null and return null
+if (!config) return null;
+```
+
+### 9.4 JSDoc for Canonical Interfaces
+
+```javascript
+/**
+ * Get variant options for a dropdown by key.
+ * Normalises legacy keys (floor_variants → floor_types).
+ * @param {string} key - Variant key from VARIANTS registry
+ * @returns {Array<{value: string, label: string}>} Options array
+ */
+function getVariantOptions(key) { ... }
+```
+
+### 9.5 Agent Memory
+
+Update `.agent-memory/memory.md` when:
+- Major feature completed
+- Architecture changed
+- Key decisions made that future sessions need
+- Cache version bumped
+- New files created or deleted
+
+---
+
+## 10. Tools & Workflow
+
+### 10.1 Git Routine (Reaper)
 
 **When to use:** After completing any logical unit of work — a fix, a feature, cleanup, or config change. Don't let work pile up uncommitted.
 
@@ -709,7 +895,7 @@ powershell -File tools/reaper.ps1 -Message "description" -Push
 
 ---
 
-### 7.2 GitHub Routine (MCP)
+### 10.2 GitHub Routine (MCP)
 
 **When to use:** PRs, issues, repo workflows — anything that talks to GitHub.
 
@@ -745,7 +931,7 @@ powershell -File tools/reaper.ps1 -Message "description" -Push
 
 ---
 
-### 7.3 QMD Search
+### 10.3 QMD Search
 
 Use `qmd` to search through local markdown notes.
 
