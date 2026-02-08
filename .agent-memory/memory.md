@@ -11,8 +11,9 @@
 - **Skills consolidated**: 29 scattered files → single `.github/copilot-skills.md` (17 sections) — COMPLETE
 - **QuoteStorage.init() fix**: Was missing `return _initPromise` — first call returned undefined — FIXED
 - **Container ID mismatch fix**: `_rebuildRoomsForSnapshot` used `generated-rooms-{type}` but DOM has `rooms-container-{type}` — FIXED
-- **Cache**: `checklist-shell-v11`
-- **Latest commit**: `2264702` on `codex/evaluate-ongoing-repo-sorting-process-nuxz06`
+- **Security: HTML → PHP rename**: checklist-modern.html → .php, rubbish-booking.html → .php, auth guards added — FIXED
+- **Cache**: `checklist-shell-v12`
+- **Latest commit**: `b91c684` on `codex/evaluate-ongoing-repo-sorting-process-nuxz06`
 
 ### DevTools Testing Results (2026-02-09)
 All buttons tested via Chrome DevTools MCP:
