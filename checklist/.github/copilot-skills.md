@@ -947,5 +947,46 @@ Collections: `docs` (78 files), `ays-premium` (517), `superclean-plugins` (404),
 
 ---
 
-*Consolidated from 29 files across .github/skills/, .vscode/skills/, and .github/skills.md.*
-*Last updated: 2026-02-09*
+### 10.4 Skill Authoring
+
+**When to use:** Creating or updating skills in THIS file. One file, no sprawl.
+
+**Rules:**
+
+1. **ALL skills live in `copilot-skills.md`** — never create separate SKILL.md files or skill subfolders.
+2. **Add a section, not a file** — new skill = new numbered section in this document.
+3. **Update the TOC** — add the new section to the Table of Contents at the top.
+4. **Concise is key** — only add context an AI doesn't already have. Challenge each paragraph: "Does this justify its token cost?"
+5. **Examples over explanations** — show a code snippet instead of writing three sentences about what to do.
+6. **Imperative form** — "Check for...", "Run...", "Validate..." — not "You should check for..."
+
+**Section Template:**
+
+```markdown
+## N. Section Name
+
+**Purpose:** One sentence.
+
+### N.1 Sub-topic
+
+| Rule | Why |
+|------|-----|
+| Do X | Because Y |
+
+### N.2 Another sub-topic
+
+\`\`\`javascript
+// Show, don't tell
+\`\`\`
+```
+
+**Validation before commit:**
+- [ ] Added to Table of Contents?
+- [ ] Section number is sequential?
+- [ ] No duplicate content with existing sections?
+- [ ] Under 100 lines for this skill? (split into sub-sections if longer)
+- [ ] Examples are concrete, not generic?
+
+---
+
+*Single source of truth. No sprawl. Last updated: 2026-02-09*
