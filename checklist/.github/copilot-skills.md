@@ -19,6 +19,8 @@
 10. [Tools & Workflow](#10-tools--workflow)
 11. [Code Excellence](#11-code-excellence)
 12. [Answer Quality](#12-answer-quality)
+13. [Playwright](#13-playwright)
+14. [Chrome DevTools](#14-chrome-devtools)
 
 ---
 
@@ -550,17 +552,47 @@ if (retries > MAX_RETRIES) { ... }
 
 ### 5.2 Design Patterns
 
-Name the pattern before writing the code: Factory, Singleton, Strategy, Observer, State, Command, Adapter.
+Name the pattern before writing the code. Pick the **simplest pattern that solves the problem** — don't use a Factory when a function will do.
 
 **SOLID (Non-Negotiable):**
 
-| Principle | Rule |
-|-----------|------|
-| **S**ingle Responsibility | One job per class/function |
-| **O**pen/Closed | Extend, don't modify |
-| **L**iskov Substitution | No fake inheritance |
-| **I**nterface Segregation | Small, focused interfaces |
-| **D**ependency Inversion | High-level owns low-level |
+| Principle | Rule | Violation Smell |
+|-----------|------|----------------|
+| **S**ingle Responsibility | One job per class/function | "and" in a function description |
+| **O**pen/Closed | Extend, don't modify | `if (type === 'x')` chains growing |
+| **L**iskov Substitution | No fake inheritance | Subclass overrides parent method to no-op |
+| **I**nterface Segregation | Small, focused interfaces | Class forced to implement unused methods |
+| **D**ependency Inversion | High-level owns low-level | Import of concrete class deep inside logic |
+
+**Creational Patterns:**
+
+| Pattern | When to Use | Example in This Codebase |
+|---------|-------------|-------------------------|
+| **Factory** | Create objects without specifying exact class | `buildChecklistConfigFor(serviceType)` — returns different room sets per type |
+| **Singleton** | One instance globally, controlled access | `DraftManager` — one manager owns all draft state |
+| **Builder** | Complex object needs step-by-step construction | Quote payload assembly — customer, rooms, items, settings |
+
+**Structural Patterns:**
+
+| Pattern | When to Use | Example |
+|---------|-------------|--------|
+| **Adapter** | Wrap old interface to fit new one | `getVariantOptions(key)` normalises `floor_variants` → `floor_types` |
+| **Facade** | Simplify complex subsystem behind one call | `saveDraft()` hides IndexedDB transaction, validation, autosave debounce |
+| **Decorator** | Add behaviour without changing original | Adding EOT tasks on top of base residential tasks |
+
+**Behavioural Patterns:**
+
+| Pattern | When to Use | Example |
+|---------|-------------|--------|
+| **Observer** | Notify many components when state changes | Event listeners on `serviceType` change → rebuild rooms |
+| **Strategy** | Swap algorithm at runtime | Room composition: different item sets for residential vs. commercial |
+| **State** | Object behaviour changes with internal state | Draft state machine: `draft` → `syncing` → `synced` / `error` |
+| **Command** | Encapsulate action as object (undo, queue) | Sync queue entries — each is a command to replay |
+
+**When NOT to use a pattern:**
+- The code is < 30 lines → just write a function
+- Only one implementation exists → no interface needed
+- You can't name the problem the pattern solves → you're cargo-culting
 
 ---
 
@@ -1139,6 +1171,153 @@ Before including any piece of information, ask: **"So what? Does the user need t
    undefined slip through as null here."
    Actionable, specific, references a line.
 ```
+
+---
+
+## 13. Playwright
+
+**Purpose:** Browser automation and end-to-end testing. Use for testing the PWA in real browser conditions.
+
+### 13.1 When to Use
+
+| Scenario | Tool |
+|----------|------|
+| Test a full user flow (login → create quote → save) | Playwright test |
+| Verify UI renders correctly after code change | Playwright screenshot comparison |
+| Test offline behaviour | Playwright with `context.setOffline(true)` |
+| Test on mobile viewport | Playwright with device emulation |
+| Automate repetitive browser tasks | Playwright script |
+
+### 13.2 Test Structure
+
+```javascript
+import { test, expect } from '@playwright/test';
+
+test.describe('Quote Creation', () => {
+  test('should save draft on checkbox change', async ({ page }) => {
+    await page.goto('/checklist/checklist-modern.html');
+
+    // Arrange: select residential
+    await page.selectOption('#service-type', 'residential');
+
+    // Act: check a cleaning item
+    await page.click('[data-item-id="dust_surfaces"]');
+
+    // Assert: draft saved in IndexedDB
+    const saved = await page.evaluate(async () => {
+      const db = await openDB('ays_quotes');
+      const drafts = await db.getAll('drafts');
+      return drafts.length > 0;
+    });
+    expect(saved).toBe(true);
+  });
+});
+```
+
+### 13.3 Key Patterns
+
+| Pattern | Code |
+|---------|------|
+| Wait for network idle | `await page.waitForLoadState('networkidle')` |
+| Wait for element | `await page.waitForSelector('.checklist-item')` |
+| Test offline | `await context.setOffline(true)` |
+| Mobile viewport | `await page.setViewportSize({ width: 375, height: 812 })` |
+| Screenshot | `await page.screenshot({ path: 'test.png', fullPage: true })` |
+| Intercept requests | `await page.route('**/api/**', route => route.fulfill({ body: '{}' }))` |
+| Test service worker | `const sw = await context.serviceWorkers()[0]` |
+
+### 13.4 PWA-Specific Tests to Write
+
+- [ ] Service worker registers and caches shell assets
+- [ ] App works offline after first load
+- [ ] Draft persists across page reload
+- [ ] Mode switch (residential → commercial) rebuilds rooms correctly
+- [ ] Floor type dropdown populates with all 9 options
+- [ ] Autosave fires on checkbox change
+- [ ] Login redirects unauthenticated users
+
+---
+
+## 14. Chrome DevTools
+
+**Purpose:** Live browser inspection via MCP. Debug rendering, performance, and DOM issues without leaving the editor.
+
+### 14.1 Available Tools
+
+| Tool | What It Does | When to Use |
+|------|-------------|-------------|
+| `evaluate_script` | Run JS in the live page | Read DOM state, test fixes, inspect variables |
+| `performance trace` | Record Core Web Vitals | Diagnose slow renders, layout thrashing |
+| `performance_analyze_insight` | Drill into specific perf issue | LCP breakdown, document latency |
+| `snapshot` | Accessibility tree capture | Check element structure, verify ARIA |
+| `screenshot` | Visual capture of page/element | Before/after comparison, bug evidence |
+| `click` / `fill` / `select_option` | Interact with page | Reproduce user flows live |
+| `navigate` | Go to URL | Switch between pages |
+| `console messages` | Read browser console | Catch runtime errors, warnings |
+
+### 14.2 Debugging Workflow
+
+```
+1. REPRODUCE   → Navigate to the page, trigger the issue
+2. INSPECT     → Snapshot the DOM, check console for errors
+3. DIAGNOSE    → evaluate_script to read state / variables
+4. TEST FIX    → evaluate_script to try a fix live
+5. IMPLEMENT   → Edit the source file with the confirmed fix
+6. VERIFY      → Screenshot / snapshot to confirm
+```
+
+### 14.3 Common Recipes
+
+**Check if element exists and is visible:**
+```javascript
+// evaluate_script
+() => {
+  const el = document.querySelector('#floor-type-select');
+  if (!el) return { found: false };
+  const rect = el.getBoundingClientRect();
+  return {
+    found: true,
+    visible: rect.width > 0 && rect.height > 0,
+    options: el.options ? el.options.length : 0,
+    value: el.value
+  };
+}
+```
+
+**Read IndexedDB draft state:**
+```javascript
+// evaluate_script
+async () => {
+  const db = await new Promise((resolve, reject) => {
+    const req = indexedDB.open('ays_quotes');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  const tx = db.transaction('drafts', 'readonly');
+  const store = tx.objectStore('drafts');
+  const all = await new Promise(resolve => {
+    store.getAll().onsuccess = e => resolve(e.target.result);
+  });
+  return { count: all.length, ids: all.map(d => d.draftId) };
+}
+```
+
+**Performance diagnosis:**
+```
+1. Start performance trace
+2. Trigger the slow action (e.g., mode switch)
+3. Stop trace
+4. Check for: long tasks, layout shifts, excessive reflows
+5. Drill into specific insight (LCPBreakdown, DocumentLatency)
+```
+
+### 14.4 Rules
+
+- Always snapshot BEFORE making changes — evidence of the original state
+- Check console messages after any page interaction — catch silent errors
+- Use `evaluate_script` to verify a fix works BEFORE editing source
+- Performance traces: keep recording short (< 10s) and focused on one action
+- Screenshots: use for user-facing bug reports and before/after proof
 
 ---
 
