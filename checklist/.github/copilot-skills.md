@@ -578,9 +578,10 @@ const apiUrl = "https://api.example.com";
 
 ### 5.6 Naming
 
-- Variables/functions: `snake_case`
+- Variables/functions: `camelCase` or `snake_case` — either is fine, stay consistent within a file.
 - Classes/types: `PascalCase`
 - Constants: `SCREAM_CASE`
+- **NEVER `kebab-case`** for identifiers — no dashes in variable names, function names, or object keys.
 - No `i`, `x`, `foo` — spell it out (except `url`, `id`).
 - Rename only what's asked. Log old → new.
 
@@ -658,15 +659,55 @@ describe('ModuleName', () => {
 
 ## 7. Tools & Workflow
 
-### 7.1 Reaper (Git Checkpoint)
+### 7.1 Git Routine (Reaper)
+
+**When to use:** After completing any logical unit of work — a fix, a feature, cleanup, or config change. Don't let work pile up uncommitted.
+
+**Process:**
+
+```
+1. VERIFY    → syntax checks pass, no broken code
+2. MESSAGE   → imperative, describes what changed
+3. REAPER    → commit + push in one shot
+```
+
+**Commands:**
 
 ```powershell
-# Quick commit
+# Quick commit (no push)
 powershell -File tools/reaper.ps1 -Message "description"
 
-# Commit + push
+# Commit + push (standard routine)
 powershell -File tools/reaper.ps1 -Message "description" -Push
 ```
+
+**What reaper does:** Stages all changes (`git add -A`), commits with timestamped message, optionally pushes. Auto-sets upstream on first push.
+
+**Message rules:**
+- Imperative: "fix", "add", "remove", "consolidate" — not "fixed", "added"
+- Describe the change, not the session
+- Under 70 chars
+
+**Examples:**
+
+```powershell
+# ✅ Good
+-Message "fix reaper.ps1 - call git directly"
+-Message "consolidate 29 skill files into single copilot-skills.md"
+-Message "auth system + variant registry + hard-guard"
+
+# ❌ Bad
+-Message "update"
+-Message "changes"
+-Message "WIP"
+```
+
+**When NOT to reaper:**
+- Syntax checks fail
+- You're mid-change (half the edit done)
+- You haven't tested the change
+
+---
 
 ### 7.2 QMD Search
 
