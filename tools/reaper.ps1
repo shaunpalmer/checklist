@@ -7,8 +7,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 function Exec([string]$Command) {
+  $ErrorActionPreference = "Continue"
   $out = & cmd.exe /c $Command 2>&1
   $code = $LASTEXITCODE
+  $ErrorActionPreference = "Stop"
   return @{ Out = $out; Code = $code }
 }
 
@@ -40,7 +42,7 @@ if ($add.Code -ne 0) {
 }
 
 $ts = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-$msg = if ([string]::IsNullOrWhiteSpace($Message)) { "checkpoint: $ts" } else { "checkpoint: $ts — $Message" }
+$msg = if ([string]::IsNullOrWhiteSpace($Message)) { "checkpoint: $ts" } else { "checkpoint: $ts - $Message" }
 
 Write-Host "Reaper: committing..."
 $commit = Exec ("git commit -m " + '"' + $msg.Replace('"','\"') + '"')

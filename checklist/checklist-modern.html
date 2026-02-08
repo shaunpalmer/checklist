@@ -29,6 +29,7 @@
   <!-- Stylesheets -->
   <link rel="stylesheet" href="css/checklist-variables.css" />
   <link rel="stylesheet" href="css/checklist-style.css" />
+  <link rel="stylesheet" href="css/rubbish-booking.css" />
 
   <!-- Flatpickr Calendar (from main plugin CDN - adjust if needed) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
@@ -58,6 +59,8 @@
       <p style="font-size: var(--font-size-sm); color: var(--color-secondary); margin-top: 6px;">
         Recommended: tablet, foldable laptop, or touchscreen device.
       </p>
+      <!-- Logout button (only works when served via index.php with auth) -->
+      <a href="auth/logout.php" class="btn-logout" title="Sign out" aria-label="Sign out">Sign Out</a>
     </header>
 
     <div id="endpoint-banner" class="endpoint-banner" role="status" aria-live="polite"></div>
@@ -125,6 +128,7 @@
           <option value="commercial">🏢 Commercial</option>
           <option value="custom">✨ Custom</option>
         </select>
+        <select id="property-type-quick" class="service-type-dropdown property-type-quick-dropdown" style="display:none;"></select>
         <span class="service-type-indicator" id="service-type-indicator">
           <span class="indicator-dot"></span>
           <span class="indicator-text">EOT Mode</span>
@@ -210,17 +214,6 @@
       <!-- START: END OF TENANCY SERVICE TAB -->
       <div class="service-tab-content is-active" data-service="end-of-tenancy" id="service-end-of-tenancy">
         <!-- ========================================
-             PROPERTY SIZE SELECTOR
-             Controls how many bedrooms/bathrooms are rendered
-             ======================================== -->
-        <div class="property-size-selector">
-          <div class="meta-field" style="margin-bottom: var(--space-md);">
-            <label for="property-type-quick">Property Type:</label>
-            <select id="property-type-quick" style="padding: 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 500px; background: var(--color-white); color: var(--color-primary); font-weight: 600;"></select>
-          </div>
-        </div>
-
-        <!-- ========================================
              MAIN CHECKLIST CONTENT
              ======================================== -->
         <div class="checklist-content">
@@ -228,6 +221,9 @@
           <!-- GENERATED ROOMS: Populated by ChecklistPageGenerator -->
           <div id="rooms-container"></div>
           <div id="floor-summary-container"></div>
+
+          <!-- RUBBISH BOOKING: Inline add-on after all EOT rooms -->
+          <div id="rubbish-booking-container"></div>
 
           <!-- LEGACY: KITCHEN (fallback if generator is not running) -->
           <div class="room-section">
@@ -1026,6 +1022,9 @@
 		  <p>This is GENERATED ROOMS (Residential)</p><!-- TODO: remove for production (testing visual cue) -->
           <div id="rooms-container-residential"></div>
           <div id="floor-summary-container-residential"></div>
+
+          <!-- RUBBISH BOOKING: Inline add-on after all residential rooms -->
+          <div id="rubbish-booking-container-residential"></div>
 
           <!-- LEGACY ROOMS (Residential): fallback only if generator fails -->
           <div id="legacy-rooms-residential">
@@ -2207,17 +2206,22 @@
                 <div class="meta-field" style="margin-bottom: var(--space-lg);">
                   <label for="setting-property-type" style="font-weight: 600;">Property Type:</label>
                   <select id="setting-property-type" style="padding: 12px; border: 1px solid var(--color-border); border-radius: 4px; font-size: inherit; width: 100%; max-width: 500px; background: var(--color-white); color: var(--color-primary); font-weight: 600;">
-                    <option value="residential">🏘️ Residential (Parametric)</option>
-                    <option value="residential_1bed">🏘️ Residential - 1 Bed, 1 Bath (Preset)</option>
-                    <option value="residential_2bed">🏘️ Residential - 2 Bed, 1 Bath (Preset)</option>
-                    <option value="residential_3bed">🏘️ Residential - 3 Bed, 2 Bath (Preset)</option>
-                    <option value="residential_4bed">🏘️ Residential - 4 Bed, 2 Bath (Preset)</option>
-                    <option value="residential_6bed">🏘️ Residential - 6 Bed, 3 Bath (Preset)</option>
-                    <option value="eot_residential">🧼 End of Tenancy - Residential</option>
-                    <option value="commercial_office">🏢 Commercial Office (Parametric)</option>
-                    <option value="commercial_gym">💪 Commercial Gym (Parametric)</option>
-                    <option value="commercial_retail">🛍️ Commercial Retail</option>
-                    <option value="commercial_warehouse">📦 Commercial Warehouse (Parametric)</option>
+                    <option value="residential"          data-family="residential" data-has-bedrooms>🏘️ Residential (Parametric)</option>
+                    <option value="residential_1bed"     data-family="residential" data-has-bedrooms>🏘️ Residential - 1 Bed, 1 Bath (Preset)</option>
+                    <option value="residential_2bed"     data-family="residential" data-has-bedrooms>🏘️ Residential - 2 Bed, 1 Bath (Preset)</option>
+                    <option value="residential_3bed"     data-family="residential" data-has-bedrooms>🏘️ Residential - 3 Bed, 2 Bath (Preset)</option>
+                    <option value="residential_4bed"     data-family="residential" data-has-bedrooms>🏘️ Residential - 4 Bed, 2 Bath (Preset)</option>
+                    <option value="residential_6bed"     data-family="residential" data-has-bedrooms>🏘️ Residential - 6 Bed, 3 Bath (Preset)</option>
+                    <option value="eot_residential"      data-family="eot"         data-has-bedrooms>🧼 End of Tenancy (Parametric)</option>
+                    <option value="eot_1bed"             data-family="eot"         data-has-bedrooms>🧼 EOT - 1 Bed, 1 Bath (Preset)</option>
+                    <option value="eot_2bed"             data-family="eot"         data-has-bedrooms>🧼 EOT - 2 Bed, 1 Bath (Preset)</option>
+                    <option value="eot_3bed"             data-family="eot"         data-has-bedrooms>🧼 EOT - 3 Bed, 2 Bath (Preset)</option>
+                    <option value="eot_4bed"             data-family="eot"         data-has-bedrooms>🧼 EOT - 4 Bed, 2 Bath (Preset)</option>
+                    <option value="eot_6bed"             data-family="eot"         data-has-bedrooms>🧼 EOT - 6 Bed, 3 Bath (Preset)</option>
+                    <option value="commercial_office"    data-family="commercial"  data-has-offices>🏢 Commercial Office (Parametric)</option>
+                    <option value="commercial_gym"       data-family="commercial"  data-has-showers>💪 Commercial Gym (Parametric)</option>
+                    <option value="commercial_retail"    data-family="commercial">🛍️ Commercial Retail</option>
+                    <option value="commercial_warehouse" data-family="commercial"  data-has-offices data-has-warehouse>📦 Commercial Warehouse (Parametric)</option>
                   </select>
                 </div>
 
@@ -2788,6 +2792,7 @@
   <script src="js/components/AysRoomOrchestrator.js"></script>
   <script src="js/components/AysProductionRateSettings.js"></script>
   <script src="js/components/AysServiceToggleRenderer.js"></script>
+  <script src="js/components/AysRubbishBooking.js"></script>
   
   <!-- Configuration & Factory -->
   <script src="js/data/checklist-config.js"></script>
@@ -2797,6 +2802,16 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       console.log('[Init] DOMContentLoaded firing - reading property config from Settings...');
+
+      // ── Populate ALL inline variant dropdowns that were rendered empty in HTML ──
+      // Uses the canonical populateVariantDropdown() from ITEM_DEFINITIONS.js
+      if (typeof populateVariantDropdown === 'function') {
+        document.querySelectorAll('select[data-options-select]').forEach(function(sel) {
+          var key = sel.getAttribute('data-options-select');
+          if (key) populateVariantDropdown(sel, key);
+        });
+        console.log('[Init] Variant dropdowns populated via canonical interface');
+      }
       
       // CRITICAL: Read property configuration FROM SETTINGS FORM (not hardcoded in code!)
       // Settings form inputs are the SOURCE OF TRUTH
@@ -2818,20 +2833,25 @@
         const propertyType = propertyTypeSelect?.value || 'residential';
         const params = {};
         
-        // Add residential params if relevant
-        if (propertyType.includes('residential')) {
+        // Read capabilities from data attributes on the selected <option>
+        // No more string guessing — the HTML declares what each type needs.
+        const selectedOption = propertyTypeSelect.selectedOptions[0];
+        const ds = selectedOption ? selectedOption.dataset : {};
+
+        // Bedrooms + bathrooms (residential AND eot types)
+        if ('hasBedrooms' in ds) {
           const beds = parseInt(numBedroomsInput?.value || 3);
           const baths = parseInt(numBathroomsInput?.value || 2);
           if (beds >= 1 && beds <= 10) params.numBedrooms = beds;
           if (baths >= 1 && baths <= 6) params.numBathrooms = baths;
         }
-        
-        // Add office params if relevant
-        if (propertyType.includes('office')) {
+
+        // Offices (commercial office + warehouse admin offices)
+        if ('hasOffices' in ds) {
           const floors = parseInt(numFloorsInput?.value || 0);
           const officesPerFloor = parseInt(numOfficesPerFloorInput?.value || 0);
           const offices = parseInt(numOfficesInput?.value || 6);
-          
+
           if (floors > 0 && officesPerFloor > 0) {
             params.numFloors = floors;
             params.numOfficesPerFloor = officesPerFloor;
@@ -2839,15 +2859,15 @@
             params.numOffices = offices;
           }
         }
-        
-        // Add gym params if relevant
-        if (propertyType.includes('gym')) {
+
+        // Showers (gym)
+        if ('hasShowers' in ds) {
           const showers = parseInt(numShowersInput?.value || 3);
           if (showers >= 1) params.numShowers = showers;
         }
-        
-        // Add warehouse params if relevant
-        if (propertyType.includes('warehouse')) {
+
+        // Loading docks + admin offices (warehouse)
+        if ('hasWarehouse' in ds) {
           const docks = parseInt(numLoadingDocksInput?.value || 0);
           const adminOffices = parseInt(numAdminOfficesInput?.value || 0);
           if (docks >= 0) params.numLoadingDocks = docks;
@@ -2861,15 +2881,17 @@
        * Show/hide parameter sections based on selected property type
        */
       function updatePropertyParamVisibility() {
-        const propertyType = propertyTypeSelect?.value || 'residential';
-        document.getElementById('property-residential-params').style.display = 
-          propertyType.includes('residential') ? 'block' : 'none';
-        document.getElementById('property-office-params').style.display = 
-          propertyType.includes('office') ? 'block' : 'none';
-        document.getElementById('property-gym-params').style.display = 
-          propertyType.includes('gym') ? 'block' : 'none';
-        document.getElementById('property-warehouse-params').style.display = 
-          propertyType.includes('warehouse') ? 'block' : 'none';
+        // Read capabilities from data attributes — no string guessing.
+        const selectedOption = propertyTypeSelect?.selectedOptions[0];
+        const ds = selectedOption ? selectedOption.dataset : {};
+        document.getElementById('property-residential-params').style.display =
+          ('hasBedrooms' in ds) ? 'block' : 'none';
+        document.getElementById('property-office-params').style.display =
+          ('hasOffices' in ds) ? 'block' : 'none';
+        document.getElementById('property-gym-params').style.display =
+          ('hasShowers' in ds) ? 'block' : 'none';
+        document.getElementById('property-warehouse-params').style.display =
+          ('hasWarehouse' in ds) ? 'block' : 'none';
       }
       
       // Initial visibility update
@@ -2924,42 +2946,26 @@
         console.warn('[Init] Failed to restore property config from localStorage:', error);
       }
       
-      // NOW generate checklist with the (saved or form-provided) config
-      function generateChecklistFromForms() {
+      // Seed PROPERTY_CONFIG from form values so Checklist.init() has correct state.
+      // Generator creation is handled exclusively by Checklist.initGeneratedRoomsForTabs()
+      // in checklist-script.js — we do NOT create AysChecklistFormFactory here.
+      function seedPropertyConfigFromForms() {
         const config = getPropertyConfigFromForms();
-        console.log('[Init] Generating checklist with config:', config);
+        console.log('[Init] Seeding PROPERTY_CONFIG with:', config);
         
         if (typeof PROPERTY_CONFIG !== 'undefined' && typeof PROPERTY_CONFIG.setPropertyType === 'function') {
           PROPERTY_CONFIG.setPropertyType(config.propertyType, config.params);
         }
-        
-        if (typeof CHECKLIST_CONFIG !== 'undefined') {
-          const generator = new AysChecklistFormFactory('rooms-container');
-          generator.generate(CHECKLIST_CONFIG);
-          console.log('✓ Initial checklist generated:', generator.getCards().length, 'rooms');
 
-          // Hide legacy hardcoded rooms in the EOT tab (generator is now the source of truth).
-          try {
-            document.querySelectorAll('#service-end-of-tenancy .room-section').forEach((el) => {
-              el.style.display = 'none';
-            });
-          } catch (_) {
-            // ignore
-          }
-          
-          // Store generator globally so property type changes can regenerate
-          window.checklistGenerator = generator;
-          
-          // Save config to localStorage
-          try {
-            localStorage.setItem('checklist_property_config', JSON.stringify(config));
-          } catch (error) {
-            console.warn('[Init] Failed to save property config:', error);
-          }
+        // Save config to localStorage so Checklist.init() can read it
+        try {
+          localStorage.setItem('checklist_property_config', JSON.stringify(config));
+        } catch (error) {
+          console.warn('[Init] Failed to save property config:', error);
         }
       }
       
-      generateChecklistFromForms();
+      seedPropertyConfigFromForms();
       
       // Add change listeners to all property config inputs
       // Use debounce (200ms) before regenerating to avoid rapid-fire regenerations
@@ -3004,8 +3010,11 @@
             spinner.style.transform = `rotate(${rotation}deg)`;
           }, 20);
           
-          // Trigger immediate regeneration (not debounced)
-          generateChecklistFromForms();
+          // Trigger immediate regeneration via Checklist (not debounced)
+          seedPropertyConfigFromForms();
+          if (typeof Checklist !== 'undefined' && typeof Checklist.regenerateActiveTab === 'function') {
+            Checklist.regenerateActiveTab();
+          }
           
           // Reset after 600ms
           setTimeout(() => {
@@ -3041,6 +3050,29 @@
         }
         if (heavyContainer) {
           heavyContainer.appendChild(heavyComponent.render());
+        }
+      }
+
+      // Initialize Rubbish Booking Components (EOT + Residential)
+      if (typeof AysRubbishBooking !== 'undefined') {
+        // EOT tab
+        const rubbishContainerEot = document.getElementById('rubbish-booking-container');
+        if (rubbishContainerEot) {
+          const rubbishEot = new AysRubbishBooking({ serviceType: 'eot' });
+          rubbishContainerEot.appendChild(rubbishEot.render());
+          rubbishEot.bind();
+          window.rubbishBookingEot = rubbishEot;
+          console.log('✓ AysRubbishBooking mounted (EOT)');
+        }
+
+        // Residential tab
+        const rubbishContainerRes = document.getElementById('rubbish-booking-container-residential');
+        if (rubbishContainerRes) {
+          const rubbishRes = new AysRubbishBooking({ serviceType: 'residential' });
+          rubbishContainerRes.appendChild(rubbishRes.render());
+          rubbishRes.bind();
+          window.rubbishBookingRes = rubbishRes;
+          console.log('✓ AysRubbishBooking mounted (Residential)');
         }
       }
     });

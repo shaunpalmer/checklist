@@ -253,6 +253,18 @@ class Room {
       });
     }
 
+    // Residential (furnished): only practical touchpoints.
+    // Full built-environment items (frames, skirting, vents, walls, etc.)
+    // are EOT/commercial scope — not regular housework.
+    if (this.serviceType === 'residential') {
+      const residentialBaseIds = new Set([
+        'base-door_handle',
+        'base-switches',
+        'base-bins'
+      ]);
+      return items.filter(item => residentialBaseIds.has(item.itemId));
+    }
+
     return items;
   }
 

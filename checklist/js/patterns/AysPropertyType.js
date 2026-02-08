@@ -149,13 +149,13 @@ class AysPropertyType {
     },
 
     // ============================================================
-    // END OF TENANCY (EOT) - Residential
+    // END OF TENANCY (EOT) - Parametric + Presets
     // ============================================================
     'eot_residential': {
       name: 'eot_residential',
       family: 'eot',
-      label: 'End of Tenancy - Residential',
-      description: 'End of tenancy residential clean with EOT-intensive item set',
+      label: 'End of Tenancy (Parametric)',
+      description: 'End of tenancy residential clean with flexible bedroom/bathroom counts',
       rooms: [
         { type: 'Bedroom', count: null },
         { type: 'Bathroom', count: null },
@@ -180,6 +180,103 @@ class AysPropertyType {
         maxBathrooms: 6,
         minBathrooms: 1
       }
+    },
+
+    'eot_1bed': {
+      name: 'eot_1bed',
+      family: 'eot',
+      label: 'EOT - 1 Bed, 1 Bath (Preset)',
+      description: 'End of tenancy 1-bedroom property',
+      rooms: [
+        { type: 'Bedroom', count: 1 },
+        { type: 'Bathroom', count: 1 },
+        { type: 'Kitchen', count: 1 },
+        { type: 'LivingArea', count: 1 },
+        { type: 'Laundry', count: 1 },
+        { type: 'Entryway', count: 1 },
+        { type: 'Outdoor', count: 1 }
+      ],
+      availableServices: ['windows', 'carpet'],
+      config: { numBedrooms: 1, numBathrooms: 1, numKitchens: 1 }
+    },
+
+    'eot_2bed': {
+      name: 'eot_2bed',
+      family: 'eot',
+      label: 'EOT - 2 Bed, 1 Bath (Preset)',
+      description: 'End of tenancy 2-bedroom property',
+      rooms: [
+        { type: 'Bedroom', count: 2 },
+        { type: 'Bathroom', count: 1 },
+        { type: 'Kitchen', count: 1 },
+        { type: 'LivingArea', count: 1 },
+        { type: 'Laundry', count: 1 },
+        { type: 'Entryway', count: 1 },
+        { type: 'Outdoor', count: 1 }
+      ],
+      availableServices: ['windows', 'carpet'],
+      config: { numBedrooms: 2, numBathrooms: 1, numKitchens: 1 }
+    },
+
+    'eot_3bed': {
+      name: 'eot_3bed',
+      family: 'eot',
+      label: 'EOT - 3 Bed, 2 Bath (Preset)',
+      description: 'End of tenancy 3-bedroom property',
+      rooms: [
+        { type: 'Bedroom', count: 3 },
+        { type: 'Bathroom', count: 2 },
+        { type: 'Kitchen', count: 1 },
+        { type: 'LivingArea', count: 1 },
+        { type: 'Laundry', count: 1 },
+        { type: 'Entryway', count: 1 },
+        { type: 'Garage', count: 1 },
+        { type: 'Outdoor', count: 1 }
+      ],
+      availableServices: ['windows', 'carpet'],
+      config: { numBedrooms: 3, numBathrooms: 2, numKitchens: 1 }
+    },
+
+    'eot_4bed': {
+      name: 'eot_4bed',
+      family: 'eot',
+      label: 'EOT - 4 Bed, 2 Bath (Preset)',
+      description: 'End of tenancy 4-bedroom property',
+      rooms: [
+        { type: 'Bedroom', count: 4 },
+        { type: 'Bathroom', count: 2 },
+        { type: 'Kitchen', count: 1 },
+        { type: 'LivingArea', count: 1 },
+        { type: 'Laundry', count: 1 },
+        { type: 'Entryway', count: 1 },
+        { type: 'HomeOffice', count: 1 },
+        { type: 'Garage', count: 1 },
+        { type: 'Outdoor', count: 1 }
+      ],
+      availableServices: ['windows', 'carpet'],
+      config: { numBedrooms: 4, numBathrooms: 2, numKitchens: 1 }
+    },
+
+    'eot_6bed': {
+      name: 'eot_6bed',
+      family: 'eot',
+      label: 'EOT - 6 Bed, 3 Bath (Preset)',
+      description: 'End of tenancy large 6-bedroom property',
+      rooms: [
+        { type: 'Bedroom', count: 6 },
+        { type: 'Bathroom', count: 3 },
+        { type: 'Kitchen', count: 1 },
+        { type: 'LivingArea', count: 1 },
+        { type: 'Laundry', count: 1 },
+        { type: 'Entryway', count: 1 },
+        { type: 'Basement', count: 1 },
+        { type: 'UtilitySpecial', count: 1 },
+        { type: 'HomeOffice', count: 1 },
+        { type: 'Garage', count: 1 },
+        { type: 'Outdoor', count: 1 }
+      ],
+      availableServices: ['windows', 'carpet'],
+      config: { numBedrooms: 6, numBathrooms: 3, numKitchens: 1 }
     },
     
     // ============================================================

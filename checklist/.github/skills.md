@@ -115,3 +115,13 @@
 **Cleanup:**
 - Synced drafts: delete after 14 days
 - Unsynced stale drafts: delete after 30 days (configurable)
+---
+name: qmd-search
+description: Use this skill to search through my 500+ local markdown notes using the qmd CLI tool.
+---
+
+# Skill Instructions
+- When the user asks a question about their notes or documents, use the `qmd` tool.
+- Run `qmd query "<search_term>"` in the terminal to find relevant snippets.
+- If specific file paths are needed, run `qmd search "<search_term>" --files`.
+- Synthesize the answer based ONLY on the results returned by the qmd tool.

@@ -27,16 +27,22 @@ const VARIANTS = {
     { value: 'carpet', label: 'Carpet' },
     { value: 'lino', label: 'Lino/Vinyl' },
     { value: 'tile', label: 'Tile' },
-    { value: 'wood', label: 'Wood' },
+    { value: 'wood', label: 'Wood/Timber' },
+    { value: 'laminate', label: 'Laminate' },
     { value: 'concrete', label: 'Concrete/Sealed' },
+    { value: 'polished', label: 'Polished Concrete' },
+    { value: 'slate', label: 'Slate/Stone' },
     { value: 'other', label: 'Other' }
   ],
   floor_variants: [
     { value: 'carpet', label: 'Carpet' },
     { value: 'lino', label: 'Lino/Vinyl' },
     { value: 'tile', label: 'Tile' },
-    { value: 'wood', label: 'Wood' },
+    { value: 'wood', label: 'Wood/Timber' },
+    { value: 'laminate', label: 'Laminate' },
     { value: 'concrete', label: 'Concrete/Sealed' },
+    { value: 'polished', label: 'Polished Concrete' },
+    { value: 'slate', label: 'Slate/Stone' },
     { value: 'other', label: 'Other' }
   ],
   oven_variants: [
@@ -45,6 +51,87 @@ const VARIANTS = {
     { value: 'double-1', label: '1 × Double oven' }
   ]
 };
+
+/**
+ * getVariantOptions(key)
+ * ─────────────────────────────────────────────────────────
+ * THE canonical interface for retrieving variant dropdown options.
+ *
+ * Every dropdown, every render path, every component must call
+ * this ONE function. Never read VARIANTS directly.
+ *
+ * Why: Add "Laminate" once here → every floor dropdown in every
+ * room across every service type picks it up automatically.
+ *
+ * @param {string} key - Variant key (e.g. 'floor_types', 'oven_variants')
+ * @returns {Array<{value: string, label: string}>} Option objects
+ */
+function getVariantOptions(key) {
+  if (!key) return [];
+
+  // Normalise legacy keys: floor_variants → floor_types (canonical)
+  const canonicalKey = key === 'floor_variants' ? 'floor_types' : key;
+
+  // 1. Check VARIANTS registry (single source of truth)
+  if (typeof VARIANTS !== 'undefined' && Array.isArray(VARIANTS[canonicalKey])) {
+    return VARIANTS[canonicalKey];
+  }
+
+  // 2. Fallback: check window.VARIANTS (for late-binding / dynamic additions)
+  if (typeof window !== 'undefined' && window.VARIANTS && Array.isArray(window.VARIANTS[canonicalKey])) {
+    return window.VARIANTS[canonicalKey];
+  }
+
+  // 3. Unknown key — log once and return empty
+  console.warn('[getVariantOptions] Unknown variant key:', key);
+  return [];
+}
+
+/**
+ * populateVariantDropdown(selectElement, key)
+ * ─────────────────────────────────────────────────────────
+ * Populate a <select> element with options from the variant registry.
+ * Safe to call multiple times — skips if already populated.
+ *
+ * @param {HTMLSelectElement} selectElement
+ * @param {string} key - Variant key
+ * @param {Object} [opts] - Options
+ * @param {string} [opts.placeholder] - Placeholder text (default: 'Choose option...')
+ * @param {boolean} [opts.force] - Re-populate even if already has options
+ */
+function populateVariantDropdown(selectElement, key, opts) {
+  if (!selectElement || !key) return;
+  opts = opts || {};
+
+  // Skip if already populated (unless forced)
+  if (!opts.force && selectElement.options && selectElement.options.length > 1) return;
+
+  const options = getVariantOptions(key);
+  if (!options.length) return;
+
+  // Clear and add placeholder
+  selectElement.innerHTML = '';
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = opts.placeholder || 'Choose option...';
+  selectElement.appendChild(placeholder);
+
+  // Add variant options
+  options.forEach(function(opt) {
+    if (!opt) return;
+    var option = document.createElement('option');
+    option.value = opt.value;
+    option.textContent = opt.label;
+    selectElement.appendChild(option);
+  });
+}
+
+// Expose globally for all render paths
+if (typeof window !== 'undefined') {
+  window.VARIANTS = VARIANTS;
+  window.getVariantOptions = getVariantOptions;
+  window.populateVariantDropdown = populateVariantDropdown;
+}
 
 const ITEM_DEFINITIONS = {
   commercial: {
@@ -1265,6 +1352,83 @@ const ITEM_DEFINITIONS = {
         baseHours: 0,
         optional: true
       }
+    },
+
+    // ============================================================
+    // RESIDENTIAL – Bedroom (furnished, time-boxed housework)
+    // ============================================================
+    bedroom: {
+      dust_surfaces: { itemId: 'res-bedroom-dust_surfaces', label: 'Dust all reachable surfaces', category: 'dust', baseHours: 0.08, optional: false },
+      make_bed: { itemId: 'res-bedroom-make_bed', label: 'Make bed / change linen (if requested)', category: 'linen', baseHours: 0.10, optional: true },
+      bedside_tables: { itemId: 'res-bedroom-bedside_tables', label: 'Bedside tables – wipe down', category: 'surfaces', baseHours: 0.04, optional: false },
+      dresser_wipe: { itemId: 'res-bedroom-dresser_wipe', label: 'Dresser / chest of drawers – wipe top', category: 'surfaces', baseHours: 0.04, optional: false },
+      mirror: { itemId: 'res-bedroom-mirror', label: 'Mirror – clean', category: 'glass', baseHours: 0.04, optional: true },
+      wardrobe_fronts: { itemId: 'res-bedroom-wardrobe_fronts', label: 'Wardrobe fronts – wipe (external only)', category: 'surfaces', baseHours: 0.04, optional: true },
+      floor_vacuum: { itemId: 'res-bedroom-floor_vacuum', label: 'Floor – vacuum (carpet)', category: 'floors', baseHours: 0.10, optional: false },
+      floor_mop: { itemId: 'res-bedroom-floor_mop', label: 'Floor – mop (hard surface)', category: 'floors', baseHours: 0.08, optional: false },
+      bin_empty: { itemId: 'res-bedroom-bin_empty', label: 'Bin – empty & reline', category: 'waste', baseHours: 0.03, optional: true }
+    },
+
+    // ============================================================
+    // RESIDENTIAL – Bathroom (furnished, time-boxed housework)
+    // ============================================================
+    bathroom: {
+      toilet_bowl: { itemId: 'res-bathroom-toilet_bowl', label: 'Toilet bowl – scrub & sanitise', category: 'plumbing', baseHours: 0.08, optional: false },
+      toilet_seat_exterior: { itemId: 'res-bathroom-toilet_seat_ext', label: 'Toilet seat, lid & exterior – wipe', category: 'plumbing', baseHours: 0.06, optional: false },
+      sink_basin: { itemId: 'res-bathroom-sink_basin', label: 'Sink / basin – clean & rinse', category: 'plumbing', baseHours: 0.06, optional: false },
+      taps_mixer: { itemId: 'res-bathroom-taps_mixer', label: 'Taps / mixer – polish', category: 'plumbing', baseHours: 0.04, optional: false },
+      mirror: { itemId: 'res-bathroom-mirror', label: 'Mirror – clean', category: 'glass', baseHours: 0.04, optional: false },
+      vanity_benchtop: { itemId: 'res-bathroom-vanity_benchtop', label: 'Vanity / benchtop – wipe', category: 'surfaces', baseHours: 0.04, optional: false },
+      shower_screen: { itemId: 'res-bathroom-shower_screen', label: 'Shower screen / door – clean', category: 'glass', baseHours: 0.08, optional: false },
+      shower_recess: { itemId: 'res-bathroom-shower_recess', label: 'Shower recess – wipe walls & floor', category: 'plumbing', baseHours: 0.10, optional: false },
+      bath_clean: { itemId: 'res-bathroom-bath_clean', label: 'Bath – scrub & rinse (if present)', category: 'plumbing', baseHours: 0.08, optional: true },
+      towel_rail: { itemId: 'res-bathroom-towel_rail', label: 'Towel rail – wipe', category: 'fixtures', baseHours: 0.02, optional: true },
+      floor_mop: { itemId: 'res-bathroom-floor_mop', label: 'Floor – mop', category: 'floors', baseHours: 0.08, optional: false },
+      bin_empty: { itemId: 'res-bathroom-bin_empty', label: 'Bin – empty & reline', category: 'waste', baseHours: 0.03, optional: true }
+    },
+
+    // ============================================================
+    // RESIDENTIAL – Kitchen (furnished, time-boxed housework)
+    // ============================================================
+    kitchen: {
+      benchtops: { itemId: 'res-kitchen-benchtops', label: 'Benchtops / counters – wipe & sanitise', category: 'surfaces', baseHours: 0.08, optional: false },
+      sink_clean: { itemId: 'res-kitchen-sink_clean', label: 'Sink – clean & rinse', category: 'plumbing', baseHours: 0.06, optional: false },
+      sink_taps: { itemId: 'res-kitchen-sink_taps', label: 'Taps / mixer – polish', category: 'plumbing', baseHours: 0.04, optional: false },
+      stovetop: { itemId: 'res-kitchen-stovetop', label: 'Stovetop / cooktop – wipe', category: 'appliances', baseHours: 0.08, optional: false },
+      splashback: { itemId: 'res-kitchen-splashback', label: 'Splashback – wipe down', category: 'walls', baseHours: 0.06, optional: false },
+      appliance_fronts: { itemId: 'res-kitchen-appliance_fronts', label: 'Appliance fronts – wipe (microwave, dishwasher, oven)', category: 'appliances', baseHours: 0.06, optional: false },
+      cabinet_fronts: { itemId: 'res-kitchen-cabinet_fronts', label: 'Cabinet fronts – spot wipe (external only)', category: 'surfaces', baseHours: 0.06, optional: true },
+      rangehood_exterior: { itemId: 'res-kitchen-rangehood_ext', label: 'Rangehood – wipe exterior', category: 'appliances', baseHours: 0.04, optional: true },
+      bin_empty: { itemId: 'res-kitchen-bin_empty', label: 'Bin – empty & reline', category: 'waste', baseHours: 0.04, optional: false },
+      floor_sweep: { itemId: 'res-kitchen-floor_sweep', label: 'Floor – sweep', category: 'floors', baseHours: 0.06, optional: false },
+      floor_mop: { itemId: 'res-kitchen-floor_mop', label: 'Floor – mop', category: 'floors', baseHours: 0.08, optional: false }
+    },
+
+    // ============================================================
+    // RESIDENTIAL – Living Area (furnished, time-boxed housework)
+    // ============================================================
+    living: {
+      dust_surfaces: { itemId: 'res-living-dust_surfaces', label: 'Dust all reachable surfaces', category: 'dust', baseHours: 0.10, optional: false },
+      tv_unit: { itemId: 'res-living-tv_unit', label: 'TV unit / entertainment – wipe', category: 'surfaces', baseHours: 0.04, optional: false },
+      coffee_table: { itemId: 'res-living-coffee_table', label: 'Coffee table – wipe', category: 'surfaces', baseHours: 0.04, optional: false },
+      side_tables: { itemId: 'res-living-side_tables', label: 'Side tables – wipe', category: 'surfaces', baseHours: 0.04, optional: true },
+      shelving_dust: { itemId: 'res-living-shelving_dust', label: 'Shelving / bookcase – dust', category: 'dust', baseHours: 0.06, optional: true },
+      mirror: { itemId: 'res-living-mirror', label: 'Mirror – clean (if present)', category: 'glass', baseHours: 0.04, optional: true },
+      floor_vacuum: { itemId: 'res-living-floor_vacuum', label: 'Floor – vacuum (carpet)', category: 'floors', baseHours: 0.10, optional: false },
+      floor_mop: { itemId: 'res-living-floor_mop', label: 'Floor – mop (hard surface)', category: 'floors', baseHours: 0.08, optional: false }
+    },
+
+    // ============================================================
+    // RESIDENTIAL – Laundry (furnished, time-boxed housework)
+    // ============================================================
+    laundry: {
+      benchtop: { itemId: 'res-laundry-benchtop', label: 'Benchtop – wipe', category: 'surfaces', baseHours: 0.04, optional: false },
+      sink_clean: { itemId: 'res-laundry-sink_clean', label: 'Sink – clean & rinse', category: 'plumbing', baseHours: 0.06, optional: true },
+      sink_taps: { itemId: 'res-laundry-sink_taps', label: 'Taps – polish', category: 'plumbing', baseHours: 0.04, optional: true },
+      washer_dryer_exterior: { itemId: 'res-laundry-washer_dryer_ext', label: 'Washer / dryer – wipe exterior', category: 'appliances', baseHours: 0.04, optional: true },
+      shelving_wipe: { itemId: 'res-laundry-shelving_wipe', label: 'Shelving – wipe', category: 'surfaces', baseHours: 0.04, optional: true },
+      floor_sweep: { itemId: 'res-laundry-floor_sweep', label: 'Floor – sweep', category: 'floors', baseHours: 0.04, optional: false },
+      floor_mop: { itemId: 'res-laundry-floor_mop', label: 'Floor – mop', category: 'floors', baseHours: 0.06, optional: false }
     }
   },
 
@@ -1340,27 +1504,18 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Entryway / Hallway / Circulation
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     entryway: {
-      ceiling_cobwebs: { itemId: 'eot-entryway-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-entryway-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
-      walls_spot_clean: { itemId: 'eot-entryway-walls_spot_clean', label: 'Walls (spot clean marks)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-entryway-skirting', label: 'Skirting boards', category: 'walls', baseHours: 0, optional: true },
-      doors_front_back: { itemId: 'eot-entryway-doors', label: 'Door (front + back)', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-entryway-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-entryway-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-entryway-power_points', label: 'Power points', category: 'fixtures', baseHours: 0, optional: true },
       shoe_storage: { itemId: 'eot-entryway-shoe_storage', label: 'Built-in shoe storage / cubbies (if present)', category: 'storage', baseHours: 0, optional: true },
       coat_hooks: { itemId: 'eot-entryway-coat_hooks', label: 'Coat hooks / coat rack (if present)', category: 'fixtures', baseHours: 0, optional: true },
       console_table: { itemId: 'eot-entryway-console_table', label: 'Console table / side table (if present)', category: 'surfaces', baseHours: 0, optional: true },
       mirror: { itemId: 'eot-entryway-mirror', label: 'Mirror (if present)', category: 'glass', baseHours: 0, optional: true },
-      windows_internal: { itemId: 'eot-entryway-windows_internal', label: 'Windows (internal glass, if present)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-entryway-window_frames', label: 'Window frames / sills (if present)', category: 'windows', baseHours: 0, optional: true },
       stair_treads: { itemId: 'eot-entryway-stair_treads', label: 'Stair treads (if present)', category: 'stairs', baseHours: 0, optional: true },
       stair_risers: { itemId: 'eot-entryway-stair_risers', label: 'Stair risers (if present)', category: 'stairs', baseHours: 0, optional: true },
       bannisters: { itemId: 'eot-entryway-bannisters', label: 'Bannisters / handrails (if present)', category: 'stairs', baseHours: 0, optional: true },
       stair_underside: { itemId: 'eot-entryway-stair_underside', label: 'Stair underside (dusting, if present)', category: 'stairs', baseHours: 0, optional: true },
       heater_unit: { itemId: 'eot-entryway-heater_unit', label: 'Heater / heat pump unit (if present)', category: 'hvac', baseHours: 0, optional: true },
-      air_vents: { itemId: 'eot-entryway-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
       smoke_alarm: { itemId: 'eot-entryway-smoke_alarm', label: 'Smoke alarm (external dusting, if present)', category: 'safety', baseHours: 0, optional: true },
       floor_vacuum: { itemId: 'eot-entryway-floor_vacuum', label: 'Floor – vacuum (carpet)', category: 'floors', baseHours: 0, optional: true },
       floor_mop: { itemId: 'eot-entryway-floor_mop', label: 'Floor – mop (hard surface)', category: 'floors', baseHours: 0, optional: true },
@@ -1368,17 +1523,10 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Basement
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     basement: {
-      ceiling_cobwebs: { itemId: 'eot-basement-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-basement-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
       beams_pipes: { itemId: 'eot-basement-beams_pipes', label: 'Exposed beams / pipes (dusting, if present)', category: 'structure', baseHours: 0, optional: true },
-      walls_spot_clean: { itemId: 'eot-basement-walls_spot_clean', label: 'Walls (spot clean marks / moisture residue)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-basement-skirting', label: 'Skirting boards (if present)', category: 'walls', baseHours: 0, optional: true },
-      doors_front_back: { itemId: 'eot-basement-doors', label: 'Doors (front + back, if present)', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-basement-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      windows_internal: { itemId: 'eot-basement-windows_internal', label: 'Windows (internal glass, if present)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-basement-window_frames', label: 'Window frames / sills (if present)', category: 'windows', baseHours: 0, optional: true },
-      air_vents: { itemId: 'eot-basement-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
       dehumidifier: { itemId: 'eot-basement-dehumidifier', label: 'Dehumidifier unit exterior (if present)', category: 'appliances', baseHours: 0, optional: true },
       hvac_unit: { itemId: 'eot-basement-hvac_unit', label: 'Heater / HVAC unit exterior (if present)', category: 'hvac', baseHours: 0, optional: true },
       shelving: { itemId: 'eot-basement-shelving', label: 'Shelving (open shelves)', category: 'storage', baseHours: 0, optional: true },
@@ -1400,26 +1548,16 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Kitchen
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     kitchen: {
-      // Ceiling & Lighting
-      ceiling_cobwebs: { itemId: 'eot-kitchen-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-kitchen-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
+      // HVAC extras
       extractor_fan: { itemId: 'eot-kitchen-extractor_fan', label: 'Extractor fan / exhaust (external)', category: 'hvac', baseHours: 0, optional: true },
 
-      // Walls & Trim
-      walls_spot_clean: { itemId: 'eot-kitchen-walls_spot_clean', label: 'Walls (spot clean marks / splashes)', category: 'walls', baseHours: 0, optional: true },
+      // Walls extras
       splashback: { itemId: 'eot-kitchen-splashback', label: 'Splashback (tiles / glass)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-kitchen-skirting', label: 'Skirting boards', category: 'walls', baseHours: 0, optional: true },
 
-      // Doors & Hardware
-      doors_front_back: { itemId: 'eot-kitchen-doors', label: 'Door (front + back)', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-kitchen-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-kitchen-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-kitchen-power_points', label: 'Power points', category: 'fixtures', baseHours: 0, optional: true },
-
-      // Windows
-      windows_internal: { itemId: 'eot-kitchen-windows_internal', label: 'Windows (internal glass)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-kitchen-window_frames', label: 'Window frames / sills', category: 'windows', baseHours: 0, optional: true },
+      // Windows extras
       curtains_blinds: { itemId: 'eot-kitchen-curtains_blinds', label: 'Curtains / blinds (dusting only)', category: 'windows', baseHours: 0, optional: true },
 
       // Counters & Surfaces
@@ -1468,9 +1606,8 @@ const ITEM_DEFINITIONS = {
       microwave_interior: { itemId: 'eot-kitchen-microwave_interior', label: 'Microwave interior (if present)', category: 'appliances', baseHours: 0, optional: true },
       small_appliances: { itemId: 'eot-kitchen-small_appliances', label: 'Small appliances exterior (kettle, toaster, if left)', category: 'appliances', baseHours: 0, optional: true },
 
-      // Waste & Utilities
+      // Waste & Utilities (base item: vents)
       bin_area: { itemId: 'eot-kitchen-bin_area', label: 'Bin area / cabinet', category: 'waste', baseHours: 0, optional: true },
-      air_vents: { itemId: 'eot-kitchen-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
       smoke_alarm: { itemId: 'eot-kitchen-smoke_alarm', label: 'Smoke alarm (external dusting)', category: 'safety', baseHours: 0, optional: true },
 
       // Floors
@@ -1482,15 +1619,9 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Utility & Special Rooms
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     utility_special: {
-      ceiling_cobwebs: { itemId: 'eot-utility-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-utility-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
-      walls_spot_clean: { itemId: 'eot-utility-walls_spot_clean', label: 'Walls (spot clean marks)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-utility-skirting', label: 'Skirting boards', category: 'walls', baseHours: 0, optional: true },
-      doors_front_back: { itemId: 'eot-utility-doors', label: 'Doors (front + back)', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-utility-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-utility-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-utility-power_points', label: 'Power points', category: 'fixtures', baseHours: 0, optional: true },
       shelving: { itemId: 'eot-utility-shelving', label: 'Shelving (open shelves)', category: 'storage', baseHours: 0, optional: true },
       cabinets_exterior: { itemId: 'eot-utility-cabinets_exterior', label: 'Cabinets exterior (if present)', category: 'storage', baseHours: 0, optional: true },
       cabinets_interior: { itemId: 'eot-utility-cabinets_interior', label: 'Cabinets interior shelving (if present)', category: 'storage', baseHours: 0, optional: true },
@@ -1505,20 +1636,13 @@ const ITEM_DEFINITIONS = {
       garage_spot_mop: { itemId: 'eot-utility-garage_spot_mop', label: 'Garage floor – spot mop (optional, if present)', category: 'floors', baseHours: 0, optional: true },
       garage_shelves: { itemId: 'eot-utility-garage_shelves', label: 'Garage shelves / racks (if present)', category: 'storage', baseHours: 0, optional: true },
       garage_door_track: { itemId: 'eot-utility-garage_door_track', label: 'Garage door track accessible surfaces (dusting, if present)', category: 'fixtures', baseHours: 0, optional: true },
-      air_vents: { itemId: 'eot-utility-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
       smoke_alarm: { itemId: 'eot-utility-smoke_alarm', label: 'Smoke alarm (external dusting, if present)', category: 'safety', baseHours: 0, optional: true }
     },
 
     // EOT – Home Office
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     home_office: {
-      ceiling_cobwebs: { itemId: 'eot-office-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-office-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
-      walls_spot_clean: { itemId: 'eot-office-walls_spot_clean', label: 'Walls (spot clean marks)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-office-skirting', label: 'Skirting boards', category: 'walls', baseHours: 0, optional: true },
-      doors_front_back: { itemId: 'eot-office-doors', label: 'Door (front + back)', category: 'doors', baseHours: 0, optional: true },
-      door_handle: { itemId: 'eot-office-door_handle', label: 'Door handle', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-office-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-office-power_points', label: 'Power points', category: 'fixtures', baseHours: 0, optional: true },
       desk_surface: { itemId: 'eot-office-desk_surface', label: 'Desk surface (dry wipe)', category: 'surfaces', baseHours: 0, optional: true },
       desk_drawers: { itemId: 'eot-office-desk_drawers', label: 'Desk drawers (external + internal, if applicable)', category: 'storage', baseHours: 0, optional: true },
       filing_cabinet: { itemId: 'eot-office-filing_cabinet', label: 'Filing cabinet exterior (if present)', category: 'storage', baseHours: 0, optional: true },
@@ -1527,10 +1651,7 @@ const ITEM_DEFINITIONS = {
       keyboard_mouse: { itemId: 'eot-office-keyboard_mouse', label: 'Keyboard / mouse surfaces (dry wipe only, if present)', category: 'electronics', baseHours: 0, optional: true },
       printers_devices: { itemId: 'eot-office-printers_devices', label: 'Printers / devices exterior (dry wipe only, if present)', category: 'electronics', baseHours: 0, optional: true },
       chair_wipe: { itemId: 'eot-office-chair_wipe', label: 'Chair (external wipe)', category: 'furniture', baseHours: 0, optional: true },
-      windows_internal: { itemId: 'eot-office-windows_internal', label: 'Windows (internal glass, if present)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-office-window_frames', label: 'Window frames / sills (if present)', category: 'windows', baseHours: 0, optional: true },
       curtains_blinds: { itemId: 'eot-office-curtains_blinds', label: 'Curtains / blinds (dusting only)', category: 'windows', baseHours: 0, optional: true },
-      air_vents: { itemId: 'eot-office-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
       smoke_alarm: { itemId: 'eot-office-smoke_alarm', label: 'Smoke alarm (external dusting, if present)', category: 'safety', baseHours: 0, optional: true },
       floor_vacuum: { itemId: 'eot-office-floor_vacuum', label: 'Floor – vacuum (carpet)', category: 'floors', baseHours: 0, optional: true },
       floor_mop: { itemId: 'eot-office-floor_mop', label: 'Floor – mop (hard surface)', category: 'floors', baseHours: 0, optional: true },
@@ -1660,26 +1781,16 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Bedroom
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     bedroom: {
-      // Ceiling & Lighting
-      ceiling_cobwebs: { itemId: 'eot-bedroom-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-bedroom-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
+      // Ceiling extras
       ceiling_fan: { itemId: 'eot-bedroom-ceiling_fan', label: 'Ceiling fan (if present)', category: 'fixtures', baseHours: 0, optional: true },
 
-      // Walls & Trim
-      walls_spot_clean: { itemId: 'eot-bedroom-walls_spot_clean', label: 'Walls (spot clean marks)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-bedroom-skirting', label: 'Skirting boards', category: 'walls', baseHours: 0, optional: true },
+      // Walls extras
       picture_rails: { itemId: 'eot-bedroom-picture_rails', label: 'Picture rails (if present)', category: 'walls', baseHours: 0, optional: true },
 
-      // Doors & Hardware
-      doors_front_back: { itemId: 'eot-bedroom-doors', label: 'Door (front + back)', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-bedroom-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-bedroom-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-bedroom-power_points', label: 'Power points', category: 'fixtures', baseHours: 0, optional: true },
-
-      // Windows
-      windows_internal: { itemId: 'eot-bedroom-windows_internal', label: 'Windows (internal glass)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-bedroom-window_frames', label: 'Window frames / sills', category: 'windows', baseHours: 0, optional: true },
+      // Windows extras
       window_tracks: { itemId: 'eot-bedroom-window_tracks', label: 'Window tracks (sliding, if present)', category: 'windows', baseHours: 0, optional: true },
       curtains_blinds: { itemId: 'eot-bedroom-curtains_blinds', label: 'Curtains / blinds (dusting only)', category: 'windows', baseHours: 0, optional: true },
 
@@ -1701,9 +1812,8 @@ const ITEM_DEFINITIONS = {
       // Mirrors & Glass
       mirror_freestanding: { itemId: 'eot-bedroom-mirror_freestanding', label: 'Freestanding / wall mirror', category: 'glass', baseHours: 0, optional: true },
 
-      // HVAC
+      // HVAC (base item: vents)
       heater_unit: { itemId: 'eot-bedroom-heater_unit', label: 'Heater / heat pump unit (if present)', category: 'hvac', baseHours: 0, optional: true },
-      air_vents: { itemId: 'eot-bedroom-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
       smoke_alarm: { itemId: 'eot-bedroom-smoke_alarm', label: 'Smoke alarm (external dusting)', category: 'safety', baseHours: 0, optional: true },
 
       // Floors
@@ -1714,27 +1824,17 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Bathroom
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     bathroom: {
-      // Ceiling & Lighting
-      ceiling_cobwebs: { itemId: 'eot-bathroom-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-bathroom-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
+      // HVAC extras
       extractor_fan: { itemId: 'eot-bathroom-extractor_fan', label: 'Extractor fan / exhaust', category: 'hvac', baseHours: 0, optional: true },
 
-      // Walls & Trim
-      walls_spot_clean: { itemId: 'eot-bathroom-walls_spot_clean', label: 'Walls (spot clean marks / splashes)', category: 'walls', baseHours: 0, optional: true },
+      // Walls extras
       tiles_walls: { itemId: 'eot-bathroom-tiles_walls', label: 'Wall tiles (full wipe)', category: 'walls', baseHours: 0, optional: true },
       tile_grout_walls: { itemId: 'eot-bathroom-grout_walls', label: 'Tile grout – walls (scrub)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-bathroom-skirting', label: 'Skirting boards (if present)', category: 'walls', baseHours: 0, optional: true },
 
-      // Doors & Hardware
-      doors_front_back: { itemId: 'eot-bathroom-doors', label: 'Door (front + back)', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-bathroom-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-bathroom-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-bathroom-power_points', label: 'Power points (if present)', category: 'fixtures', baseHours: 0, optional: true },
-
-      // Windows
-      windows_internal: { itemId: 'eot-bathroom-windows_internal', label: 'Window (internal glass)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-bathroom-window_frames', label: 'Window frame / sill', category: 'windows', baseHours: 0, optional: true },
+      // Windows extras
       window_tracks: { itemId: 'eot-bathroom-window_tracks', label: 'Window tracks (if present)', category: 'windows', baseHours: 0, optional: true },
       blinds: { itemId: 'eot-bathroom-blinds', label: 'Blinds (dusting / wipe)', category: 'windows', baseHours: 0, optional: true },
 
@@ -1786,9 +1886,8 @@ const ITEM_DEFINITIONS = {
       hooks: { itemId: 'eot-bathroom-hooks', label: 'Hooks (robe / towel)', category: 'fixtures', baseHours: 0, optional: true },
       shelving: { itemId: 'eot-bathroom-shelving', label: 'Shelving (if present)', category: 'storage', baseHours: 0, optional: true },
 
-      // HVAC & Safety
+      // HVAC & Safety (base item: vents)
       heater_unit: { itemId: 'eot-bathroom-heater_unit', label: 'Heater / heat lamp (if present)', category: 'hvac', baseHours: 0, optional: true },
-      air_vents: { itemId: 'eot-bathroom-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
       smoke_alarm: { itemId: 'eot-bathroom-smoke_alarm', label: 'Smoke alarm (external dusting, if present)', category: 'safety', baseHours: 0, optional: true },
 
       // Floors
@@ -1801,27 +1900,17 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Living Room / Lounge
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     living: {
-      // Ceiling & Lighting
-      ceiling_cobwebs: { itemId: 'eot-living-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-living-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
+      // Ceiling extras
       ceiling_fan: { itemId: 'eot-living-ceiling_fan', label: 'Ceiling fan (if present)', category: 'fixtures', baseHours: 0, optional: true },
 
-      // Walls & Trim
-      walls_spot_clean: { itemId: 'eot-living-walls_spot_clean', label: 'Walls (spot clean marks)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-living-skirting', label: 'Skirting boards', category: 'walls', baseHours: 0, optional: true },
+      // Walls extras
       picture_rails: { itemId: 'eot-living-picture_rails', label: 'Picture rails (if present)', category: 'walls', baseHours: 0, optional: true },
       dado_rails: { itemId: 'eot-living-dado_rails', label: 'Dado rails (if present)', category: 'walls', baseHours: 0, optional: true },
 
-      // Doors & Hardware
-      doors_front_back: { itemId: 'eot-living-doors', label: 'Doors (front + back)', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-living-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-living-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-living-power_points', label: 'Power points', category: 'fixtures', baseHours: 0, optional: true },
-
-      // Windows
-      windows_internal: { itemId: 'eot-living-windows_internal', label: 'Windows (internal glass)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-living-window_frames', label: 'Window frames / sills', category: 'windows', baseHours: 0, optional: true },
+      // Windows extras
       window_tracks: { itemId: 'eot-living-window_tracks', label: 'Window tracks (sliding, if present)', category: 'windows', baseHours: 0, optional: true },
       curtains_blinds: { itemId: 'eot-living-curtains_blinds', label: 'Curtains / blinds (dusting only)', category: 'windows', baseHours: 0, optional: true },
 
@@ -1844,9 +1933,8 @@ const ITEM_DEFINITIONS = {
       // Mirrors & Glass
       mirrors: { itemId: 'eot-living-mirrors', label: 'Mirrors (if present)', category: 'glass', baseHours: 0, optional: true },
 
-      // HVAC & Safety
+      // HVAC & Safety (base item: vents)
       heater_unit: { itemId: 'eot-living-heater_unit', label: 'Heater / heat pump unit (if present)', category: 'hvac', baseHours: 0, optional: true },
-      air_vents: { itemId: 'eot-living-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
       smoke_alarm: { itemId: 'eot-living-smoke_alarm', label: 'Smoke alarm (external dusting)', category: 'safety', baseHours: 0, optional: true },
 
       // Floors
@@ -1857,25 +1945,11 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Laundry
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     laundry: {
-      // Ceiling & Lighting
-      ceiling_cobwebs: { itemId: 'eot-laundry-ceiling_cobwebs', label: 'Ceiling (cobwebs)', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-laundry-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
-
-      // Walls & Trim
-      walls_spot_clean: { itemId: 'eot-laundry-walls_spot_clean', label: 'Walls (spot clean marks / splashes)', category: 'walls', baseHours: 0, optional: true },
+      // Walls extras
       splashback: { itemId: 'eot-laundry-splashback', label: 'Splashback (if tiled)', category: 'walls', baseHours: 0, optional: true },
-      skirting_boards: { itemId: 'eot-laundry-skirting', label: 'Skirting boards', category: 'walls', baseHours: 0, optional: true },
-
-      // Doors & Hardware
-      doors_front_back: { itemId: 'eot-laundry-doors', label: 'Door (front + back)', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-laundry-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-laundry-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-laundry-power_points', label: 'Power points', category: 'fixtures', baseHours: 0, optional: true },
-
-      // Windows
-      windows_internal: { itemId: 'eot-laundry-windows_internal', label: 'Window (internal glass, if present)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-laundry-window_frames', label: 'Window frame / sill (if present)', category: 'windows', baseHours: 0, optional: true },
 
       // Sink / Tub
       laundry_tub: { itemId: 'eot-laundry-tub', label: 'Laundry tub / sink (scrub + polish)', category: 'plumbing', baseHours: 0, optional: true },
@@ -1907,8 +1981,7 @@ const ITEM_DEFINITIONS = {
       drying_rack_area: { itemId: 'eot-laundry-drying_rack', label: 'Drying rack area (if fitted)', category: 'fixtures', baseHours: 0, optional: true },
       wall_airer: { itemId: 'eot-laundry-wall_airer', label: 'Wall-mounted airer (if present)', category: 'fixtures', baseHours: 0, optional: true },
 
-      // HVAC & Safety
-      air_vents: { itemId: 'eot-laundry-air_vents', label: 'Air vents', category: 'hvac', baseHours: 0, optional: true },
+      // HVAC & Safety (base item: vents)
       smoke_alarm: { itemId: 'eot-laundry-smoke_alarm', label: 'Smoke alarm (external dusting, if present)', category: 'safety', baseHours: 0, optional: true },
 
       // Floors
@@ -1920,28 +1993,20 @@ const ITEM_DEFINITIONS = {
     },
 
     // EOT – Garage
+    // Base items (via getBaseItems): door, frame, handle, switches, power points,
+    //   vents, skirting, windows/sills, built-ins, walls, light fittings, ceiling cobwebs
     garage: {
-      // ===== CEILING & LIGHTING =====
-      ceiling_cobwebs: { itemId: 'eot-garage-ceiling_cobwebs', label: 'Ceiling – cobweb removal', category: 'ceiling', baseHours: 0, optional: true },
-      light_fittings: { itemId: 'eot-garage-light_fittings', label: 'Light fittings', category: 'fixtures', baseHours: 0, optional: true },
+      // ===== CEILING extras =====
       exposed_beams: { itemId: 'eot-garage-beams', label: 'Exposed beams / rafters (dust, if reachable)', category: 'ceiling', baseHours: 0, optional: true },
 
-      // ===== WALLS =====
-      walls_spot_clean: { itemId: 'eot-garage-walls_spot', label: 'Walls – spot clean marks / scuffs', category: 'walls', baseHours: 0, optional: true },
+      // ===== WALLS extras =====
       walls_cobwebs: { itemId: 'eot-garage-walls_cobwebs', label: 'Walls – cobweb removal', category: 'walls', baseHours: 0, optional: true },
 
-      // ===== DOORS =====
+      // ===== GARAGE-SPECIFIC DOORS =====
       garage_door_interior: { itemId: 'eot-garage-door_int', label: 'Garage door – interior surface wipe', category: 'doors', baseHours: 0, optional: true },
       garage_door_tracks: { itemId: 'eot-garage-door_tracks', label: 'Garage door tracks – clear debris', category: 'doors', baseHours: 0, optional: true },
       garage_door_sensors: { itemId: 'eot-garage-door_sensors', label: 'Garage door sensors – wipe', category: 'doors', baseHours: 0, optional: true },
       internal_door: { itemId: 'eot-garage-internal_door', label: 'Internal access door – front + back', category: 'doors', baseHours: 0, optional: true },
-      door_handles: { itemId: 'eot-garage-door_handles', label: 'Door handles', category: 'doors', baseHours: 0, optional: true },
-      light_switches: { itemId: 'eot-garage-light_switches', label: 'Light switches', category: 'fixtures', baseHours: 0, optional: true },
-      power_points: { itemId: 'eot-garage-power_points', label: 'Power points', category: 'fixtures', baseHours: 0, optional: true },
-
-      // ===== WINDOWS =====
-      windows: { itemId: 'eot-garage-windows', label: 'Windows (internal glass, if present)', category: 'windows', baseHours: 0, optional: true },
-      window_frames: { itemId: 'eot-garage-window_frames', label: 'Window frames / sills', category: 'windows', baseHours: 0, optional: true },
 
       // ===== STORAGE & SHELVING =====
       shelving_units: { itemId: 'eot-garage-shelving', label: 'Shelving units – wipe', category: 'storage', baseHours: 0, optional: true },
@@ -2074,6 +2139,9 @@ const COMMERCIAL_PACKAGES = {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     ITEM_DEFINITIONS,
+    VARIANTS,
+    getVariantOptions,
+    populateVariantDropdown,
     OPTIONAL_FORM_CHOICES,
     COMMERCIAL_PACKAGES
   };

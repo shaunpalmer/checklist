@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'checklist-shell-v1';
+const CACHE_VERSION = 'checklist-shell-v10';
 const SHELL_ASSETS = [
   './',
   './checklist-modern.html',
@@ -9,6 +9,7 @@ const SHELL_ASSETS = [
   './js/event-worker.js',
   './js/data/ITEM_DEFINITIONS.js',
   './js/data/checklist-config.js',
+  './js/patterns/AysPropertyType.js',
   './icons/icon-192.svg',
   './icons/icon-512.svg'
 ];
@@ -33,6 +34,12 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+
+  // Never cache auth-related PHP files — they must always hit the server
+  const path = url.pathname;
+  if (path.endsWith('.php') || path.includes('/auth/') || path.includes('/config/') || path.includes('/storage/')) {
+    return;
+  }
 
   event.respondWith(
     caches.match(req).then((cached) => {

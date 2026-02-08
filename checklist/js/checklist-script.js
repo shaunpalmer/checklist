@@ -524,18 +524,50 @@
       try {
         const builder = AysChecklistConfigBuilder.forPropertyType(targetType);
 
-        if (PROPERTY_CONFIG.numBedrooms) builder.withBedroomCount(PROPERTY_CONFIG.numBedrooms);
-        if (PROPERTY_CONFIG.numBathrooms) builder.withBathroomCount(PROPERTY_CONFIG.numBathrooms);
-
-        if (PROPERTY_CONFIG.numFloors && PROPERTY_CONFIG.numOfficesPerFloor) {
-          builder.withMultiStoryOffice(PROPERTY_CONFIG.numFloors, PROPERTY_CONFIG.numOfficesPerFloor);
-        } else if (PROPERTY_CONFIG.numOffices) {
-          builder.withOfficeCount(PROPERTY_CONFIG.numOffices);
+        // Determine which room types this property actually requires (parametric = count: null).
+        // Only apply params the type needs, and provide safe defaults so build() never
+        // throws and falls back to a stale CHECKLIST_CONFIG from a different service family.
+        var typeInfo = (typeof AysPropertyType !== 'undefined') ? AysPropertyType.getType(targetType) : null;
+        var needsRoom = {};
+        if (typeInfo && Array.isArray(typeInfo.rooms)) {
+          typeInfo.rooms.forEach(function(spec) { if (spec.count === null) needsRoom[spec.type] = true; });
         }
 
-        if (PROPERTY_CONFIG.numShowers) builder.withShowerCount(PROPERTY_CONFIG.numShowers);
-        if (PROPERTY_CONFIG.numLoadingDocks) builder.withLoadingDockCount(PROPERTY_CONFIG.numLoadingDocks);
-        if (PROPERTY_CONFIG.numAdminOffices) builder.withAdminOfficeCount(PROPERTY_CONFIG.numAdminOffices);
+        if (needsRoom.Bedroom) {
+          var bedrooms = PROPERTY_CONFIG.numBedrooms
+            || (typeInfo && typeInfo.config && typeInfo.config.numBedrooms)
+            || 3;
+          builder.withBedroomCount(bedrooms);
+        }
+        if (needsRoom.Bathroom) {
+          var bathrooms = PROPERTY_CONFIG.numBathrooms
+            || (typeInfo && typeInfo.config && typeInfo.config.numBathrooms)
+            || 1;
+          builder.withBathroomCount(bathrooms);
+        }
+        if (needsRoom.Office) {
+          if (PROPERTY_CONFIG.numFloors && PROPERTY_CONFIG.numOfficesPerFloor) {
+            builder.withMultiStoryOffice(PROPERTY_CONFIG.numFloors, PROPERTY_CONFIG.numOfficesPerFloor);
+          } else {
+            var offices = PROPERTY_CONFIG.numOffices
+              || PROPERTY_CONFIG.numAdminOffices
+              || (typeInfo && typeInfo.config && typeInfo.config.numOffices)
+              || 4;
+            builder.withOfficeCount(offices);
+          }
+        }
+        if (needsRoom.Shower) {
+          var showers = PROPERTY_CONFIG.numShowers
+            || (typeInfo && typeInfo.config && typeInfo.config.numShowers)
+            || 6;
+          builder.withShowerCount(showers);
+        }
+        if (needsRoom.LoadingDock) {
+          var docks = PROPERTY_CONFIG.numLoadingDocks
+            || (typeInfo && typeInfo.config && typeInfo.config.numLoadingDocks)
+            || 2;
+          builder.withLoadingDockCount(docks);
+        }
 
         const rawDefaults = this.getFloorDefaultsFromStorage();
         const normalizedDefaults = this.normalizeFloorDefaults(rawDefaults);
@@ -545,8 +577,13 @@
 
         return builder.build();
       } catch (err) {
-        console.warn('[Checklist] Per-tab config build failed, falling back to global config:', err);
-        return this._getCurrentGeneratedConfig();
+        // HARD GUARD: Never fall back to _getCurrentGeneratedConfig() here.
+        // That returned whatever CHECKLIST_CONFIG was last built — potentially from
+        // a different service family (e.g. residential config when switching to commercial).
+        // Return null so the caller shows an error rather than silently rendering
+        // stale cross-family rooms.
+        console.error('[Checklist] Per-tab config build failed for', targetType, ':', err);
+        return null;
       }
     },
 
@@ -608,6 +645,8 @@
           }
 
           const generator = this._generatorsByService[serviceType];
+          // Keep window.checklistGenerator pointing at the ACTIVE tab's generator
+          // so legacy code paths that read (not write) still work.
           window.checklistGenerator = generator;
 
           // Regenerate into the correct container.
@@ -659,6 +698,26 @@
         });
     },
 
+    /**
+     * Get the generator instance for a given service type.
+     * Falls back to the active tab's generator if serviceType is not found.
+     * @param {string} [serviceType] - e.g. 'end-of-tenancy', 'residential', 'commercial'
+     * @returns {AysChecklistFormFactory|null}
+     */
+    getGeneratorForService: function(serviceType) {
+      if (!serviceType) serviceType = this.getActiveServiceType();
+      return (this._generatorsByService && this._generatorsByService[serviceType]) || null;
+    },
+
+    /**
+     * Convenience: regenerate the currently active tab with fresh config.
+     * Called from the manual "Regenerate" button in checklist-modern.html.
+     */
+    regenerateActiveTab: function() {
+      var activeService = this.getActiveServiceType();
+      this.setActiveChecklistGenerator(activeService);
+    },
+
     setActiveChecklistGenerator: function(serviceType) {
       const containerId = this._generatorContainerByService && this._generatorContainerByService[serviceType];
       if (!containerId) return;
@@ -669,10 +728,16 @@
       // Show deterministic status while waiting for prerequisites in large pages.
       containerEl.innerHTML = '<p>Loading generated rooms…</p>';
 
-      // Promise-based render (no try/catch). Errors are surfaced in the container.
-      const propertyType = (typeof PROPERTY_CONFIG !== 'undefined' && PROPERTY_CONFIG.property_type)
-        ? PROPERTY_CONFIG.property_type
-        : null;
+      // Read property type from the quick selector first (it's already filtered
+      // for the active service), then fall back to PROPERTY_CONFIG.
+      const quickSelect = document.getElementById('property-type-quick');
+      let propertyType = null;
+      if (quickSelect && quickSelect.value && quickSelect.style.display !== 'none') {
+        propertyType = quickSelect.value;
+      }
+      if (!propertyType && typeof PROPERTY_CONFIG !== 'undefined' && PROPERTY_CONFIG.property_type) {
+        propertyType = PROPERTY_CONFIG.property_type;
+      }
       const config = this.buildChecklistConfigFor(serviceType, propertyType);
       this._renderGeneratedRoomsForService(serviceType, containerId, containerEl, config);
     },
@@ -680,49 +745,122 @@
     initQuickPropertyTypeSelector: function() {
       const quickSelect = document.getElementById('property-type-quick');
       const settingsSelect = document.getElementById('setting-property-type');
+      const globalServiceSelect = document.getElementById('global-service-type');
       if (!quickSelect || !settingsSelect) return;
       if (quickSelect.dataset.aysQuickPropertyTypeInit === '1') return;
       quickSelect.dataset.aysQuickPropertyTypeInit = '1';
 
-      const syncOptionsFromSettings = () => {
-        try {
-          // Clone options from Settings so we never drift
-          quickSelect.innerHTML = '';
-          Array.from(settingsSelect.options).forEach((opt) => {
-            const copy = document.createElement('option');
-            copy.value = opt.value;
-            copy.textContent = opt.textContent;
-            quickSelect.appendChild(copy);
-          });
-        } catch (_) {
-          // ignore
-        }
+      // Map global selector short keys → data-family values on the <option> elements.
+      const SERVICE_TO_FAMILY = {
+        'eot':            'eot',
+        'end-of-tenancy': 'eot',
+        'residential':    'residential',
+        'commercial':     'commercial'
       };
 
-      const syncValueFromSettings = () => {
+      /**
+       * Rebuild the quick-select options from Settings, filtered for the
+       * active service. Uses data-family attribute on each <option> — no
+       * string-prefix guessing.
+       *  - Commercial: show (user needs to pick office/gym/retail/warehouse)
+       *  - Residential: show if presets exist
+       *  - EOT: show presets (1-6 bed)
+       */
+      const syncOptions = () => {
+        const activeService = this.getActiveServiceType() || 'end-of-tenancy';
+        const globalVal = globalServiceSelect ? globalServiceSelect.value : '';
+        const lookupKey = globalVal || activeService;
+        const targetFamily = SERVICE_TO_FAMILY[lookupKey] || 'eot';
+
+        quickSelect.innerHTML = '';
+        let count = 0;
+        Array.from(settingsSelect.options).forEach((opt) => {
+          // Read the explicit data-family attribute instead of guessing from the value string
+          const family = opt.dataset.family || '';
+          if (family !== targetFamily) return;
+          const copy = document.createElement('option');
+          copy.value = opt.value;
+          copy.textContent = opt.textContent;
+          // Copy data attributes so downstream code can read them
+          Object.keys(opt.dataset).forEach((key) => { copy.dataset[key] = opt.dataset[key]; });
+          quickSelect.appendChild(copy);
+          count++;
+        });
+
+        // Hide if 0-1 options (nothing to choose), show if multiple options
+        quickSelect.style.display = (count > 1) ? '' : 'none';
+      };
+
+      const syncValue = () => {
         if (!settingsSelect.value) return;
-        quickSelect.value = settingsSelect.value;
+        // Only sync if the value exists in quick-select's current options
+        const hasOption = Array.from(quickSelect.options).some((o) => o.value === settingsSelect.value);
+        if (hasOption) quickSelect.value = settingsSelect.value;
       };
 
-      syncOptionsFromSettings();
-      syncValueFromSettings();
+      // Initial sync
+      syncOptions();
+      syncValue();
 
-      // When user changes the quick selector, update Settings and trigger existing wiring
+      // When user changes the quick property-type selector → update Settings + regenerate
       quickSelect.addEventListener('change', () => {
-        settingsSelect.value = quickSelect.value;
+        const selectedType = quickSelect.value;
+
+        // 1. Update the Settings select to match
+        settingsSelect.value = selectedType;
+
+        // 2. Look up the preset's default params so Settings inputs stay in sync
+        const typeConfig = (typeof AysPropertyType !== 'undefined' && AysPropertyType.getType)
+          ? AysPropertyType.getType(selectedType)
+          : null;
+        const presetConfig = (typeConfig && typeConfig.config) || {};
+
+        // 3. Update Settings form inputs to reflect the preset values
+        const numBedroomsInput = document.getElementById('setting-num-bedrooms');
+        const numBathroomsInput = document.getElementById('setting-num-bathrooms');
+        const numOfficesInput = document.getElementById('setting-num-offices');
+        if (numBedroomsInput && presetConfig.numBedrooms) numBedroomsInput.value = presetConfig.numBedrooms;
+        if (numBathroomsInput && presetConfig.numBathrooms) numBathroomsInput.value = presetConfig.numBathrooms;
+        if (numOfficesInput && presetConfig.numOffices) numOfficesInput.value = presetConfig.numOffices;
+
+        // 4. Dispatch change on the Settings select — this triggers the inline
+        //    scheduleRegenerate() → onPropertyTypeChanged() pipeline that:
+        //    - calls PROPERTY_CONFIG.setPropertyType()
+        //    - regenerates the active tab
+        //    - saves to localStorage
+        //    - updates service toggles
         settingsSelect.dispatchEvent(new Event('change', { bubbles: true }));
       });
 
-      // When Settings changes (restore, user edits settings tab), reflect it in quick selector
+      // When Settings dropdown changes → re-sync quick selector
       settingsSelect.addEventListener('change', () => {
-        syncOptionsFromSettings();
-        syncValueFromSettings();
+        syncOptions();
+        syncValue();
+      });
+
+      // When the global service type changes → re-filter the property type options
+      if (globalServiceSelect) {
+        globalServiceSelect.addEventListener('change', () => {
+          syncOptions();
+          syncValue();
+        });
+      }
+
+      // Also re-filter when tabs are clicked directly
+      document.querySelectorAll('.tab[data-service]').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          // Short delay so getActiveServiceType() reflects the new tab
+          setTimeout(() => {
+            syncOptions();
+            syncValue();
+          }, 50);
+        });
       });
 
       // In case Settings is hydrated after Checklist.init, resync shortly after load
       setTimeout(() => {
-        syncOptionsFromSettings();
-        syncValueFromSettings();
+        syncOptions();
+        syncValue();
       }, 0);
     },
 
@@ -798,23 +936,11 @@
           switchToTab(tabDataService);
         }
         
-        // PHASE 2: Trigger form rebuild using existing factory pattern
-        // Maps: eot → end-of-tenancy, residential → residential, etc.
-        if (typeof window.checklistGenerator !== 'undefined') {
-          const propertyType = (typeof PROPERTY_CONFIG !== 'undefined') 
-            ? PROPERTY_CONFIG.property_type 
-            : null;
-          const newConfig = self.buildChecklistConfigFor(tabDataService, propertyType);
-          
-          if (newConfig && newConfig.rooms) {
-            window.checklistGenerator.regenerate(newConfig);
-            console.log(`[Checklist] Form rebuilt for ${serviceType} with ${newConfig.rooms.length} rooms`);
-            
-            // Re-init room progress bars after regeneration
-            if (typeof self.initRoomProgressBars === 'function') {
-              self.initRoomProgressBars();
-            }
-          }
+        // Render the correct tab's generator into its own container.
+        // This replaces the old window.checklistGenerator singleton pattern.
+        if (tabDataService) {
+          self.setActiveChecklistGenerator(tabDataService);
+          console.log(`[Checklist] Generator activated for ${tabDataService}`);
         }
         
         // Save to snapshot (existing flow)
@@ -833,6 +959,9 @@
           if (mappedService && selector.value !== mappedService) {
             selector.value = mappedService;
             updateIndicator(mappedService);
+            // CRITICAL: Dispatch change event so setActiveChecklistGenerator fires.
+            // Programmatic .value = ... does NOT fire change events automatically.
+            selector.dispatchEvent(new Event('change', { bubbles: true }));
           }
         });
       });
@@ -853,20 +982,20 @@
     },
 
     getFloorVariantOptions: function() {
-      if (window.VARIANTS && Array.isArray(window.VARIANTS.floor_types)) {
-        return window.VARIANTS.floor_types;
-      }
-      if (window.VARIANTS && Array.isArray(window.VARIANTS.floor_variants)) {
-        return window.VARIANTS.floor_variants;
-      }
-      return [
-        { value: 'carpet', label: 'Carpet' },
-        { value: 'lino', label: 'Lino/Vinyl' },
-        { value: 'tile', label: 'Tile' },
-        { value: 'wood', label: 'Wood' },
-        { value: 'concrete', label: 'Concrete/Sealed' },
-        { value: 'other', label: 'Other' }
-      ];
+      // Canonical interface — delegates to getVariantOptions()
+      return (typeof getVariantOptions === 'function')
+        ? getVariantOptions('floor_types')
+        : [
+          { value: 'carpet', label: 'Carpet' },
+          { value: 'lino', label: 'Lino/Vinyl' },
+          { value: 'tile', label: 'Tile' },
+          { value: 'wood', label: 'Wood/Timber' },
+          { value: 'laminate', label: 'Laminate' },
+          { value: 'concrete', label: 'Concrete/Sealed' },
+          { value: 'polished', label: 'Polished Concrete' },
+          { value: 'slate', label: 'Slate/Stone' },
+          { value: 'other', label: 'Other' }
+        ];
     },
 
     initFloorDefaultsPanel: function() {
@@ -913,12 +1042,9 @@
           console.warn('[Checklist] Failed to save floor defaults:', e);
         }
 
-        if (typeof window.checklistGenerator !== 'undefined') {
-          const activeService = this.getActiveServiceType();
-          const propertyType = (typeof PROPERTY_CONFIG !== 'undefined') ? PROPERTY_CONFIG.property_type : null;
-          const newConfig = this.buildChecklistConfigFor(activeService, propertyType);
-          window.checklistGenerator.regenerate(newConfig);
-        }
+        // Regenerate the active tab's generator (not the global singleton)
+        const activeService = this.getActiveServiceType();
+        this.setActiveChecklistGenerator(activeService);
       };
 
       const applyBtn = document.getElementById('btn-apply-floor-defaults');
@@ -1052,13 +1178,21 @@
     onPropertyTypeChanged: function(newPropertyType, params) {
       console.log(`[Checklist] Property type changed to: ${newPropertyType}`, params);
 
-      // Regenerate checklist with new property type config
-      if (typeof window.checklistGenerator !== 'undefined') {
-        const activeService = this.getActiveServiceType();
-        const newConfig = this.buildChecklistConfigFor(activeService, newPropertyType);
-        window.checklistGenerator.regenerate(newConfig);
+      // CRITICAL: Update PROPERTY_CONFIG with the new type + params BEFORE regenerating.
+      // Without this, setActiveChecklistGenerator reads stale PROPERTY_CONFIG.property_type
+      // and the rooms don't change.
+      if (typeof PROPERTY_CONFIG !== 'undefined' && typeof PROPERTY_CONFIG.setPropertyType === 'function') {
+        PROPERTY_CONFIG.setPropertyType(newPropertyType, params || {});
+      }
 
-        console.log(`[Checklist] Checklist regenerated with ${newConfig.rooms.length} rooms`);
+      // Regenerate the active service tab with the new property type config
+      const activeService = this.getActiveServiceType();
+      this.setActiveChecklistGenerator(activeService);
+
+      console.log(`[Checklist] Checklist regenerated for ${activeService} with property type ${newPropertyType}`);
+
+      {
+        // Scoped block to preserve downstream code that saves config to localStorage
         
         // SAVE property config to localStorage so next load remembers this choice
         try {
@@ -3019,18 +3153,49 @@
       try {
         const builder = AysChecklistConfigBuilder.forPropertyType(targetType);
 
-        if (propertyConfig.numBedrooms) builder.withBedroomCount(propertyConfig.numBedrooms);
-        if (propertyConfig.numBathrooms) builder.withBathroomCount(propertyConfig.numBathrooms);
-
-        if (propertyConfig.numFloors && propertyConfig.numOfficesPerFloor) {
-          builder.withMultiStoryOffice(propertyConfig.numFloors, propertyConfig.numOfficesPerFloor);
-        } else if (propertyConfig.numOffices) {
-          builder.withOfficeCount(propertyConfig.numOffices);
+        // Same room-aware param logic as buildChecklistConfigFor:
+        // Only apply params the target type requires, with safe defaults.
+        var typeInfo = (typeof AysPropertyType !== 'undefined') ? AysPropertyType.getType(targetType) : null;
+        var needsRoom = {};
+        if (typeInfo && Array.isArray(typeInfo.rooms)) {
+          typeInfo.rooms.forEach(function(spec) { if (spec.count === null) needsRoom[spec.type] = true; });
         }
 
-        if (propertyConfig.numShowers) builder.withShowerCount(propertyConfig.numShowers);
-        if (propertyConfig.numLoadingDocks) builder.withLoadingDockCount(propertyConfig.numLoadingDocks);
-        if (propertyConfig.numAdminOffices) builder.withAdminOfficeCount(propertyConfig.numAdminOffices);
+        if (needsRoom.Bedroom) {
+          var bedrooms = propertyConfig.numBedrooms
+            || (typeInfo && typeInfo.config && typeInfo.config.numBedrooms)
+            || 3;
+          builder.withBedroomCount(bedrooms);
+        }
+        if (needsRoom.Bathroom) {
+          var bathrooms = propertyConfig.numBathrooms
+            || (typeInfo && typeInfo.config && typeInfo.config.numBathrooms)
+            || 1;
+          builder.withBathroomCount(bathrooms);
+        }
+        if (needsRoom.Office) {
+          if (propertyConfig.numFloors && propertyConfig.numOfficesPerFloor) {
+            builder.withMultiStoryOffice(propertyConfig.numFloors, propertyConfig.numOfficesPerFloor);
+          } else {
+            var offices = propertyConfig.numOffices
+              || propertyConfig.numAdminOffices
+              || (typeInfo && typeInfo.config && typeInfo.config.numOffices)
+              || 4;
+            builder.withOfficeCount(offices);
+          }
+        }
+        if (needsRoom.Shower) {
+          var showers = propertyConfig.numShowers
+            || (typeInfo && typeInfo.config && typeInfo.config.numShowers)
+            || 6;
+          builder.withShowerCount(showers);
+        }
+        if (needsRoom.LoadingDock) {
+          var docks = propertyConfig.numLoadingDocks
+            || (typeInfo && typeInfo.config && typeInfo.config.numLoadingDocks)
+            || 2;
+          builder.withLoadingDockCount(docks);
+        }
 
         // Get floor defaults from storage if available
         const rawDefaults = this.getFloorDefaultsFromStorage();
@@ -3697,15 +3862,23 @@
         floor_variants: {
           carpet: { price: 0 },
           wood: { price: 0 },
+          laminate: { price: 0 },
           lino: { price: 0 },
-          tile: { price: 0 }
+          tile: { price: 0 },
+          concrete: { price: 0 },
+          polished: { price: 0 },
+          slate: { price: 0 },
+          other: { price: 0 }
         },
         floor_types: {
           carpet: { price: 0 },
           wood: { price: 0 },
+          laminate: { price: 0 },
           lino: { price: 0 },
           tile: { price: 0 },
           concrete: { price: 0 },
+          polished: { price: 0 },
+          slate: { price: 0 },
           other: { price: 0 }
         }
       };

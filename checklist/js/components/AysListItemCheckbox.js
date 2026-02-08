@@ -112,9 +112,7 @@ class AysListItemCheckbox {
     if (wantsSelect && optionsKeyForSelect) {
       const options = Array.isArray(this.variantOptions)
         ? this.variantOptions
-        : (window.VARIANTS && Array.isArray(window.VARIANTS[optionsKeyForSelect])
-          ? window.VARIANTS[optionsKeyForSelect]
-          : []);
+        : (typeof getVariantOptions === 'function' ? getVariantOptions(optionsKeyForSelect) : []);
 
       variantSelect = document.createElement('select');
       variantSelect.className = 'variant-dropdown';

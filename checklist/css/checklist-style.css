@@ -232,6 +232,7 @@ body {
   text-align: center;
   border-bottom: 4px solid var(--color-accent);
   box-shadow: inset 0 -2px 8px rgba(0, 0, 0, 0.3);
+  position: relative;
 }
 
 .checklist-header h1 {
@@ -247,6 +248,27 @@ body {
   opacity: 0.95;
   margin-bottom: var(--space-md);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Logout button — top-right of header */
+.btn-logout {
+  position: absolute;
+  top: var(--space-sm, 8px);
+  right: var(--space-sm, 8px);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-logout:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 
 /* ============================================================================
@@ -665,6 +687,17 @@ body {
 
 .indicator-text {
   white-space: nowrap;
+}
+
+/* Property type quick selector (inline in service header) */
+.property-type-quick-dropdown {
+  max-width: 320px !important;
+  transition: opacity var(--transition-fast), max-width var(--transition-fast);
+}
+
+.property-type-quick-dropdown[style*="display: none"],
+.property-type-quick-dropdown[style*="display:none"] {
+  /* Overridden by JS display toggle */
 }
 
 /* Service type specific colors */

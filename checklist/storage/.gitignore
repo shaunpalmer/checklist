@@ -1,0 +1,2 @@
+# Ignore rate-limit data files (contain IP addresses)
+rate-limits.json

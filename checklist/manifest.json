@@ -1,7 +1,7 @@
 {
   "name": "Cleaning Checklist",
   "short_name": "Checklist",
-  "start_url": "./checklist-modern.html",
+  "start_url": "./index.php",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",

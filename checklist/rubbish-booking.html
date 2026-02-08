@@ -1,0 +1,1275 @@
+<!--
+/**
+ * @file rubbish-booking.html → rubbish-booking.php
+ * @description Rubbish removal booking form with conditional hoarding assessment.
+ *              Part of a multi-page service booking application.
+ * @version 1.0
+ * @date 2026-02-08
+ *
+ * PHP CONVERSION NOTES
+ * ====================
+ * Rename to rubbish-booking.php and integrate into the larger project.
+ * This page is ONE section of a multi-step booking flow.
+ *
+ * OOP ARCHITECTURE (Polymorphism + Inheritance)
+ * =============================================
+ *
+ * Base class:
+ *   abstract class BookingService {
+ *     protected string $serviceType;
+ *     protected array  $formFields = [];
+ *     protected array  $validationRules = [];
+ *
+ *     abstract public function render(): string;
+ *     abstract public function validate(array $data): array;
+ *     abstract public function getEstimate(array $data): float;
+ *
+ *     public function process(array $postData): BookingResult { ... }
+ *     protected function sanitize(string $input): string { ... }
+ *     protected function buildFieldHtml(FormField $field): string { ... }
+ *   }
+ *
+ * This page's class:
+ *   class RubbishRemovalBooking extends BookingService {
+ *     protected string $serviceType = 'rubbish_removal';
+ *
+ *     public function render(): string { /* renders this form */ }
+ *     public function validate(array $data): array { ... }
+ *     public function getEstimate(array $data): float {
+ *       // base rate × loads + skip surcharge if hoarding
+ *     }
+ *   }
+ *
+ * Hoarding extends RubbishRemoval (inheritance):
+ *   class HoardingBooking extends RubbishRemovalBooking {
+ *     // Overrides getEstimate() to factor in hours, skips, severity
+ *     // Overrides validate() to require additional fields
+ *     // Adds getSuppliesList(): array
+ *
+ *     public function getEstimate(array $data): float {
+ *       $base = parent::getEstimate($data);
+ *       return $base + ($data['skip_bins'] * SKIP_RATE)
+ *                     + ($data['est_hours'] * HOURLY_RATE);
+ *     }
+ *
+ *     public function isHoarding(array $data): bool {
+ *       return $data['rubbish_type'] === 'Hoarder waste'
+ *           || (int) $data['trailer_loads'] >= 2;
+ *     }
+ *   }
+ *
+ * Polymorphism — the controller doesn't care which subclass:
+ *   interface BookingServiceInterface {
+ *     public function render(): string;
+ *     public function validate(array $data): array;
+ *     public function getEstimate(array $data): float;
+ *     public function process(array $postData): BookingResult;
+ *   }
+ *
+ *   // In the controller / router:
+ *   $service = BookingServiceFactory::create($serviceType);
+ *   // $service could be RubbishRemovalBooking, HoardingBooking,
+ *   // CarpetCleaningBooking, WindowCleaningBooking, etc.
+ *   // They all implement BookingServiceInterface.
+ *   echo $service->render();
+ *
+ * Other sibling classes in the project (same interface):
+ *   class CarpetCleaningBooking  extends BookingService { ... }
+ *   class WindowCleaningBooking  extends BookingService { ... }
+ *   class CouchCleaningBooking   extends BookingService { ... }
+ *   class HouseCleaningBooking   extends BookingService { ... }
+ *
+ * SHARED COMPONENTS
+ * =================
+ * - FormField value object (type, name, label, options, required, validation)
+ * - BookingResult DTO (success, errors, redirectUrl, estimateTotal)
+ * - CSRF token via $_SESSION['csrf_token']
+ * - Flash messages via $_SESSION['flash']
+ *
+ * FORM HANDLING
+ * =============
+ * - method="POST" action handled by BookingController::store()
+ * - BookingController detects hoarding via HoardingBooking::isHoarding()
+ *   and switches class at runtime (polymorphism)
+ * - Validation returns to this page with old input + errors on failure
+ * - Success redirects to confirmation / next booking step
+ *
+ * SENSITIVITY NOTE — HOARDING
+ * ===========================
+ * Hoarding is a recognised disorder. The UI should NEVER be judgemental.
+ * - Use language like "larger job" or "additional services" — not "hoarder"
+ *   in customer-facing text. The data attribute value "Hoarder waste" is
+ *   internal only; the <option> label shown to users should be softened
+ *   in production, e.g. "Heavy clean-out" or "Full property clearance".
+ * - The hoarding section only appears when clearly relevant (2+ loads
+ *   or explicitly selected), and even then via a gentle optional nudge.
+ * - Staff-side / admin views can use clinical terminology; client-facing
+ *   views should remain empathetic and matter-of-fact.
+ */
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- @php: <title><?php echo $service->getPageTitle(); ?></title> -->
+  <title>Rubbish Removal Booking</title>
+
+  <style>
+    /* ==========================================
+       CSS Custom Properties
+       ========================================== */
+    :root {
+      --primary: dodgerblue;
+      --primary-hover: royalblue;
+      --bg: whitesmoke;
+      --surface: white;
+      --text: #212529;
+      --text-muted: slategray;
+      --label-color: #333;
+      --border: gainsboro;
+      --input-border: darkgray;
+      --accent: #ffab23;
+      --required: crimson;
+      --radius: 8px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --toast-speed: 200ms;
+    }
+
+    /* ==========================================
+       Reset & Base
+       ========================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       Page Layout
+       ========================================== */
+    .page-wrapper {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .page-header h1 {
+      font-size: 1.75rem;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* ==========================================
+       Details / Summary — Toast Toggle
+       ========================================== */
+    .rubbish-toggle {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .rubbish-toggle summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--surface);
+      border: none;
+      list-style: none;
+      user-select: none;
+      transition: background-color var(--toast-speed);
+    }
+
+    /* Remove default marker */
+    .rubbish-toggle summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .rubbish-toggle summary::after {
+      content: '▸';
+      font-size: 1.2rem;
+      transition: transform var(--toast-speed);
+      color: var(--primary);
+    }
+
+    .rubbish-toggle[open] summary::after {
+      transform: rotate(90deg);
+    }
+
+    .rubbish-toggle summary:hover {
+      background: #f0f4f8;
+    }
+
+    .rubbish-toggle .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .rubbish-toggle .toggle-icon {
+      font-size: 1.3rem;
+    }
+
+    /* The animated content wrapper */
+    .rubbish-content {
+      overflow: hidden;
+    }
+
+    .rubbish-content-inner {
+      padding: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ==========================================
+       Form Layout — CSS Grid
+       ========================================== */
+    .booking-form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--label-color);
+    }
+
+    .form-group .required {
+      color: var(--required);
+      margin-left: 2px;
+    }
+
+    .form-group .field-description {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: -0.1rem;
+    }
+
+    /* ==========================================
+       Inputs, Selects
+       ========================================== */
+    select,
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: border-color var(--toast-speed);
+    }
+
+    select:focus,
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.15);
+    }
+
+    /* ==========================================
+       Radio Group — Volume (m³)
+       ========================================== */
+    .volume-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .volume-option {
+      position: relative;
+    }
+
+    .volume-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .volume-option label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 0.25rem;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-align: center;
+      transition: all var(--toast-speed);
+      background: var(--surface);
+    }
+
+    .volume-option input[type="radio"]:checked + label {
+      border-color: var(--primary);
+      background: rgba(30, 144, 255, 0.08);
+      color: var(--primary);
+    }
+
+    .volume-option label:hover {
+      border-color: var(--primary);
+    }
+
+    /* ==========================================
+       Checkbox
+       ========================================== */
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin-top: 0.25rem;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .checkbox-group label {
+      font-weight: normal;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    /* ==========================================
+       Photo Uploads — hidden by default
+       ========================================== */
+    .photo-uploads {
+      display: none;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .photo-uploads.visible {
+      display: flex;
+    }
+
+    .photo-uploads .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .upload-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .upload-item label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--label-color);
+    }
+
+    input[type="file"] {
+      padding: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    /* ==========================================
+       Conditional "Other" text fields
+       ========================================== */
+    .other-specify {
+      display: none;
+      margin-top: 0.35rem;
+    }
+
+    .other-specify.visible {
+      display: block;
+    }
+
+    /* ==========================================
+       Section Dividers
+       ========================================== */
+    .form-section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ==========================================
+       Trailer Loads (from slideToggle)
+       ========================================== */
+    .trailer-loads {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px dashed var(--input-border);
+    }
+
+    /* ==========================================
+       Hoarding Assessment — auto-revealed section
+       Triggers: "Hoarder waste" selected OR 3+ trailer loads
+       ========================================== */
+    .hoarding-section {
+      display: none;
+      background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      overflow: hidden;
+    }
+
+    .hoarding-section.visible {
+      display: block;
+    }
+
+    .hoarding-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .hoarding-header .hoarding-icon {
+      font-size: 1.4rem;
+    }
+
+    .hoarding-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #b35c00;
+    }
+
+    .hoarding-header .hoarding-tag {
+      margin-left: auto;
+      background: var(--accent);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    .hoarding-note {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+
+    .hoarding-form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .hoarding-form .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 500px) {
+      .hoarding-form .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Skip selector cards */
+    .skip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .skip-option {
+      position: relative;
+    }
+
+    .skip-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .skip-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 0.5rem;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: center;
+      transition: all var(--toast-speed);
+      background: var(--surface);
+      line-height: 1.3;
+    }
+
+    .skip-option label small {
+      font-weight: 400;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .skip-option input[type="radio"]:checked + label {
+      border-color: var(--accent);
+      background: rgba(255, 171, 35, 0.08);
+      color: #b35c00;
+    }
+
+    .skip-option label:hover {
+      border-color: var(--accent);
+    }
+
+    /* Hours estimate */
+    .hours-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .hours-option {
+      position: relative;
+    }
+
+    .hours-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .hours-option label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 0.25rem;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: center;
+      transition: all var(--toast-speed);
+      background: var(--surface);
+    }
+
+    .hours-option input[type="radio"]:checked + label {
+      border-color: var(--accent);
+      background: rgba(255, 171, 35, 0.08);
+      color: #b35c00;
+    }
+
+    .hours-option label:hover {
+      border-color: var(--accent);
+    }
+
+    /* ==========================================
+       Hoarding Warning Banner
+       Soft nudge shown above hoarding section
+       ========================================== */
+    .hoarding-warning {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 6px;
+      margin-top: 0.25rem;
+      font-size: 0.88rem;
+      color: #8d6e00;
+      line-height: 1.4;
+    }
+
+    .hoarding-warning.visible {
+      display: flex;
+    }
+
+    .hoarding-warning .warning-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .hoarding-warning .warning-text {
+      flex: 1;
+    }
+
+    .hoarding-warning .btn-hoarding {
+      flex-shrink: 0;
+      padding: 0.4rem 0.85rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color var(--toast-speed);
+    }
+
+    .hoarding-warning .btn-hoarding:hover {
+      background: #e69500;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    @php: This file is included/rendered by the controller:
+          echo $service->render();
+
+    @php: At top of .php file:
+          <?php
+            session_start();
+            require_once __DIR__ . '/../config/app.php';
+            require_once __DIR__ . '/../classes/BookingService.php';
+            require_once __DIR__ . '/../classes/RubbishRemovalBooking.php';
+            require_once __DIR__ . '/../classes/HoardingBooking.php';
+
+            $service = BookingServiceFactory::create('rubbish_removal');
+            $errors  = $_SESSION['errors'] ?? [];
+            $old     = $_SESSION['old_input'] ?? [];
+            unset($_SESSION['errors'], $_SESSION['old_input']);
+          ?>
+
+    @php: CSRF token should be generated once per session:
+          if (empty($_SESSION['csrf_token'])) {
+              $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+          }
+  -->
+
+  <div class="page-wrapper">
+
+    <header class="page-header">
+      <!-- @php: heading from $service->getPageTitle() or config -->
+      <h1>Booking</h1>
+      <p>Complete your service booking details below</p>
+    </header>
+
+    <!--
+      @php: Error display block:
+      <?php if (!empty($errors)): ?>
+        <div class="form-message error">
+          <ul>
+            <?php foreach ($errors as $error): ?>
+              <li><?php echo htmlspecialchars($error); ?></li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+      <?php endif; ?>
+    -->
+
+    <!-- ==========================================
+         RUBBISH REMOVAL — Details/Summary Toggle
+         ==========================================
+         Uses <details>/<summary> for native toggle.
+         jQuery enhances with 200ms slide animation.
+    -->
+    <details class="rubbish-toggle" id="rubbishToggle">
+      <summary>
+        <span class="toggle-label">
+          <span class="toggle-icon">🗑️</span>
+          Yes, I need rubbish taken away
+        </span>
+      </summary>
+
+      <div class="rubbish-content">
+        <div class="rubbish-content-inner">
+          <!--
+            @php: Wrap in <form> with CSRF:
+            <form method="POST" action="<?php echo $service->getFormAction(); ?>">
+              <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+              <input type="hidden" name="service_type" value="rubbish_removal">
+
+            @php: Each select/input should have:
+              - name="field_name"  (already set)
+              - value="<?php echo htmlspecialchars($old['field_name'] ?? ''); ?>"  for old input
+              - Selects: 'selected' set via $old comparison
+              - required fields validated server-side in $service->validate()
+
+            @php: The BookingController::store() method:
+              1. Validates CSRF token
+              2. Instantiates the correct service class
+              3. Calls $service->validate($postData)
+              4. If HoardingBooking::isHoarding($postData), upgrades to HoardingBooking
+              5. Calls $service->process($postData)
+              6. On success: redirect to confirmation
+              7. On failure: flash errors + old input, redirect back
+          -->
+
+          <div class="booking-form">
+
+            <!-- ===== Trailer Loads ===== -->
+            <!--
+              @php: Value from $old['trailer_loads'] ?? '1'
+              @php: This field feeds into HoardingBooking::isHoarding()
+                    via (int)$data['trailer_loads'] >= 2
+              @php: RubbishRemovalBooking::getEstimate() uses this:
+                    $estimate = $data['trailer_loads'] * self::RATE_PER_LOAD;
+            -->
+            <div class="trailer-loads">
+              <div class="form-group">
+                <label for="trailerLoads">How many trailer loads does it take?</label>
+                <select name="trailer_loads" id="trailerLoads">
+                  <option value="1">1 load</option>
+                  <option value="2">2 loads</option>
+                  <option value="3">3 loads</option>
+                  <option value="4">4 loads</option>
+                  <option value="5">5 loads</option>
+                  <option value="6">6 loads</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- ===== Section: Rubbish Details ===== -->
+            <p class="form-section-title">Rubbish Details</p>
+
+            <!-- Rubbish Type -->
+            <!--
+              @php: Value from $old['rubbish_type'] ?? 'Household'
+              @php: IMPORTANT — Rename "Hoarder waste" label for production.
+                    Internal value can stay "Hoarder waste" for backend logic,
+                    but the user-facing <option> text should be softer:
+                    e.g. "Full property clearance" or "Heavy clean-out"
+              @php: This value is checked by HoardingBooking::isHoarding():
+                    $data['rubbish_type'] === 'Hoarder waste'
+              @php: If "Other" selected, rubbish_type_other field is enabled
+                    and validated as required in $service->validate()
+            -->
+            <div class="form-group">
+              <label for="rubbishType">What type of rubbish do you have?<span class="required">*</span></label>
+              <select name="rubbish_type" id="rubbishType" aria-required="true" data-has-other="true">
+                <option value="Household" selected>Household</option>
+                <option value="Garden waste">Garden waste</option>
+                <option value="Renovation rubbish">Renovation rubbish</option>
+                <option value="Office waste">Office waste</option>
+                <option value="Hoarder waste">Hoarder waste</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="other-specify" id="rubbishTypeOther">
+                <input type="text" name="rubbish_type_other" placeholder="Please specify the type of rubbish...">
+              </div>
+            </div>
+
+            <!-- Rubbish Location -->
+            <!--
+              @php: Value from $old['rubbish_location'] ?? 'Driveway'
+              @php: Validated as required in RubbishRemovalBooking::validate()
+              @php: If "Other" → rubbish_location_other required
+            -->
+            <div class="form-group">
+              <label for="rubbishLocation">Where is your rubbish located?<span class="required">*</span></label>
+              <select name="rubbish_location" id="rubbishLocation" aria-required="true" data-has-other="true">
+                <option value="Driveway" selected>Driveway</option>
+                <option value="Inside the house/building">Inside the house/building</option>
+                <option value="Under the house/building">Under the house/building</option>
+                <option value="Back of the building">Back of the building</option>
+                <option value="In a storage facility">In a storage facility</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="other-specify" id="rubbishLocationOther">
+                <input type="text" name="rubbish_location_other" placeholder="Please specify the location...">
+              </div>
+            </div>
+
+            <!-- Access -->
+            <!--
+              @php: Value from $old['rubbish_access'] ?? 'Easy access'
+              @php: Affects estimate — "Limited site access" may add surcharge:
+                    if ($data['rubbish_access'] === 'Limited site access') {
+                        $estimate += self::LIMITED_ACCESS_SURCHARGE;
+                    }
+            -->
+            <div class="form-group">
+              <label for="rubbishAccess">Access to the rubbish?<span class="required">*</span></label>
+              <select name="rubbish_access" id="rubbishAccess" aria-required="true" data-has-other="true">
+                <option value="Easy access" selected>Easy access</option>
+                <option value="Limited site access">Limited site access</option>
+                <option value="Other">Other</option>
+              </select>
+              <div class="other-specify" id="rubbishAccessOther">
+                <input type="text" name="rubbish_access_other" placeholder="Please describe access...">
+              </div>
+            </div>
+
+            <!-- ===== Section: Scheduling ===== -->
+            <p class="form-section-title">Scheduling</p>
+
+            <!-- Preferred Time -->
+            <!--
+              @php: Value from $old['preferred_time'] ?? '8am - 10am'
+              @php: "After hours" may trigger surcharge in getEstimate()
+            -->
+            <div class="form-group">
+              <label for="preferredTime">What time of the day would be best?<span class="required">*</span></label>
+              <select name="preferred_time" id="preferredTime" aria-required="true">
+                <option value="8am - 10am" selected>8am – 10am</option>
+                <option value="10am - 12pm">10am – 12pm</option>
+                <option value="12pm - 2pm">12pm – 2pm</option>
+                <option value="2pm - 5:30pm">2pm – 5:30pm</option>
+                <option value="After hours">After hours</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- ===== Section: Volume ===== -->
+            <p class="form-section-title">Volume</p>
+
+            <!-- Rubbish Volume -->
+            <!--
+              @php: Value from $old['rubbish_volume'] ?? '1'
+              @php: Used in RubbishRemovalBooking::getEstimate():
+                    Combined with trailer_loads to determine total waste volume.
+                    May cross-validate: if volume > 5m³ and loads < 2, suggest more loads.
+            -->
+            <div class="form-group">
+              <label>How much rubbish do you want to get rid of?<span class="required">*</span></label>
+              <div class="volume-grid">
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol1" value="1" checked>
+                  <label for="vol1">1m³</label>
+                </div>
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol2" value="2">
+                  <label for="vol2">2m³</label>
+                </div>
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol3" value="3">
+                  <label for="vol3">3m³</label>
+                </div>
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol4" value="4">
+                  <label for="vol4">4m³</label>
+                </div>
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol5" value="5">
+                  <label for="vol5">5m³</label>
+                </div>
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol6" value="6">
+                  <label for="vol6">6m³</label>
+                </div>
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol7" value="7">
+                  <label for="vol7">7m³</label>
+                </div>
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol8" value="8">
+                  <label for="vol8">8m³</label>
+                </div>
+                <div class="volume-option">
+                  <input type="radio" name="rubbish_volume" id="vol9" value="9">
+                  <label for="vol9">9m³</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- ===== Section: Photos ===== -->
+            <p class="form-section-title">Photos (Optional)</p>
+
+            <!-- Photo Checkbox -->
+            <!--
+              @php: Checked state from !empty($old['upload_photos'])
+              @php: File uploads handled by BookingService::processUploads()
+                    - Validates MIME type (image/*)
+                    - Max file size: 300MB (314572800 bytes)
+                    - Stores in /uploads/bookings/{booking_id}/
+                    - Saves paths to booking_photos table
+            -->
+            <div class="form-group">
+              <div class="checkbox-group">
+                <input type="checkbox" name="upload_photos" id="uploadPhotosCheck" value="yes">
+                <label for="uploadPhotosCheck">Yes, I can upload photos of the rubbish (optional — helps us give more accurate quotes).</label>
+              </div>
+            </div>
+
+            <!-- Photo Upload Fields (shown when checkbox ticked) -->
+            <div class="photo-uploads" id="photoUploads">
+              <div class="upload-grid">
+                <div class="upload-item">
+                  <label for="photo1">Photo 1</label>
+                  <input type="file" name="photo_1" id="photo1" accept="image/*">
+                </div>
+                <div class="upload-item">
+                  <label for="photo2">Photo 2</label>
+                  <input type="file" name="photo_2" id="photo2" accept="image/*">
+                </div>
+                <div class="upload-item">
+                  <label for="photo3">Photo 3</label>
+                  <input type="file" name="photo_3" id="photo3" accept="image/*">
+                </div>
+                <div class="upload-item">
+                  <label for="photo4">Photo 4</label>
+                  <input type="file" name="photo_4" id="photo4" accept="image/*">
+                </div>
+                <div class="upload-item">
+                  <label for="photo5">Photo 5</label>
+                  <input type="file" name="photo_5" id="photo5" accept="image/*">
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /.booking-form -->
+
+          <!--
+            HOARDING WARNING BANNER
+            =======================
+            Soft, non-judgemental nudge. This only appears when
+            2+ trailer loads are selected (but NOT hoarder waste,
+            which skips straight to the assessment).
+
+            @php: This banner is rendered conditionally:
+                  In a server-rendered version, you could pre-show it:
+                  <?php if (($old['trailer_loads'] ?? 1) >= 2
+                         && ($old['rubbish_type'] ?? '') !== 'Hoarder waste'): ?>
+                  But since we use jQuery toast animation, it's better
+                  to let JS handle visibility — the server just renders
+                  the HTML hidden and JS decides.
+
+            TONE NOTE: Keep language neutral. "Larger job" not "hoarding".
+            The customer may not identify with that term, and it's not
+            our place to label. We're just asking if they need more help.
+          -->
+          <div class="hoarding-warning" id="hoardingWarning">
+            <span class="warning-icon">⚠️</span>
+            <span class="warning-text">
+              This looks like it could be a larger job. Need skip bins or extra hours?
+            </span>
+            <button type="button" class="btn-hoarding" id="openHoardingBtn">Open Hoarding Assessment</button>
+          </div>
+
+          <!--
+            HOARDING ASSESSMENT SECTION
+            ===========================
+            Auto-reveals when:
+            1. Rubbish type = "Hoarder waste" (auto-open), OR
+            2. Trailer loads >= 2 (warning banner → optional button)
+
+            @php: This section's fields are only validated when
+                  HoardingBooking::isHoarding() returns true.
+                  The controller polymorphically upgrades:
+
+                  $service = new RubbishRemovalBooking();
+                  if (HoardingBooking::isHoarding($postData)) {
+                      $service = new HoardingBooking();
+                      // HoardingBooking extends RubbishRemovalBooking
+                      // Overrides: validate(), getEstimate()
+                      // validate() now requires: skip_bins, est_hours,
+                      //   hoard_rooms, hoard_severity
+                      // getEstimate() adds:
+                      //   skip cost + hourly rate × estimated hours
+                  }
+
+            @php: HoardingBooking constants:
+                  const SKIP_RATE     = 350.00;  // per skip bin
+                  const HOURLY_RATE   = 55.00;   // per hour
+                  const SEVERITY_MULTIPLIERS = [
+                      'light'    => 1.0,
+                      'moderate' => 1.3,
+                      'severe'   => 1.6,
+                      'extreme'  => 2.0,
+                  ];
+
+            SENSITIVITY: All user-facing text says "larger job",
+            "additional services", "full clearance". The word
+            "hoarding" appears only in code/admin contexts.
+          -->
+          <div class="hoarding-section" id="hoardingSection">
+            <div class="hoarding-header">
+              <span class="hoarding-icon">⚠️</span>
+              <h3>Hoarding Assessment</h3>
+              <span class="hoarding-tag">Large Job</span>
+            </div>
+
+            <p class="hoarding-note">
+              Hoarding jobs typically require 30–40+ hours and at least one skip bin.
+              The details below help us scope the work and give you an accurate quote.
+              Skip bins handle the heavy/bulky waste that won't fit on standard trailer loads.
+            </p>
+
+            <div class="hoarding-form">
+
+              <!-- Skip Bins Required -->
+              <div class="form-group">
+                <label>How many skip bins will you need?<span class="required">*</span></label>
+                <p class="field-description">Most hoarding jobs need at least 1 skip. Skips hold roughly 3–4m³ of heavy waste.</p>
+                <div class="skip-grid">
+                  <div class="skip-option">
+                    <input type="radio" name="skip_bins" id="skip1" value="1" checked>
+                    <label for="skip1">1 Skip<small>Standard</small></label>
+                  </div>
+                  <div class="skip-option">
+                    <input type="radio" name="skip_bins" id="skip2" value="2">
+                    <label for="skip2">2 Skips<small>Heavy job</small></label>
+                  </div>
+                  <div class="skip-option">
+                    <input type="radio" name="skip_bins" id="skip3" value="3">
+                    <label for="skip3">3 Skips<small>Major job</small></label>
+                  </div>
+                  <div class="skip-option">
+                    <input type="radio" name="skip_bins" id="skip4" value="4+">
+                    <label for="skip4">4+ Skips<small>We'll assess</small></label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Estimated Hours -->
+              <div class="form-group">
+                <label>Estimated hours for the job?</label>
+                <p class="field-description">Your best guess — we'll confirm after an on-site visit.</p>
+                <div class="hours-grid">
+                  <div class="hours-option">
+                    <input type="radio" name="est_hours" id="hrs10" value="10" checked>
+                    <label for="hrs10">~10 hrs</label>
+                  </div>
+                  <div class="hours-option">
+                    <input type="radio" name="est_hours" id="hrs20" value="20">
+                    <label for="hrs20">~20 hrs</label>
+                  </div>
+                  <div class="hours-option">
+                    <input type="radio" name="est_hours" id="hrs30" value="30">
+                    <label for="hrs30">~30 hrs</label>
+                  </div>
+                  <div class="hours-option">
+                    <input type="radio" name="est_hours" id="hrs40" value="40">
+                    <label for="hrs40">~40 hrs</label>
+                  </div>
+                  <div class="hours-option">
+                    <input type="radio" name="est_hours" id="hrs50" value="50+">
+                    <label for="hrs50">50+ hrs</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <!-- Number of rooms -->
+                <div class="form-group">
+                  <label for="hoardRooms">How many rooms affected?</label>
+                  <select name="hoard_rooms" id="hoardRooms">
+                    <option value="1-2">1–2 rooms</option>
+                    <option value="3-4">3–4 rooms</option>
+                    <option value="5-6">5–6 rooms</option>
+                    <option value="whole-property" selected>Whole property</option>
+                  </select>
+                </div>
+
+                <!-- Severity -->
+                <div class="form-group">
+                  <label for="hoardSeverity">Severity level?</label>
+                  <select name="hoard_severity" id="hoardSeverity">
+                    <option value="light">Light — clutter, some bags</option>
+                    <option value="moderate" selected>Moderate — packed rooms</option>
+                    <option value="severe">Severe — floor to ceiling</option>
+                    <option value="extreme">Extreme — unsafe/hazardous</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Additional notes -->
+              <div class="form-group">
+                <label for="hoardNotes">Anything else we should know?</label>
+                <p class="field-description">Hazards, pets, access issues, items to keep, etc.</p>
+                <input type="text" name="hoard_notes" id="hoardNotes" placeholder="e.g. Second floor only, narrow hallway, keep photo albums...">
+              </div>
+
+            </div><!-- /.hoarding-form -->
+          </div><!-- /.hoarding-section -->
+
+          <!--
+            @php: Submit button + close form:
+            <div class="form-group" style="margin-top: 1.5rem;">
+              <button type="submit" class="btn btn-primary">
+                <?php echo $service->getSubmitLabel(); ?>
+              </button>
+            </div>
+            </form>
+
+            @php: $service->getSubmitLabel() returns:
+                  - RubbishRemovalBooking: "Get Rubbish Removal Quote"
+                  - HoardingBooking: "Request Hoarding Assessment"
+                  (polymorphism — controller doesn't need to know which)
+          -->
+
+        </div><!-- /.rubbish-content-inner -->
+      </div><!-- /.rubbish-content -->
+    </details>
+
+  </div><!-- /.page-wrapper -->
+
+  <!-- jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+
+      /* ==========================================
+         Details/Summary — Toast Animation (200ms)
+         Override native toggle with jQuery slideDown/slideUp
+         ========================================== */
+      var $details  = $('#rubbishToggle');
+      var $content  = $details.find('.rubbish-content');
+      var speed     = 200; // toast speed in ms
+
+      // Hide content initially (details starts closed)
+      $content.hide();
+
+      $details.find('summary').on('click', function (e) {
+        e.preventDefault(); // stop native toggle
+
+        if ($details.attr('open')) {
+          // Slide up then remove open attribute
+          $content.stop(true).slideUp(speed, function () {
+            $details.removeAttr('open');
+          });
+        } else {
+          // Add open attribute then slide down
+          $details.attr('open', '');
+          $content.stop(true).hide().slideDown(speed);
+        }
+      });
+
+      /* ==========================================
+         "Other" select — show/hide specify field
+         ========================================== */
+      $('select[data-has-other]').on('change', function () {
+        var $other = $('#' + this.id + 'Other');
+        if ($(this).val() === 'Other') {
+          $other.addClass('visible').find('input').prop('disabled', false).focus();
+        } else {
+          $other.removeClass('visible').find('input').prop('disabled', true).val('');
+        }
+      });
+
+      /* ==========================================
+         Photo uploads — toggle on checkbox
+         ========================================== */
+      $('#uploadPhotosCheck').on('change', function () {
+        var $uploads = $('#photoUploads');
+        if (this.checked) {
+          $uploads.addClass('visible').hide().slideDown(speed);
+        } else {
+          $uploads.slideUp(speed, function () {
+            $(this).removeClass('visible');
+          });
+        }
+      });
+
+      /* ==========================================
+         Hoarding Assessment — Auto-detect
+         Shows warning banner when:
+         1. Rubbish type is "Hoarder waste", OR
+         2. Trailer loads is 2 or more
+         
+         Hoarder waste auto-opens the section directly.
+         Otherwise the warning is a soft nudge with
+         an optional button to expand.
+         ========================================== */
+      var $hoardingSection = $('#hoardingSection');
+      var $hoardingWarning = $('#hoardingWarning');
+
+      function showHoardingSection() {
+        if (!$hoardingSection.hasClass('visible')) {
+          $hoardingSection.addClass('visible').hide().slideDown(speed);
+        }
+      }
+
+      function hideHoardingSection() {
+        if ($hoardingSection.hasClass('visible')) {
+          $hoardingSection.slideUp(speed, function () {
+            $(this).removeClass('visible');
+          });
+        }
+      }
+
+      function showWarning() {
+        if (!$hoardingWarning.hasClass('visible')) {
+          $hoardingWarning.addClass('visible').hide().slideDown(speed);
+        }
+      }
+
+      function hideWarning() {
+        if ($hoardingWarning.hasClass('visible')) {
+          $hoardingWarning.slideUp(speed, function () {
+            $(this).removeClass('visible');
+          });
+        }
+      }
+
+      function checkHoarding() {
+        var rubbishType  = $('#rubbishType').val();
+        var trailerLoads = parseInt($('#trailerLoads').val(), 10);
+        var isHoarder    = (rubbishType === 'Hoarder waste');
+        var isLargeJob   = (trailerLoads >= 2);
+
+        if (isHoarder) {
+          // Hoarder waste — skip warning, open section directly
+          hideWarning();
+          showHoardingSection();
+        } else if (isLargeJob) {
+          // 2+ loads — show warning banner, don't auto-open section
+          showWarning();
+        } else {
+          // Neither — hide everything
+          hideWarning();
+          hideHoardingSection();
+        }
+      }
+
+      // Warning button — opens hoarding section on click
+      $('#openHoardingBtn').on('click', function () {
+        showHoardingSection();
+        // Scroll to it
+        $('html, body').animate({
+          scrollTop: $hoardingSection.offset().top - 20
+        }, speed);
+      });
+
+      // Listen to both triggers
+      $('#rubbishType').on('change', checkHoarding);
+      $('#trailerLoads').on('change', checkHoarding);
+
+    });
+  </script>
+
+</body>
+</html>

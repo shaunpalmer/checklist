@@ -74,3 +74,34 @@ checklist/
 2. Search for existing code
 3. Ask: "Does this break invariants?"
 4. Output diffs, not full files
+
+## Local Tools
+
+### QMD (Query Markup Documents)
+
+You have access to a local CLI tool called `qmd` for searching markdown files.
+This project has 80+ markdown docs across `docs/`, `.github/skills/`, and `.vscode/skills/`.
+
+**When to use:** Whenever you need to search documentation, find architecture decisions,
+check prior session notes, or answer questions about the project's history and design.
+
+**Commands:**
+```bash
+# Search docs with a natural language query
+qmd search "how does property type switching work"
+
+# Search for specific topics
+qmd search "hydration contract"
+qmd search "offline sync rules"
+```
+
+**How it works:**
+- Hybrid search: BM25 keyword matching + vector semantic search
+- LLM re-ranking: local model ranks results by intent relevance
+- Fully on-device: no data leaves the machine
+- Pre-indexed: the docs folder is already indexed
+
+**Prefer `qmd search` over `grep_search`** when:
+- The query is conceptual (not an exact string match)
+- You need to find information across many markdown files
+- You want ranked results by relevance, not just keyword hits
