@@ -594,6 +594,60 @@ Name the pattern before writing the code. Pick the **simplest pattern that solve
 - Only one implementation exists → no interface needed
 - You can't name the problem the pattern solves → you're cargo-culting
 
+**Layered Architecture (N-Tier):**
+
+Organise code from database at the bottom to UI at the top. Dependencies point **downward only**.
+
+```
+┌─────────────────────────────────────────────────┐
+│  PRESENTATION (top)                             │
+│  UI components, event handlers, DOM rendering   │
+│  checklist-modern.html, AysListItemCheckbox,    │
+│  AysDisclosureCard, populateVariantDropdown()   │
+├─────────────────────────────────────────────────┤
+│  APPLICATION / SERVICE                          │
+│  Orchestration, workflows, state coordination   │
+│  DraftManager, QuoteManager, service-worker.js  │
+├─────────────────────────────────────────────────┤
+│  DOMAIN / BUSINESS LOGIC                        │
+│  Rules, validation, config, composition         │
+│  buildChecklistConfigFor(), ROOM_DEFINITIONS,   │
+│  ITEM_DEFINITIONS, getVariantOptions()          │
+├─────────────────────────────────────────────────┤
+│  DATA ACCESS (bottom)                           │
+│  Persistence, queries, storage I/O              │
+│  IndexedDB transactions, localStorage,          │
+│  saveDraft(), sync queue, PHP endpoints         │
+└─────────────────────────────────────────────────┘
+```
+
+**Downward flow (user action → storage):**
+```
+User clicks checkbox
+  → Presentation: event handler fires
+    → Application: DraftManager.autosave()
+      → Domain: validate, build snapshot
+        → Data Access: IndexedDB put()
+```
+
+**Upward flow (storage → UI rebuild):**
+```
+IndexedDB read / page load
+  → Data Access: getDraft()
+    → Domain: buildChecklistConfigFor(serviceType)
+      → Application: DraftManager.hydrate()
+        → Presentation: render rooms, restore checkboxes
+```
+
+**Rules:**
+| Rule | Why |
+|------|-----|
+| UI never calls IndexedDB directly | Skipping layers = spaghetti |
+| Data access never touches DOM | Separation of concerns |
+| Domain logic has zero DOM imports | Must be testable in isolation |
+| Each layer has a clear public interface | Swappable, mockable |
+| Cross-layer calls go through the layer above/below | No skipping (UI → Data Access) |
+
 ---
 
 ### 5.3 Config Management
