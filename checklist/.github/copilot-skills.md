@@ -1021,17 +1021,46 @@ powershell -File tools/reaper.ps1 -Message "description" -Push
 
 ### 10.3 QMD Search
 
-Use `qmd` to search through local markdown notes.
+**When to use:** Find architecture decisions, prior session notes, implementation details, or design rationale across 1,000+ markdown files without reading every one.
+
+**Commands:**
 
 ```bash
-# Keyword search
-qmd search "search terms" -c docs -n 10
+# Search a specific collection (fastest)
+qmd search "hydration contract" -c docs -n 10
 
-# All collections
-qmd search "search terms"
+# Search all collections
+qmd search "offline sync rules"
+
+# Narrow results
+qmd search "room composition" -c docs -n 5
 ```
 
-Collections: `docs` (78 files), `ays-premium` (517), `superclean-plugins` (404), `leadstream` (5).
+**Collections:**
+
+| Collection | Files | Contains |
+|------------|-------|----------|
+| `docs` | 78 | Architecture, specs, session notes, implementation plans |
+| `ays-premium` | 517 | Premium plugin docs |
+| `superclean-plugins` | 404 | Plugin ecosystem docs |
+| `leadstream` | 5 | Lead management docs |
+
+**When to search (triggers):**
+
+| Situation | Search For |
+|-----------|-----------|
+| About to change a system you haven't touched | `qmd search "system name"` — check for prior decisions |
+| User asks "why does X work this way?" | `qmd search "X"` — find the original spec |
+| Debugging a reoccurring pattern | `qmd search "bug pattern"` — check lessons learned |
+| Before creating a new doc | `qmd search "topic"` — ensure it doesn't already exist |
+| Need implementation context | `qmd search "feature name" -c docs` — find the spec |
+
+**Rules:**
+- Search BEFORE answering questions about architecture or history
+- Use `-c docs` for this project's docs (fastest, most relevant)
+- Use broad search (no `-c`) when unsure which collection has it
+- Results include file path + matched snippets — follow up with `read_file` if needed
+- BM25 keyword search works reliably; semantic/vector search may stall on Windows
 
 ---
 
