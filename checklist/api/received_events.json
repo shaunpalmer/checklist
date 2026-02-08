@@ -1,0 +1,61 @@
+[
+    {
+        "received_at": "2026-02-09T00:48:37+01:00",
+        "remote_ip": "::1",
+        "content_length": 882,
+        "envelope": {
+            "meta": {
+                "schema": 1,
+                "created_at": "2026-02-08T23:48:37.900Z"
+            },
+            "events": [
+                {
+                    "event_id": "533f0c21-b733-4664-9971-28e1f43a2243",
+                    "type": "meta",
+                    "ts": "2026-02-08T23:44:41.230Z",
+                    "context": {
+                        "page": "\/test",
+                        "serviceType": "eot"
+                    },
+                    "payload": {
+                        "field": "crew",
+                        "value": "Test Crew Alpha"
+                    },
+                    "fingerprint": "meta|\/test|"
+                },
+                {
+                    "event_id": "c61a71be-3d16-41ad-9b99-f4871503f230",
+                    "type": "item_check",
+                    "ts": "2026-02-08T23:44:41.230Z",
+                    "context": {
+                        "page": "\/test",
+                        "serviceType": "eot",
+                        "room": "Kitchen"
+                    },
+                    "payload": {
+                        "itemId": "test_bench_wipe",
+                        "checked": true,
+                        "label": "Bench tops - wiped down"
+                    },
+                    "fingerprint": "item_check|\/test|"
+                },
+                {
+                    "event_id": "f685d686-cb95-43a0-9b13-2272e7c9a4ff",
+                    "type": "item_check",
+                    "ts": "2026-02-08T23:44:41.230Z",
+                    "context": {
+                        "page": "\/test",
+                        "serviceType": "eot",
+                        "room": "Kitchen"
+                    },
+                    "payload": {
+                        "itemId": "test_sink_clean",
+                        "checked": true,
+                        "label": "Sink - cleaned and polished"
+                    },
+                    "fingerprint": "item_check|\/test|"
+                }
+            ]
+        }
+    }
+]

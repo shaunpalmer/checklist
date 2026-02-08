@@ -278,6 +278,7 @@
         $('#service-api-endpoint').val(endpoint);
         $('#first-run-endpoint').val(endpoint);
         this.updateEndpointBanner();
+        this.updateSystemStatus();
         if (this._eventWorker) {
           this._eventWorker.postMessage({ op: 'config', config: { endpoint } });
           this.flushEventQueue();
@@ -2239,7 +2240,7 @@
       if (!(window && 'Worker' in window)) return;
 
       try {
-        this._eventWorker = new Worker('js/event-worker.js');
+        this._eventWorker = new Worker('js/event-worker.js?v=15');
 
         this._eventWorker.onmessage = (e) => {
           const msg = e.data || {};
@@ -5632,6 +5633,13 @@
         navigator.serviceWorker.register('service-worker.js').catch(() => {
           // silent fail
         });
+      });
+      // Auto-reload when a new service worker activates (cache version change)
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!this._swReloading) {
+          this._swReloading = true;
+          window.location.reload();
+        }
       });
     }
   };
