@@ -2860,6 +2860,10 @@
         client,
         quoteServiceType: ($('#quote-service-type').val() || '').toString().trim() || null,
         bookingDate: ($('#quote-booking-date').val() || '').toString().trim() || null,
+        rubbishBooking: {
+          eot: (window.rubbishBookingEot && typeof window.rubbishBookingEot.serialize === 'function') ? window.rubbishBookingEot.serialize() : null,
+          residential: (window.rubbishBookingRes && typeof window.rubbishBookingRes.serialize === 'function') ? window.rubbishBookingRes.serialize() : null
+        },
         notes: {
           special: ($('#special-notes').val() || '').toString().trim() || null,
           resNotes: ($('#res-notes-area').val() || '').toString().trim() || null
@@ -3115,6 +3119,16 @@
             };
             indicatorText.textContent = labels[snapshot.globalServiceType] || 'Unknown';
           }
+        }
+      }
+
+      // Restore Rubbish Booking state
+      if (snapshot.rubbishBooking && typeof snapshot.rubbishBooking === 'object') {
+        if (snapshot.rubbishBooking.eot && window.rubbishBookingEot && typeof window.rubbishBookingEot.restoreState === 'function') {
+          window.rubbishBookingEot.restoreState(snapshot.rubbishBooking.eot);
+        }
+        if (snapshot.rubbishBooking.residential && window.rubbishBookingRes && typeof window.rubbishBookingRes.restoreState === 'function') {
+          window.rubbishBookingRes.restoreState(snapshot.rubbishBooking.residential);
         }
       }
 
