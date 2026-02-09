@@ -4043,8 +4043,8 @@
       }
 
       const settings = this.getSettings() || {};
-      const baseRate = parseFloat($('#setting-base-hourly-rate').val()) || parseFloat(settings.base_hourly_rate) || 50;
-      const premiumRate = parseFloat($('#setting-premium-hourly-rate').val()) || parseFloat(settings.premium_hourly_rate) || 75;
+      const baseRate = parseFloat($('#setting-base-hourly-rate').val()) || parseFloat(settings.base_hourly_rate) || 60;
+      const premiumRate = parseFloat($('#setting-premium-hourly-rate').val()) || parseFloat(settings.premium_hourly_rate) || 85;
 
       const items = [];
       let totalHours = 0;
@@ -5713,13 +5713,13 @@
      * Reset settings to defaults
      */
     resetSettings: function() {
-      $('#setting-base-hourly-rate').val('50');
-      $('#setting-premium-hourly-rate').val('75');
+      $('#setting-base-hourly-rate').val('60');
+      $('#setting-premium-hourly-rate').val('85');
       $('#setting-tax-rate').val('15');
       $('#setting-staff-multiplier').val('25');
       $('#setting-staff-extra-hourly-rate').val('30');
       $('#setting-staff-threshold').val('7');
-      $('#setting-currency').val('USD');
+      $('#setting-currency').val('NZD');
       $('#setting-customer-id-prefix').val('CUST');
       $('#setting-theme-dark').prop('checked', false);
       $('#setting-discount-percent').val('0');
@@ -5730,7 +5730,7 @@
       $('#surcharge-double-oven').val('200');
       $('#surcharge-windows').val('65');
       $('#surcharge-carpet').val('52');
-      $('#surcharge-drawers').val('50');
+      $('#surcharge-drawers').val('120');
       $('#surcharge-garage').val('100');
       $('#first-run-endpoint').val('');
       

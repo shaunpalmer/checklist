@@ -309,10 +309,10 @@ if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
                   <option value="2story">2-Story Add-on - $40</option>
                 </select>
               </label>
-              <label class="checklist-item" data-item-id="deep-drawers" data-room="deep-cleaning" data-category="drawers" data-hours="1" data-base-charge="50" data-labor-cost="50" data-service-code="DRAW" data-settings-key="surcharge_drawers" data-difficulty="intermediate">
+              <label class="checklist-item" data-item-id="deep-drawers" data-room="deep-cleaning" data-category="drawers" data-hours="2" data-base-charge="120" data-labor-cost="120" data-service-code="DRAW" data-settings-key="surcharge_drawers" data-difficulty="intermediate">
                 <input type="checkbox" id="deep-drawers" name="deep" />
                 <span class="checkbox-custom"></span>
-                <span class="item-label">Drawers (inside) - $50</span>
+                <span class="item-label">Drawers (inside) - $120</span>
               </label>
               <label class="checklist-item" data-item-id="deep-launder-apparel" data-room="deep-cleaning" data-category="laundry" data-hours="1.0" data-difficulty="basic">
                 <input type="checkbox" id="deep-launder-apparel" name="deep" />
@@ -1500,11 +1500,11 @@ if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
               <div class="grid grid-2col gap-md">
                 <div class="meta-field">
                   <label for="setting-base-hourly-rate">Base Hourly Rate ($)</label>
-                  <input type="number" id="setting-base-hourly-rate" value="50" step="5" min="0" />
+                  <input type="number" id="setting-base-hourly-rate" value="60" step="5" min="0" />
                 </div>
                 <div class="meta-field">
                   <label for="setting-premium-hourly-rate">Premium Hourly Rate ($)</label>
-                  <input type="number" id="setting-premium-hourly-rate" value="75" step="5" min="0" />
+                  <input type="number" id="setting-premium-hourly-rate" value="85" step="5" min="0" />
                 </div>
                 <div class="meta-field">
                   <label for="setting-tax-rate">Tax Rate (%)</label>
@@ -1609,7 +1609,7 @@ if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
                 </div>
                 <div class="meta-field">
                   <label for="surcharge-drawers">Drawer/Pantry Clean ($)</label>
-                  <input type="number" id="surcharge-drawers" value="50" step="5" min="0" />
+                  <input type="number" id="surcharge-drawers" value="120" step="5" min="0" />
                 </div>
                 <div class="meta-field">
                   <label for="surcharge-garage">Garage Clean ($)</label>
@@ -1783,8 +1783,8 @@ if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
                 <div class="meta-field">
                   <label for="setting-currency">Currency</label>
                   <select id="setting-currency">
+                    <option value="NZD" selected>New Zealand Dollar (NZ$)</option>
                     <option value="USD">US Dollar ($)</option>
-                    <option value="NZD">New Zealand Dollar (NZ$)</option>
                     <option value="AUD">Australian Dollar ($)</option>
                     <option value="GBP">British Pound (£)</option>
                     <option value="EUR">Euro (€)</option>
