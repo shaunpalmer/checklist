@@ -1753,7 +1753,6 @@ details[open] .progress-badge {
 
 .checklist-item input[type="checkbox"]:checked + .checkbox-custom + .item-label {
   color: var(--color-secondary);
-  text-decoration: line-through;
 }
 
 /* Focus state for accessibility */
