@@ -129,7 +129,8 @@ $csrf_token = generate_csrf_token();
         }
 
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="text"].password-visible {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid var(--input-border);
@@ -137,6 +138,34 @@ $csrf_token = generate_csrf_token();
             font-size: 1rem;
             outline: none;
             transition: border-color 0.2s;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 2.75rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            padding: 4px;
+            line-height: 1;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .password-toggle:hover {
+            opacity: 1;
         }
 
         input:focus {
@@ -214,8 +243,11 @@ $csrf_token = generate_csrf_token();
                            value="<?php echo htmlspecialchars($old_email); ?>">
                 </div>
                 <div class="form-group">
-                    <input type="password" name="password" placeholder="Password" required
-                           autocomplete="current-password">
+                    <div class="password-wrapper">
+                        <input type="password" id="login-password" name="password" placeholder="Password" required
+                               autocomplete="current-password">
+                        <button type="button" class="password-toggle" aria-label="Show password" onclick="togglePasswordVisibility()">👁</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <button type="submit">Sign In</button>
@@ -224,5 +256,22 @@ $csrf_token = generate_csrf_token();
 
         </div>
     </div>
+    <script>
+        function togglePasswordVisibility() {
+            const input = document.getElementById('login-password');
+            const btn = input.nextElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                input.classList.add('password-visible');
+                btn.textContent = '🙈';
+                btn.setAttribute('aria-label', 'Hide password');
+            } else {
+                input.type = 'password';
+                input.classList.remove('password-visible');
+                btn.textContent = '👁';
+                btn.setAttribute('aria-label', 'Show password');
+            }
+        }
+    </script>
 </body>
 </html>

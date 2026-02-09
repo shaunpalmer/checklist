@@ -2268,6 +2268,7 @@
             if (msg.ok) {
               if (typeof msg.delivered === 'number' && msg.delivered > 0) {
                 this.setSyncStatus('synced', `Synced (${msg.delivered})`);
+                this.showSyncToast(`✓ ${msg.delivered} event${msg.delivered === 1 ? '' : 's'} synced`, 'success');
               } else {
                 this.setSyncStatus('synced', 'Synced');
               }
@@ -2369,6 +2370,77 @@
       $el.attr('data-state', state || '');
       $el.text(text || '');
       this.announce(text || '');
+    },
+
+    /**
+     * Show a brief toast notification that slides in from the top-right
+     * and auto-dismisses after the given duration.
+     * @param {string} message - Text to display
+     * @param {'success'|'info'|'error'} [type='info'] - Visual style
+     * @param {number} [duration=3000] - ms before auto-dismiss
+     */
+    showSyncToast: function(message, type, duration) {
+      type = type || 'info';
+      duration = duration || 3000;
+
+      // Ensure container exists
+      let container = document.getElementById('sync-toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'sync-toast-container';
+        Object.assign(container.style, {
+          position: 'fixed',
+          top: '12px',
+          right: '12px',
+          zIndex: '10000',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          pointerEvents: 'none'
+        });
+        document.body.appendChild(container);
+      }
+
+      const toast = document.createElement('div');
+      const colors = {
+        success: { bg: '#22c55e', text: '#fff' },
+        info:    { bg: '#3b82f6', text: '#fff' },
+        error:   { bg: '#ef4444', text: '#fff' }
+      };
+      const c = colors[type] || colors.info;
+      Object.assign(toast.style, {
+        background: c.bg,
+        color: c.text,
+        padding: '10px 18px',
+        borderRadius: '8px',
+        fontSize: '0.9rem',
+        fontWeight: '600',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        opacity: '0',
+        transform: 'translateX(100%)',
+        transition: 'opacity 0.3s ease, transform 0.3s ease',
+        pointerEvents: 'auto',
+        cursor: 'pointer',
+        maxWidth: '300px'
+      });
+      toast.textContent = message;
+      toast.addEventListener('click', function() { dismiss(); });
+      container.appendChild(toast);
+
+      // Slide in
+      requestAnimationFrame(function() {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+      });
+
+      // Auto-dismiss
+      const timer = window.setTimeout(dismiss, duration);
+      function dismiss() {
+        window.clearTimeout(timer);
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        window.setTimeout(function() { toast.remove(); }, 350);
+      }
     },
 
     announce: function(text) {

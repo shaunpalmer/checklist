@@ -1,59 +1,147 @@
 [
     {
-        "received_at": "2026-02-09T00:48:37+01:00",
+        "received_at": "2026-02-09T01:02:31+01:00",
         "remote_ip": "::1",
-        "content_length": 882,
+        "content_length": 503,
         "envelope": {
             "meta": {
                 "schema": 1,
-                "created_at": "2026-02-08T23:48:37.900Z"
+                "created_at": "2026-02-09T00:02:31.603Z"
             },
             "events": [
                 {
-                    "event_id": "533f0c21-b733-4664-9971-28e1f43a2243",
-                    "type": "meta",
-                    "ts": "2026-02-08T23:44:41.230Z",
+                    "event_id": "61be8246-1254-406d-bc49-e3bee1ceadf3",
+                    "type": "checkbox",
+                    "ts": "2026-02-09T00:02:22.791Z",
                     "context": {
-                        "page": "\/test",
-                        "serviceType": "eot"
+                        "page": "\/checklist\/checklist\/index.php",
+                        "serviceType": "end-of-tenancy",
+                        "client_id": null,
+                        "population_id": null,
+                        "quote_id": null
                     },
                     "payload": {
-                        "field": "crew",
-                        "value": "Test Crew Alpha"
+                        "id": "kitchen-benchtops",
+                        "checked": true,
+                        "room": "kitchen",
+                        "label": "Benchtops (laminate \/ stainless steel)"
                     },
-                    "fingerprint": "meta|\/test|"
+                    "fingerprint": "checkbox|\/checklist\/checklist\/index.php|kitchen-benchtops"
+                }
+            ]
+        }
+    },
+    {
+        "received_at": "2026-02-09T01:05:11+01:00",
+        "remote_ip": "::1",
+        "content_length": 500,
+        "envelope": {
+            "meta": {
+                "schema": 1,
+                "created_at": "2026-02-09T00:05:11.605Z"
+            },
+            "events": [
+                {
+                    "event_id": "aa782f15-b6cf-4c84-b9ef-e7cf70288afe",
+                    "type": "checkbox",
+                    "ts": "2026-02-09T00:05:06.382Z",
+                    "context": {
+                        "page": "\/checklist\/checklist\/index.php",
+                        "serviceType": "end-of-tenancy",
+                        "client_id": null,
+                        "population_id": null,
+                        "quote_id": null
+                    },
+                    "payload": {
+                        "id": "kitchen-bench_edges_joins",
+                        "checked": true,
+                        "room": "kitchen",
+                        "label": "Bench edges & joins"
+                    },
+                    "fingerprint": "checkbox|\/checklist\/checklist\/index.php|kitchen-bench_edges_joins"
+                }
+            ]
+        }
+    },
+    {
+        "received_at": "2026-02-09T01:05:21+01:00",
+        "remote_ip": "::1",
+        "content_length": 495,
+        "envelope": {
+            "meta": {
+                "schema": 1,
+                "created_at": "2026-02-09T00:05:21.608Z"
+            },
+            "events": [
+                {
+                    "event_id": "57651ac4-dd41-4806-85c5-b1b5e824029a",
+                    "type": "checkbox",
+                    "ts": "2026-02-09T00:05:12.549Z",
+                    "context": {
+                        "page": "\/checklist\/checklist\/index.php",
+                        "serviceType": "end-of-tenancy",
+                        "client_id": null,
+                        "population_id": null,
+                        "quote_id": null
+                    },
+                    "payload": {
+                        "id": "kitchen-sink_bowls",
+                        "checked": true,
+                        "room": "kitchen",
+                        "label": "Sink bowls (single \/ double)"
+                    },
+                    "fingerprint": "checkbox|\/checklist\/checklist\/index.php|kitchen-sink_bowls"
+                }
+            ]
+        }
+    },
+    {
+        "received_at": "2026-02-09T04:26:53+01:00",
+        "remote_ip": "::1",
+        "content_length": 914,
+        "envelope": {
+            "meta": {
+                "schema": 1,
+                "created_at": "2026-02-09T03:26:53.316Z"
+            },
+            "events": [
+                {
+                    "event_id": "20de0da8-e23b-47dc-9283-a4725c1c3fea",
+                    "type": "checkbox",
+                    "ts": "2026-02-09T03:26:50.644Z",
+                    "context": {
+                        "page": "\/checklist\/checklist\/index.php",
+                        "serviceType": "end-of-tenancy",
+                        "client_id": null,
+                        "population_id": null,
+                        "quote_id": null
+                    },
+                    "payload": {
+                        "id": "kitchen-cooktop_hotplates",
+                        "checked": true,
+                        "room": "kitchen",
+                        "label": "Cooktop \/ hotplates"
+                    },
+                    "fingerprint": "checkbox|\/checklist\/checklist\/index.php|kitchen-cooktop_hotplates"
                 },
                 {
-                    "event_id": "c61a71be-3d16-41ad-9b99-f4871503f230",
-                    "type": "item_check",
-                    "ts": "2026-02-08T23:44:41.230Z",
+                    "event_id": "4fc7ac2f-850c-4376-bab2-2bbd104c3187",
+                    "type": "checkbox",
+                    "ts": "2026-02-09T03:26:46.030Z",
                     "context": {
-                        "page": "\/test",
-                        "serviceType": "eot",
-                        "room": "Kitchen"
+                        "page": "\/checklist\/checklist\/index.php",
+                        "serviceType": "end-of-tenancy",
+                        "client_id": null,
+                        "population_id": null,
+                        "quote_id": null
                     },
                     "payload": {
-                        "itemId": "test_bench_wipe",
+                        "id": "kitchen-oven_exterior",
                         "checked": true,
-                        "label": "Bench tops - wiped down"
+                        "room": "kitchen",
+                        "label": "Oven exterior"
                     },
-                    "fingerprint": "item_check|\/test|"
-                },
-                {
-                    "event_id": "f685d686-cb95-43a0-9b13-2272e7c9a4ff",
-                    "type": "item_check",
-                    "ts": "2026-02-08T23:44:41.230Z",
-                    "context": {
-                        "page": "\/test",
-                        "serviceType": "eot",
-                        "room": "Kitchen"
-                    },
-                    "payload": {
-                        "itemId": "test_sink_clean",
-                        "checked": true,
-                        "label": "Sink - cleaned and polished"
-                    },
-                    "fingerprint": "item_check|\/test|"
+                    "fingerprint": "checkbox|\/checklist\/checklist\/index.php|kitchen-oven_exterior"
                 }
             ]
         }
