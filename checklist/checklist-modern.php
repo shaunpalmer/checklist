@@ -1503,7 +1503,7 @@ if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
                   <input type="number" id="setting-base-hourly-rate" value="60" step="5" min="0" />
                 </div>
                 <div class="meta-field">
-                  <label for="setting-premium-hourly-rate">Premium Hourly Rate ($)</label>
+                  <label for="setting-premium-hourly-rate">Premium Hourly Rate ($) — Deep Cleans / EOT</label>
                   <input type="number" id="setting-premium-hourly-rate" value="85" step="5" min="0" />
                 </div>
                 <div class="meta-field">

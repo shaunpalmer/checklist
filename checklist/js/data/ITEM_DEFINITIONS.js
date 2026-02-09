@@ -1632,8 +1632,8 @@ const ITEM_DEFINITIONS = {
       steam_benches: { itemId: 'eot-utility-steam_benches', label: 'Steam room benches (if present)', category: 'special', baseHours: 0, optional: true },
       steam_walls: { itemId: 'eot-utility-steam_walls', label: 'Steam room walls (if present)', category: 'special', baseHours: 0, optional: true },
       steam_floor: { itemId: 'eot-utility-steam_floor', label: 'Steam room floor (if present)', category: 'special', baseHours: 0, optional: true },
-      garage_sweep: { itemId: 'eot-utility-garage_sweep', label: 'Garage floor – sweep (if present)', category: 'floors', baseHours: 0, optional: true },
-      garage_spot_mop: { itemId: 'eot-utility-garage_spot_mop', label: 'Garage floor – spot mop (optional, if present)', category: 'floors', baseHours: 0, optional: true },
+      garage_sweep: { itemId: 'eot-utility-garage_sweep', label: 'Garage floor – sweep (if present)', category: 'floors', baseHours: 0.25, optional: true },
+      garage_spot_mop: { itemId: 'eot-utility-garage_spot_mop', label: 'Garage floor – spot mop (optional, if present)', category: 'floors', baseHours: 0.15, optional: true },
       garage_shelves: { itemId: 'eot-utility-garage_shelves', label: 'Garage shelves / racks (if present)', category: 'storage', baseHours: 0, optional: true },
       garage_door_track: { itemId: 'eot-utility-garage_door_track', label: 'Garage door track accessible surfaces (dusting, if present)', category: 'fixtures', baseHours: 0, optional: true },
       smoke_alarm: { itemId: 'eot-utility-smoke_alarm', label: 'Smoke alarm (external dusting, if present)', category: 'safety', baseHours: 0, optional: true }
@@ -2035,10 +2035,10 @@ const ITEM_DEFINITIONS = {
       dryer: { itemId: 'eot-garage-dryer', label: 'Dryer exterior (if present)', category: 'appliances', baseHours: 0, optional: true },
 
       // ===== FLOOR =====
-      floor_sweep: { itemId: 'eot-garage-floor_sweep', label: 'Floor – sweep', category: 'floors', baseHours: 0, optional: true },
-      floor_mop: { itemId: 'eot-garage-floor_mop', label: 'Floor – mop / wash (if sealed)', category: 'floors', baseHours: 0, optional: true },
-      floor_oil_stains: { itemId: 'eot-garage-oil_stains', label: 'Floor – oil / grease stain treatment', category: 'floors', baseHours: 0, optional: true },
-      floor_edges: { itemId: 'eot-garage-floor_edges', label: 'Floor edges / corners', category: 'floors', baseHours: 0, optional: true },
+      floor_sweep: { itemId: 'eot-garage-floor_sweep', label: 'Floor – sweep', category: 'floors', baseHours: 0.25, optional: true },
+      floor_mop: { itemId: 'eot-garage-floor_mop', label: 'Floor – mop / wash (if sealed)', category: 'floors', baseHours: 0.2, optional: true },
+      floor_oil_stains: { itemId: 'eot-garage-oil_stains', label: 'Floor – oil / grease stain treatment', category: 'floors', baseHours: 0.25, optional: true },
+      floor_edges: { itemId: 'eot-garage-floor_edges', label: 'Floor edges / corners', category: 'floors', baseHours: 0.1, optional: true },
       floor_drain: { itemId: 'eot-garage-floor_drain', label: 'Floor drain – clear debris (if present)', category: 'floors', baseHours: 0, optional: true },
       step_up: { itemId: 'eot-garage-step', label: 'Step up to house – sweep / wipe', category: 'floors', baseHours: 0, optional: true },
 
