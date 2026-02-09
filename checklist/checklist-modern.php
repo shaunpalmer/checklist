@@ -2496,64 +2496,6 @@ if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
                 <!-- Filled by AysServiceToggleRenderer.render() -->
               </div>
 
-              <!-- API Configuration Section (Advanced) -->
-              <details style="margin-top: var(--space-lg); cursor: pointer;">
-                <summary style="
-                  color: var(--color-secondary);
-                  font-weight: 600;
-                  padding: var(--space-sm);
-                  cursor: pointer;
-                  user-select: none;
-                ">
-                  ⚙️ API Configuration (Advanced)
-                </summary>
-                
-                <div style="padding: var(--space-md); background: var(--color-light); border-radius: 4px; margin-top: var(--space-md);">
-                  <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
-                    Optional: Link service types to API endpoints for dynamic data retrieval.
-                  </p>
-                  
-                  <div class="meta-field">
-                    <label for="service-api-endpoint">Service API Endpoint</label>
-                    <input type="url" id="service-api-endpoint" placeholder="https://api.example.com/services" />
-                  </div>
-
-                  <div style="background: var(--color-white); border-radius: 4px; padding: var(--space-md); margin: var(--space-md) 0;">
-                    <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Linked Services</h4>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                      <thead>
-                        <tr style="border-bottom: 2px solid var(--color-border);">
-                          <th style="text-align: left; padding: 8px;">Service ID</th>
-                          <th style="text-align: left; padding: 8px;">Service Name</th>
-                          <th style="text-align: left; padding: 8px;">Type</th>
-                          <th style="text-align: center; padding: 8px;">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr style="border-bottom: 1px solid var(--color-border);">
-                          <td style="padding: 8px;">SVC-001</td>
-                          <td style="padding: 8px;">End of Tenancy</td>
-                          <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">end-of-tenancy</span></td>
-                          <td style="padding: 8px; text-align: center;">
-                            <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
-                          </td>
-                        </tr>
-                        <tr style="border-bottom: 1px solid var(--color-border);">
-                          <td style="padding: 8px;">SVC-002</td>
-                          <td style="padding: 8px;">Residential Tidying</td>
-                          <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">residential</span></td>
-                          <td style="padding: 8px; text-align: center;">
-                            <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                    <button type="button" class="btn btn-primary" style="margin-top: var(--space-md); width: 100%;">
-                      + Add Service
-                    </button>
-                  </div>
-                </div>
-              </details>
             </div>
 
             <!-- TAB: Manage Quotes -->
@@ -2653,6 +2595,70 @@ if (!defined('AYS_AUTH_PASSED') && !isset($current_user)) {
                   <button type="button" id="first-run-offline" class="btn btn-secondary">Clear &amp; go offline</button>
                 </div>
                 <p id="first-run-status" class="first-run-status" role="status" aria-live="polite"></p>
+              </div>
+
+              <!-- ═══════════════════════════════════════════════════════════
+                   API CONFIGURATION (Advanced)
+                   Moved here from Services tab — groups with other connectivity
+                   ═══════════════════════════════════════════════════════════ -->
+              <div class="system-section">
+                <details style="cursor: pointer;">
+                  <summary style="
+                    color: var(--color-secondary);
+                    font-weight: 600;
+                    padding: var(--space-sm);
+                    cursor: pointer;
+                    user-select: none;
+                  ">
+                    ⚙️ API Configuration (Advanced)
+                  </summary>
+                  
+                  <div style="padding: var(--space-md); background: var(--color-light); border-radius: 4px; margin-top: var(--space-md);">
+                    <p style="color: var(--color-secondary); font-size: var(--font-size-sm); margin-bottom: var(--space-md);">
+                      Optional: Link service types to API endpoints for dynamic data retrieval.
+                    </p>
+                    
+                    <div class="meta-field">
+                      <label for="service-api-endpoint">Service API Endpoint</label>
+                      <input type="url" id="service-api-endpoint" placeholder="https://api.example.com/services" />
+                    </div>
+
+                    <div style="background: var(--color-white); border-radius: 4px; padding: var(--space-md); margin: var(--space-md) 0;">
+                      <h4 style="color: var(--color-secondary); margin-bottom: var(--space-sm);">Linked Services</h4>
+                      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead>
+                          <tr style="border-bottom: 2px solid var(--color-border);">
+                            <th style="text-align: left; padding: 8px;">Service ID</th>
+                            <th style="text-align: left; padding: 8px;">Service Name</th>
+                            <th style="text-align: left; padding: 8px;">Type</th>
+                            <th style="text-align: center; padding: 8px;">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 8px;">SVC-001</td>
+                            <td style="padding: 8px;">End of Tenancy</td>
+                            <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">end-of-tenancy</span></td>
+                            <td style="padding: 8px; text-align: center;">
+                              <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
+                            </td>
+                          </tr>
+                          <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: 8px;">SVC-002</td>
+                            <td style="padding: 8px;">Residential Tidying</td>
+                            <td style="padding: 8px;"><span style="background: var(--color-accent); color: var(--color-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 12px;">residential</span></td>
+                            <td style="padding: 8px; text-align: center;">
+                              <button class="btn btn-secondary" style="font-size: 12px; padding: 4px 8px;">Edit</button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <button type="button" class="btn btn-primary" style="margin-top: var(--space-md); width: 100%;">
+                        + Add Service
+                      </button>
+                    </div>
+                  </div>
+                </details>
               </div>
 
               <!-- ═══════════════════════════════════════════════════════════
