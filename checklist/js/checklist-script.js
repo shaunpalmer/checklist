@@ -2860,6 +2860,18 @@
         client,
         quoteServiceType: ($('#quote-service-type').val() || '').toString().trim() || null,
         bookingDate: ($('#quote-booking-date').val() || '').toString().trim() || null,
+        notes: {
+          special: ($('#special-notes').val() || '').toString().trim() || null,
+          resNotes: ($('#res-notes-area').val() || '').toString().trim() || null
+        },
+        quotableServices: {
+          carpetEot: ($('#carpet-cleaning-eot').val() || '').toString().trim() || null,
+          carpetRes: ($('#carpet-cleaning-res').val() || '').toString().trim() || null,
+          carpetCom: ($('#carpet-cleaning-com').val() || '').toString().trim() || null,
+          windowsEot: ($('#windows-cleaning-eot').val() || '').toString().trim() || null,
+          windowsRes: ($('#windows-cleaning-res').val() || '').toString().trim() || null,
+          windowsCom: ($('#windows-cleaning-com').val() || '').toString().trim() || null
+        },
         progress,
         variantSelections,
         customItemsSnapshot: this.getCustomItemsSnapshot()
@@ -3102,6 +3114,30 @@
               'custom': 'Custom Mode'
             };
             indicatorText.textContent = labels[snapshot.globalServiceType] || 'Unknown';
+          }
+        }
+      }
+
+      // Restore notes textareas
+      if (snapshot.notes && typeof snapshot.notes === 'object') {
+        if (snapshot.notes.special) $('#special-notes').val(snapshot.notes.special);
+        if (snapshot.notes.resNotes) $('#res-notes-area').val(snapshot.notes.resNotes);
+      }
+
+      // Restore Quotable Services dropdowns and re-trigger price display
+      if (snapshot.quotableServices && typeof snapshot.quotableServices === 'object') {
+        const qs = snapshot.quotableServices;
+        const map = {
+          carpetEot: '#carpet-cleaning-eot',
+          carpetRes: '#carpet-cleaning-res',
+          carpetCom: '#carpet-cleaning-com',
+          windowsEot: '#windows-cleaning-eot',
+          windowsRes: '#windows-cleaning-res',
+          windowsCom: '#windows-cleaning-com'
+        };
+        for (const key in map) {
+          if (qs[key]) {
+            $(map[key]).val(qs[key]).trigger('change');
           }
         }
       }
