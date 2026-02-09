@@ -275,7 +275,6 @@
         const settings = this.getSettings() || {};
         const next = { ...settings, service_api_endpoint: endpoint };
         localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(next));
-        $('#service-api-endpoint').val(endpoint);
         $('#first-run-endpoint').val(endpoint);
         this.updateEndpointBanner();
         this.updateSystemStatus();
@@ -1068,10 +1067,7 @@
         const next = { ...settings, service_api_endpoint: endpoint };
         localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(next));
 
-        const $input = $('#service-api-endpoint');
-        if ($input.length) $input.val(endpoint);
-        const $systemInput = $('#system-service-api-endpoint');
-        if ($systemInput.length) $systemInput.val(endpoint);
+        $('#first-run-endpoint').val(endpoint);
 
         if (this._eventWorker) {
           this._eventWorker.postMessage({
@@ -2125,8 +2121,7 @@
       applyIfPresent('#surcharge-carpet', 'surcharge_carpet');
       applyIfPresent('#surcharge-drawers', 'surcharge_drawers');
       applyIfPresent('#surcharge-garage', 'surcharge_garage');
-      applyIfPresent('#service-api-endpoint', 'service_api_endpoint');
-      applyIfPresent('#system-service-api-endpoint', 'service_api_endpoint');
+      applyIfPresent('#first-run-endpoint', 'service_api_endpoint');
     },
 
     applyTheme: function(theme) {
@@ -5635,7 +5630,7 @@
         surcharge_carpet: $('#surcharge-carpet').val(),
         surcharge_drawers: $('#surcharge-drawers').val(),
         surcharge_garage: $('#surcharge-garage').val(),
-        service_api_endpoint: ($('#system-service-api-endpoint').val() || $('#service-api-endpoint').val())
+        service_api_endpoint: $('#first-run-endpoint').val()
       };
       
       localStorage.setItem('checklist_settings', JSON.stringify(settings));
@@ -5687,8 +5682,7 @@
       $('#surcharge-carpet').val('52');
       $('#surcharge-drawers').val('50');
       $('#surcharge-garage').val('100');
-      $('#service-api-endpoint').val('');
-      $('#system-service-api-endpoint').val('');
+      $('#first-run-endpoint').val('');
       
       localStorage.removeItem('checklist_settings');
       this.saveEndpointToIdb('');
